@@ -1,5 +1,8 @@
+import {useNavigation} from '@react-navigation/native';
+import React, {useRef, useState} from 'react';
 import {
   Alert,
+  Animated,
   FlatList,
   Image,
   StyleSheet,
@@ -8,9 +11,8 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import React from 'react';
 
-const COLORS = {primary: '#282534', white: '#fff'};
+const COLORS = {primary: '#282534', white: '#fff', gray: '#aaa'};
 
 const data = [
   {
@@ -18,134 +20,97 @@ const data = [
     image: require('../../../assets/images/OnBoardingScreenImages/01.png'),
     title: 'Find Your Interest Just a Swipe Away.',
     subTitle:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's!!",
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's!!",
   },
   {
     id: 2,
     image: require('../../../assets/images/OnBoardingScreenImages/02.png'),
     title: 'Milestone Rewards and Discounts!',
     subTitle:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's!!",
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's!!",
   },
   {
     id: 3,
     image: require('../../../assets/images/OnBoardingScreenImages/03.png'),
     title:
-      'Or simply add to the cart your favourite wines and try them at home!"',
+      'Or simply add to the cart your favourite wines and try them at home!',
     subTitle: 'Because chilled drinks are always better!!',
   },
 ];
 
 const Onboarding = () => {
-  const {height, width} = useWindowDimensions();
-  const [currentSlideIndex, setCurrentSlideIndex] = React.useState(0);
-  const ref = React.useRef();
-  const updateCurrentSlideIndex = e => {
-    const contentOffsetX = e.nativeEvent.contentOffset.x;
-    const currentIndex = Math.round(contentOffsetX / width);
-    setCurrentSlideIndex(currentIndex);
-  };
+  const {width, height} = useWindowDimensions();
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const flatListRef = useRef(null);
+  const navigation = useNavigation();
 
   const goToNextSlide = () => {
-    const nextSlideIndex = currentSlideIndex + 1;
-    if (nextSlideIndex != data.length) {
-      const offset = nextSlideIndex * width;
-      ref?.current.scrollToOffset({offset});
-      setCurrentSlideIndex(currentSlideIndex + 1);
+    if (currentSlideIndex < data.length - 1) {
+      flatListRef.current.scrollToOffset({
+        offset: (currentSlideIndex + 1) * width,
+        animated: true,
+      });
     }
   };
 
-  const skip = () => {
-    const lastSlideIndex = data.length - 1;
-    const offset = lastSlideIndex * width;
-    ref?.current.scrollToOffset({offset});
-    setCurrentSlideIndex(lastSlideIndex);
+  const skipToLastSlide = () => {
+    flatListRef.current.scrollToOffset({
+      offset: (data.length - 1) * width,
+      animated: true,
+    });
   };
 
-  const Slides = ({item}) => {
+  const Indicator = () => {
     return (
-      <View style={{alignItems: 'center'}}>
-        <Image source={item?.image} style={{width: width, height: height}} />
+      <View style={styles.indicatorContainer}>
+        {data.map((_, index) => {
+          const scale = scrollX.interpolate({
+            inputRange: [
+              (index - 1) * width,
+              index * width,
+              (index + 1) * width,
+            ],
+            outputRange: [0.8, 1.4, 0.8],
+            extrapolate: 'clamp',
+          });
+
+          return (
+            <Animated.View
+              key={index}
+              style={[
+                styles.indicator,
+                {transform: [{scale}]},
+                currentSlideIndex === index && {backgroundColor: COLORS.white},
+              ]}
+            />
+          );
+        })}
       </View>
     );
   };
 
   const Footer = () => {
     return (
-      <View
-        style={{
-          justifyContent: 'space-between',
-          paddingHorizontal: 20,
-          position: 'absolute',
-          width: '100%',
-          bottom: 20,
-        }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            marginBottom: 20,
-          }}>
-          {data.map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.indicator,
-                currentSlideIndex == index && {
-                  backgroundColor: COLORS.white,
-                  width: 25,
-                },
-              ]}
-            />
-          ))}
-        </View>
-
-        {/* Render buttons */}
-        <View style={{marginBottom: 20}}>
-          {currentSlideIndex == data.length - 1 ? (
-            <View style={{height: 50}}>
-              <TouchableOpacity
-                style={styles.btn}
-                onPress={() => Alert.alert('Vishal pandey ')}>
-                <Text style={{fontWeight: 'bold', fontSize: 15}}>
-                  GET STARTED
-                </Text>
-              </TouchableOpacity>
-            </View>
+      <View style={styles.footer}>
+        <Indicator />
+        <View style={styles.footerButtons}>
+          {currentSlideIndex === data.length - 1 ? (
+            <TouchableOpacity
+              style={styles.btn}
+              onPress={() => navigation.navigate('Login')}>
+              <Text style={styles.btnText}>GET STARTED</Text>
+            </TouchableOpacity>
           ) : (
-            <View style={{flexDirection: 'row'}}>
+            <View style={styles.buttonRow}>
               <TouchableOpacity
-                activeOpacity={0.8}
-                style={[
-                  styles.btn,
-                  {
-                    borderColor: COLORS.white,
-                    borderWidth: 1,
-                    backgroundColor: 'transparent',
-                  },
-                ]}
-                onPress={skip}>
-                <Text
-                  style={{
-                    fontWeight: 'bold',
-                    fontSize: 15,
-                    color: COLORS.white,
-                  }}>
-                  SKIP
-                </Text>
+                style={[styles.btn, styles.transparentBtn]}
+                onPress={skipToLastSlide}>
+                <Text style={styles.transparentBtnText}>SKIP</Text>
               </TouchableOpacity>
-              <View style={{width: 15}} />
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={goToNextSlide}
-                style={styles.btn}>
-                <Text
-                  style={{
-                    fontWeight: 'bold',
-                    fontSize: 15,
-                  }}>
-                  NEXT
-                </Text>
+              <View style={styles.buttonSpacing} />
+              <TouchableOpacity style={styles.btn} onPress={goToNextSlide}>
+                <Text style={styles.btnText}>NEXT</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -155,16 +120,29 @@ const Onboarding = () => {
   };
 
   return (
-    <View style={{flex: 1}}>
+    <View style={styles.container}>
       <FlatList
-        pagingEnabled
+        ref={flatListRef}
         data={data}
-        ref={ref}
-        onMomentumScrollEnd={updateCurrentSlideIndex}
-        bounces={false}
+        keyExtractor={item => item.id.toString()}
         horizontal
+        pagingEnabled
+        bounces={false}
         showsHorizontalScrollIndicator={false}
-        renderItem={({item}) => <Slides item={item} />}
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {x: scrollX}}}],
+          {useNativeDriver: false},
+        )}
+        onMomentumScrollEnd={e =>
+          setCurrentSlideIndex(
+            Math.round(e.nativeEvent.contentOffset.x / width),
+          )
+        }
+        renderItem={({item}) => (
+          <View style={[styles.slide, {width}]}>
+            <Image source={item.image} style={[styles.image, {height}]} />
+          </View>
+        )}
       />
       <Footer />
     </View>
@@ -174,19 +152,63 @@ const Onboarding = () => {
 export default Onboarding;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
+  },
+  slide: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: '100%',
+    resizeMode: 'cover',
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 40,
+    width: '100%',
+    paddingHorizontal: 20,
+  },
+  indicatorContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
   indicator: {
-    height: 2.5,
     width: 10,
-    backgroundColor: 'grey',
-    marginHorizontal: 3,
-    borderRadius: 2,
+    height: 10,
+    backgroundColor: COLORS.gray,
+    marginHorizontal: 5,
+    borderRadius: 5,
+  },
+
+  buttonRow: {
+    flexDirection: 'row',
+  },
+  buttonSpacing: {
+    width: 15,
   },
   btn: {
     flex: 1,
     height: 50,
+    backgroundColor: COLORS.white,
     borderRadius: 5,
-    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  btnText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  transparentBtn: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: COLORS.white,
+  },
+  transparentBtnText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: COLORS.white,
   },
 });
