@@ -11,8 +11,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-
-const COLORS = {primary: '#282534', white: '#fff', gray: '#aaa'};
+import {Colors} from '../../constant/Styles';
 
 const data = [
   {
@@ -81,7 +80,7 @@ const Onboarding = () => {
               style={[
                 styles.indicator,
                 {transform: [{scale}]},
-                currentSlideIndex === index && {backgroundColor: COLORS.white},
+                currentSlideIndex === index && {backgroundColor: Colors.white},
               ]}
             />
           );
@@ -98,7 +97,7 @@ const Onboarding = () => {
           {currentSlideIndex === data.length - 1 ? (
             <TouchableOpacity
               style={styles.btn}
-              onPress={() => navigation.navigate('Login')}>
+              onPress={() => navigation.navigate('AuthType')}>
               <Text style={styles.btnText}>GET STARTED</Text>
             </TouchableOpacity>
           ) : (
@@ -154,7 +153,7 @@ export default Onboarding;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.primary,
+    backgroundColor: Colors.primary,
   },
   slide: {
     justifyContent: 'center',
@@ -178,7 +177,7 @@ const styles = StyleSheet.create({
   indicator: {
     width: 10,
     height: 10,
-    backgroundColor: COLORS.gray,
+    backgroundColor: Colors.gray,
     marginHorizontal: 5,
     borderRadius: 5,
   },
@@ -192,7 +191,7 @@ const styles = StyleSheet.create({
   btn: {
     flex: 1,
     height: 50,
-    backgroundColor: COLORS.white,
+    backgroundColor: Colors.white,
     borderRadius: 5,
     justifyContent: 'center',
     alignItems: 'center',
@@ -204,11 +203,11 @@ const styles = StyleSheet.create({
   transparentBtn: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: COLORS.white,
+    borderColor: Colors.white,
   },
   transparentBtnText: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: COLORS.white,
+    color: Colors.white,
   },
 });
