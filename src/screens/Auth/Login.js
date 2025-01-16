@@ -141,6 +141,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.gray2,
     flexDirection: 'row',
     alignItems: 'center',
+    borderRadius: 10,
   },
   countryPicker: {
     flexDirection: 'row',

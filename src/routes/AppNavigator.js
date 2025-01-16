@@ -6,6 +6,7 @@ import Onboarding from '../screens/Onboarding/Onboarding';
 import AuthType from '../screens/Auth/AuthType';
 import Otp from '../screens/Auth/Otp';
 import Register from '../screens/Auth/Register';
+import Welcome from '../screens/Welcome/Welcome';
 
 const Stack = createNativeStackNavigator();
 
@@ -19,6 +20,7 @@ const AppNavigator = () => {
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Otp" component={Otp} />
       <Stack.Screen name="Register" component={Register} />
+      <Stack.Screen name="Welcome" component={Welcome} />
     </Stack.Navigator>
   );
 };
