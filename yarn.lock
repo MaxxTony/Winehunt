@@ -6320,12 +6320,27 @@ react-native-gesture-handler@^2.22.0:
     hoist-non-react-statics "^3.3.0"
     invariant "^2.2.4"
 
+react-native-linear-gradient@^2.8.3:
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/react-native-linear-gradient/-/react-native-linear-gradient-2.8.3.tgz#9a116649f86d74747304ee13db325e20b21e564f"
+  integrity sha512-KflAXZcEg54PXkLyflaSZQ3PJp4uC4whM7nT/Uot9m0e/qxFV3p6uor1983D1YOBJbJN7rrWdqIjq0T42jOJyA==
+
+react-native-multiswitch-selector@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/react-native-multiswitch-selector/-/react-native-multiswitch-selector-1.0.4.tgz#8b37c406f3eb72e1440b06dfe60c1addccd28fdf"
+  integrity sha512-KUUjO9Eg3a6C+U0vZYRB+eatuABx7Z956dPK2PzR0wlLRaNEFcksOwb74ONSd8uJsrjVZDBQvKU+R+TBYhhUmQ==
+
 react-native-onboarding-swiper@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/react-native-onboarding-swiper/-/react-native-onboarding-swiper-1.3.0.tgz#a97f945f03a036845242b3e1f319c6fdb262bc2b"
   integrity sha512-2ZPMrZrJFgR5dmVWIj60x/vTBWrm0BZPuc2w7Cz2Sq/8ChypCi3oL8F7GYMrzky1fmknCS6Z0WPphfZVpnLUnQ==
   dependencies:
     tinycolor2 "^1.4.1"
+
+react-native-reanimated-carousel@^3.5.1:
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/react-native-reanimated-carousel/-/react-native-reanimated-carousel-3.5.1.tgz#3605b9959ffc0aa1c6b8b8736d98f91f46e36b17"
+  integrity sha512-9BBQV6JAYSQm2lV7MFtT4mzapXmW4IZO6s38gfiJL84Jg23ivGB1UykcNQauKgtHyhtW2NuZJzItb1s42lM+hA==
 
 react-native-reanimated@^3.3.0:
   version "3.16.7"

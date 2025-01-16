@@ -6,6 +6,8 @@ export const Colors = {
   gray2: '#D6DCE3',
   gray3: '#ccc',
   gray4: '#898794',
+  gray5: '#E6EBF1',
+  gray6: '#F8F8F8',
   red: '#AF202E',
   red2: '#AC1C2B',
 };

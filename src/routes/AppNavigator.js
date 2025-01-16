@@ -15,7 +15,7 @@ const AppNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{headerShown: false}}
-      initialRouteName="TabNavigator">
+      initialRouteName="Onboarding">
       <Stack.Screen name="Onboarding" component={Onboarding} />
       <Stack.Screen name="AuthType" component={AuthType} />
       <Stack.Screen name="Login" component={Login} />
