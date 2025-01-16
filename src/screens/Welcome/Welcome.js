@@ -2,8 +2,10 @@ import {Image, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {Colors, Fonts} from '../../constant/Styles';
 import WineHuntButton from '../../common/WineHuntButton';
+import {useNavigation} from '@react-navigation/native';
 
 const Welcome = () => {
+  const navigation = useNavigation();
   return (
     <View style={{flex: 1, backgroundColor: Colors.white}}>
       <View
@@ -36,7 +38,10 @@ const Welcome = () => {
         </Text>
       </View>
       <View style={{padding: 20, marginBottom: 30}}>
-        <WineHuntButton text="Continue" />
+        <WineHuntButton
+          text="Continue"
+          onPress={() => navigation.navigate('TabNavigator')}
+        />
       </View>
     </View>
   );

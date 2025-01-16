@@ -7,6 +7,7 @@ import AuthType from '../screens/Auth/AuthType';
 import Otp from '../screens/Auth/Otp';
 import Register from '../screens/Auth/Register';
 import Welcome from '../screens/Welcome/Welcome';
+import TabNavigator from './TabNavigator';
 
 const Stack = createNativeStackNavigator();
 
@@ -14,13 +15,14 @@ const AppNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{headerShown: false}}
-      initialRouteName="Onboarding">
+      initialRouteName="TabNavigator">
       <Stack.Screen name="Onboarding" component={Onboarding} />
       <Stack.Screen name="AuthType" component={AuthType} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Otp" component={Otp} />
       <Stack.Screen name="Register" component={Register} />
       <Stack.Screen name="Welcome" component={Welcome} />
+      <Stack.Screen name="TabNavigator" component={TabNavigator} />
     </Stack.Navigator>
   );
 };
