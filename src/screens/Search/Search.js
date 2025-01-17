@@ -1,154 +1,140 @@
 import {
+  FlatList,
   Image,
-  Keyboard,
   Platform,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useMemo, useRef, useState} from 'react';
 import {Colors, Fonts} from '../../constant/Styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Fontisto from 'react-native-vector-icons/Fontisto';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {MultiSwitch} from 'react-native-multiswitch-selector';
+import WineCard from './components/WineCard';
+import BottomSheet from '@gorhom/bottom-sheet';
+import WineHuntButton from '../../common/WineHuntButton';
+import VendorLocationFilter from './Modal/VendorLocationFilter';
 
 const Search = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
+  const bottomSheetModalRef = useRef(null);
+  const snapPoints = useMemo(() => ['45%'], []);
 
   const [searchText, setSearchText] = useState('');
   const [type, setType] = useState('Popular');
+  const [selectedVendor, setSelectedVendor] = useState(null);
+
+  const vendorLocation = [
+    {
+      id: 1,
+      name: 'Restaurant',
+    },
+    {
+      id: 2,
+      name: 'Hotel',
+    },
+    {
+      id: 3,
+      name: 'Winery',
+    },
+    {
+      id: 4,
+      name: 'Wine Bar',
+    },
+    {
+      id: 5,
+      name: 'Wine Shop',
+    },
+  ];
 
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View style={[styles.container, {paddingTop: inset.top}]}>
-        <BackNavigationWithTitle
-          title="Search"
-          onPress={() => navigation.goBack()}
-          extraStyle={{borderBottomWidth: 0}}
-        />
-        <View style={{paddingHorizontal: 20, gap: 10, flexDirection: 'row'}}>
-          <View
-            style={{
-              padding: 10,
-              borderWidth: 1,
-              borderColor: Colors.gray2,
-              borderRadius: 8,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 10,
-              shadowColor: '#000',
-              shadowOffset: {
-                width: 0,
-                height: 2,
-              },
-              shadowOpacity: 0.25,
-              shadowRadius: 3.84,
-              backgroundColor: '#fff',
-              elevation: 5,
-              flex: 1,
-            }}>
-            <TextInput
-              value={searchText}
-              onChangeText={e => setSearchText(e)}
-              style={{
-                paddingVertical: Platform.OS == 'ios' ? 5 : 0,
-                flex: 1,
-                paddingRight: 10,
-                color: Colors.black,
-              }}
-              placeholder="Search by cultivars/wines/vendors"
-              placeholderTextColor={Colors.gray9}
+    <View style={[styles.container, {paddingTop: inset.top}]}>
+      <BackNavigationWithTitle
+        title="Search"
+        onPress={() => navigation.goBack()}
+        extraStyle={styles.backNavigationExtraStyle}
+      />
+      <View style={styles.searchContainer}>
+        <View style={[styles.searchBox, styles.flex1]}>
+          <TextInput
+            value={searchText}
+            onChangeText={setSearchText}
+            style={styles.searchInput}
+            placeholder="Search by cultivars/wines/vendors"
+            placeholderTextColor={Colors.gray9}
+          />
+          {searchText.length > 0 && (
+            <AntDesign
+              name="closecircle"
+              size={20}
+              color={Colors.gray4}
+              onPress={() => setSearchText('')}
             />
-            {searchText.length > 0 && (
-              <AntDesign
-                name="closecircle"
-                size={20}
-                color={Colors.gray4}
-                onPress={() => setSearchText('')}
-              />
-            )}
-            <Image
-              source={require('./images/searchIcon.png')}
-              style={{height: 16, width: 16}}
-            />
-          </View>
-          <View
-            style={{
-              padding: 10,
-              borderWidth: 1,
-              borderColor: Colors.gray2,
-              borderRadius: 8,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 10,
-              shadowColor: '#000',
-              shadowOffset: {
-                width: 0,
-                height: 2,
-              },
-              shadowOpacity: 0.25,
-              shadowRadius: 3.84,
-              backgroundColor: '#fff',
-              elevation: 5,
-            }}>
-            <Image
-              source={require('./images/map.png')}
-              style={{height: 23, width: 23}}
-              resizeMode="contain"
-            />
-          </View>
-          <View
-            style={{
-              padding: 10,
-              borderWidth: 1,
-              borderColor: Colors.gray2,
-              borderRadius: 8,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 10,
-              shadowColor: '#000',
-              shadowOffset: {
-                width: 0,
-                height: 2,
-              },
-              shadowOpacity: 0.25,
-              shadowRadius: 3.84,
-              backgroundColor: '#fff',
-              elevation: 5,
-            }}>
-            <Image
-              source={require('./images/filter.png')}
-              style={{height: 23, width: 23}}
-              resizeMode="contain"
-            />
-          </View>
+          )}
+          <Image
+            source={require('./images/searchIcon.png')}
+            style={styles.iconSmall}
+          />
         </View>
-        <View
-          style={{
-            padding: 20,
-            borderBottomWidth: 2,
-            borderColor: Colors.gray2,
-          }}>
-          <MultiSwitch
-            allStates={['Top Rated', 'Popular']}
-            currentState={type}
-            changeState={setType}
-            mode="white"
-            styleRoot={styles.multiSwitchRoot}
-            styleAllStatesContainer={styles.multiSwitchContainer}
-            styleActiveState={styles.activeState}
-            styleActiveStateText={styles.activeStateText}
-            styleInactiveStateText={styles.inactiveStateText}
+        <Pressable
+          style={styles.iconBox}
+          onPress={() => bottomSheetModalRef.current?.snapToIndex(0)}>
+          <Image
+            source={require('./images/map.png')}
+            style={styles.iconLarge}
+            resizeMode="contain"
+          />
+        </Pressable>
+        <View style={styles.iconBox}>
+          <Image
+            source={require('./images/filter.png')}
+            style={styles.iconLarge}
+            resizeMode="contain"
           />
         </View>
       </View>
-    </TouchableWithoutFeedback>
+      <View style={styles.switchContainer}>
+        <MultiSwitch
+          allStates={['Top Rated', 'Popular']}
+          currentState={type}
+          changeState={setType}
+          mode="white"
+          styleRoot={styles.multiSwitchRoot}
+          styleAllStatesContainer={styles.multiSwitchContainer}
+          styleActiveState={styles.activeState}
+          styleActiveStateText={styles.activeStateText}
+          styleInactiveStateText={styles.inactiveStateText}
+        />
+      </View>
+
+      <FlatList
+        data={Array.from({length: 10})}
+        numColumns={2}
+        showsVerticalScrollIndicator={false}
+        columnWrapperStyle={{columnGap: 10}}
+        contentContainerStyle={{
+          padding: 20,
+          gap: 10,
+          columnGap: 10,
+        }}
+        renderItem={() => <WineCard />}
+      />
+
+      <VendorLocationFilter
+        bottomSheetModalRef={bottomSheetModalRef}
+        snapPoints={snapPoints}
+        vendorLocation={vendorLocation}
+        selectedVendor={selectedVendor}
+        setSelectedVendor={setSelectedVendor}
+      />
+    </View>
   );
 };
 
@@ -159,6 +145,72 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
+  backNavigationExtraStyle: {
+    borderBottomWidth: 0,
+  },
+  searchContainer: {
+    paddingHorizontal: 20,
+    gap: 10,
+    flexDirection: 'row',
+  },
+  searchBox: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: Colors.gray2,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    backgroundColor: '#fff',
+    elevation: 5,
+  },
+  flex1: {
+    flex: 1,
+  },
+  searchInput: {
+    paddingVertical: Platform.OS === 'ios' ? 5 : 0,
+    flex: 1,
+    paddingRight: 10,
+    color: Colors.black,
+  },
+  iconSmall: {
+    height: 16,
+    width: 16,
+  },
+  iconBox: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: Colors.gray2,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    backgroundColor: '#fff',
+    elevation: 5,
+  },
+  iconLarge: {
+    height: 23,
+    width: 23,
+  },
+  switchContainer: {
+    padding: 20,
+    borderBottomWidth: 2,
+    borderColor: Colors.gray2,
+  },
   multiSwitchRoot: {
     borderRadius: 50,
     padding: 0,
@@ -168,9 +220,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray6,
     borderRadius: 50,
     borderWidth: 2,
-
     borderColor: '#E6EBF1',
-    // paddingHorizontal: 10,
   },
   activeState: {
     backgroundColor: Colors.blue,
