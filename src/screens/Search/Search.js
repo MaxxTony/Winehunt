@@ -13,13 +13,14 @@ import {Colors, Fonts} from '../../constant/Styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import Fontisto from 'react-native-vector-icons/Fontisto';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {MultiSwitch} from 'react-native-multiswitch-selector';
 import WineCard from './components/WineCard';
-import BottomSheet from '@gorhom/bottom-sheet';
+import BottomSheet, {BottomSheetScrollView} from '@gorhom/bottom-sheet';
 import WineHuntButton from '../../common/WineHuntButton';
 import VendorLocationFilter from './Modal/VendorLocationFilter';
+import FilterModal from './Modal/FilterModal';
 
 const Search = () => {
   const inset = useSafeAreaInsets();
@@ -30,6 +31,9 @@ const Search = () => {
   const [searchText, setSearchText] = useState('');
   const [type, setType] = useState('Popular');
   const [selectedVendor, setSelectedVendor] = useState(null);
+
+  const bottomSheetModalRef2 = useRef(null);
+  const snapPoints2 = useMemo(() => ['80%'], []);
 
   const vendorLocation = [
     {
@@ -92,13 +96,15 @@ const Search = () => {
             resizeMode="contain"
           />
         </Pressable>
-        <View style={styles.iconBox}>
+        <Pressable
+          style={styles.iconBox}
+          onPress={() => bottomSheetModalRef2.current?.snapToIndex(0)}>
           <Image
             source={require('./images/filter.png')}
             style={styles.iconLarge}
             resizeMode="contain"
           />
-        </View>
+        </Pressable>
       </View>
       <View style={styles.switchContainer}>
         <MultiSwitch
@@ -133,6 +139,11 @@ const Search = () => {
         vendorLocation={vendorLocation}
         selectedVendor={selectedVendor}
         setSelectedVendor={setSelectedVendor}
+      />
+
+      <FilterModal
+        bottomSheetModalRef2={bottomSheetModalRef2}
+        snapPoints2={snapPoints2}
       />
     </View>
   );
