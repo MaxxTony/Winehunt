@@ -8,8 +8,13 @@ export const Colors = {
   gray4: '#898794',
   gray5: '#E6EBF1',
   gray6: '#F8F8F8',
+  gray7: '#666464',
+  gray8: '#524B4B',
+  gray9: '#808386',
   red: '#AF202E',
   red2: '#AC1C2B',
+  yellow: '#F8C832',
+  blue: '#0F1627',
 };
 
 export const Fonts = {

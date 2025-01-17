@@ -1,7 +1,10 @@
 import {
+  Alert,
   Dimensions,
   FlatList,
   Image,
+  Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -11,25 +14,22 @@ import {Colors, Fonts} from '../../constant/Styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Carousel from 'react-native-reanimated-carousel';
 import {MultiSwitch} from 'react-native-multiswitch-selector';
+import HeadingWithLink from '../../components/HeadingWithLink';
+import NearVendorCards from './components/NearVendorCards';
+import FeatureWindeCard from './components/FeatureWindeCard';
+import NewArrivalCard from './components/NewArrivalCard';
+import {useNavigation} from '@react-navigation/native';
 
 const Home = () => {
   const inset = useSafeAreaInsets();
+  const navigation = useNavigation();
   const width = Dimensions.get('window').width;
   const [type, setType] = useState('Wine types');
 
   const data = [
-    {
-      id: 1,
-      image: require('./images/slider.png'),
-    },
-    {
-      id: 2,
-      image: require('./images/slider2.png'),
-    },
-    {
-      id: 3,
-      image: require('./images/slider3.png'),
-    },
+    {id: 1, image: require('./images/slider.png')},
+    {id: 2, image: require('./images/slider2.png')},
+    {id: 3, image: require('./images/slider3.png')},
   ];
 
   return (
@@ -57,85 +57,86 @@ const Home = () => {
           />
         </View>
       </View>
-      <View style={{padding: 20, flex: 0.5}}>
-        <Carousel
-          loop
-          width={width - 40}
-          height={width / 2}
-          autoPlay={true}
-          data={data}
-          scrollAnimationDuration={1000}
-          pagingEnabled={true}
-          style={{borderRadius: 10}}
-          renderItem={({item, index}) => (
-            <Image
-              source={item?.image}
-              style={{height: '100%', width: width - 40, borderRadius: 10}}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}>
+        <View style={styles.carouselContainer}>
+          <Carousel
+            loop
+            width={width - 40}
+            height={width / 2}
+            autoPlay={true}
+            data={data}
+            scrollAnimationDuration={1000}
+            pagingEnabled={true}
+            renderItem={({item}) => (
+              <Image source={item.image} style={styles.carouselImage} />
+            )}
+          />
+        </View>
+        <View style={styles.contentContainer}>
+          <MultiSwitch
+            allStates={['Wine types', 'Popular countries', 'Popular grapes']}
+            currentState={type}
+            changeState={setType}
+            mode="white"
+            styleRoot={styles.multiSwitchRoot}
+            styleAllStatesContainer={styles.multiSwitchContainer}
+            styleActiveState={styles.activeState}
+            styleActiveStateText={styles.activeStateText}
+            styleInactiveStateText={styles.inactiveStateText}
+          />
+          <View style={styles.listContainer}>
+            <FlatList
+              data={Array.from({length: 10})}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalList}
+              renderItem={({index}) => (
+                <Pressable
+                  style={styles.listItem}
+                  key={index}
+                  onPress={() => Alert.alert('Coming Soon')}>
+                  <Image
+                    source={require('./images/wine.png')}
+                    style={styles.listItemImage}
+                  />
+                  <Text style={styles.listItemText}>Red</Text>
+                </Pressable>
+              )}
             />
-          )}
-        />
-      </View>
-      <View style={{flex: 1, padding: 20}}>
-        <MultiSwitch
-          allStates={['Wine types', 'Popular countries', 'Popular grapes']}
-          currentState={type}
-          changeState={e => {
-            setType(e);
-          }}
-          mode="white"
-          styleRoot={{
-            borderRadius: 10,
-            padding: 0,
-          }}
-          styleAllStatesContainer={{
-            backgroundColor: Colors.gray6,
-            borderRadius: 5,
-            borderWidth: 2,
-            borderColor: '#E6EBF1',
-            paddingHorizontal: 10,
-          }}
-          styleActiveState={{
-            backgroundColor: Colors.red,
-            borderRadius: 5,
-          }}
-          styleActiveStateText={{
-            fontFamily: Fonts.InterRegular,
-            color: Colors.white,
-            fontWeight: '500',
-            fontSize: 14,
-          }}
-          styleInactiveStateText={{
-            color: Colors.black,
-            fontFamily: Fonts.InterRegular,
-            fontWeight: '500',
-            fontSize: 14,
-          }}
-        />
-        <View style={{paddingVertical: 20}}>
+          </View>
+          <HeadingWithLink title="Near Vendors for you" />
+          <FlatList
+            data={Array.from({length: 10})}
+            scrollEnabled={false}
+            contentContainerStyle={styles.verticalList}
+            renderItem={() => <NearVendorCards />}
+          />
+          <HeadingWithLink title="Featured Wine" />
           <FlatList
             data={Array.from({length: 10})}
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{columnGap: 10}}
-            renderItem={({item, index}) => {
-              return (
-                <View
-                  style={{
-                    alignItems: 'center',
-                    gap: 10,
-                    minWidth: 80,
-                  }}>
-                  <Image
-                    source={require('./images/wine.png')}
-                    style={{height: 60, width: 60}}
-                  />
-                  <Text>Red</Text>
-                </View>
-              );
-            }}
+            contentContainerStyle={[
+              styles.horizontalList,
+              {marginVertical: 20},
+            ]}
+            renderItem={() => <FeatureWindeCard />}
+          />
+          <HeadingWithLink title="New Arrival" />
+          <FlatList
+            data={Array.from({length: 10})}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={[
+              styles.horizontalList,
+              {marginVertical: 20},
+            ]}
+            renderItem={() => <NewArrivalCard />}
           />
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 };
@@ -149,9 +150,9 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
+    paddingVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
     borderBottomWidth: 2,
     borderColor: Colors.gray5,
   },
@@ -160,8 +161,8 @@ const styles = StyleSheet.create({
     width: 40,
   },
   userInfo: {
-    gap: 5,
     flex: 1,
+    marginHorizontal: 10,
   },
   userName: {
     fontSize: 16,
@@ -172,7 +173,6 @@ const styles = StyleSheet.create({
   userLocationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
   },
   locationIcon: {
     height: 16,
@@ -192,5 +192,71 @@ const styles = StyleSheet.create({
   icon: {
     height: 40,
     width: 40,
+  },
+  scrollContent: {
+    paddingBottom: 70,
+  },
+  carouselContainer: {
+    padding: 20,
+  },
+  carouselImage: {
+    height: '100%',
+    width: Dimensions.get('window').width - 40,
+    borderRadius: 10,
+  },
+  contentContainer: {
+    paddingHorizontal: 20,
+  },
+  multiSwitchRoot: {
+    borderRadius: 10,
+    padding: 0,
+  },
+  multiSwitchContainer: {
+    backgroundColor: Colors.gray6,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: '#E6EBF1',
+    paddingHorizontal: 10,
+  },
+  activeState: {
+    backgroundColor: Colors.red,
+    borderRadius: 5,
+  },
+  activeStateText: {
+    fontFamily: Fonts.InterRegular,
+    color: Colors.white,
+    fontWeight: '500',
+    fontSize: 14,
+  },
+  inactiveStateText: {
+    color: Colors.black,
+    fontFamily: Fonts.InterRegular,
+    fontWeight: '500',
+    fontSize: 14,
+  },
+  listContainer: {
+    paddingVertical: 20,
+  },
+  horizontalList: {
+    gap: 10,
+  },
+  listItem: {
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 20,
+  },
+  listItemImage: {
+    height: 60,
+    width: 60,
+  },
+  listItemText: {
+    fontSize: 14,
+    color: Colors.black,
+    fontFamily: Fonts.InterRegular,
+    fontWeight: '500',
+  },
+  verticalList: {
+    gap: 10,
+    marginVertical: 15,
   },
 });
