@@ -6,7 +6,8 @@ const WineHuntButton = props => {
   return (
     <Pressable
       style={[styles.submitButton, props?.extraButtonStyle]}
-      onPress={props?.onPress}>
+      onPress={props?.onPress}
+      {...props}>
       <Text style={[styles.submitButtonText, props?.extraTextStyle]}>
         {props?.text}
       </Text>
