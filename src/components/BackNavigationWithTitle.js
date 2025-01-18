@@ -26,6 +26,21 @@ const BackNavigationWithTitle = props => {
           {props?.title}
         </Text>
       </Pressable>
+      {props?.rightIcon && (
+        <Pressable
+          onPress={props?.onPressRightIcon}
+          style={{paddingHorizontal: 20}}>
+          <Text
+            style={{
+              fontSize: 16,
+              color: Colors.red2,
+              fontFamily: Fonts.InterMedium,
+              fontWeight: '500',
+            }}>
+            {props?.rightText}
+          </Text>
+        </Pressable>
+      )}
     </View>
   );
 };
@@ -40,5 +55,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     paddingBottom: 10,
     borderColor: Colors.gray2,
+    justifyContent: 'space-between',
   },
 });

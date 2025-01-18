@@ -1,14 +1,231 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {
+  FlatList,
+  Image,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import React from 'react';
+import {useNavigation} from '@react-navigation/native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
+import {Colors, Fonts} from '../../constant/Styles';
+import Entypo from 'react-native-vector-icons/Entypo';
 
 const Profile = () => {
+  const navigation = useNavigation();
+  const inset = useSafeAreaInsets();
+
+  const data = [
+    {
+      id: 1,
+      name: 'Edit Profile',
+      image: require('./images/userIcon.png'),
+    },
+    {
+      id: 2,
+      name: 'Favorite',
+      image: require('./images/heart.png'),
+    },
+    {
+      id: 3,
+      name: 'My Address list',
+      image: require('./images/file.png'),
+    },
+    {
+      id: 4,
+      name: 'Change Password',
+      image: require('./images/password.png'),
+    },
+    {
+      id: 5,
+      name: 'Notification',
+      image: require('./images/notification.png'),
+    },
+    {
+      id: 6,
+      name: 'Help & Support',
+      image: require('./images/help.png'),
+    },
+    {
+      id: 7,
+      name: 'Privacy Policy',
+      image: require('./images/privacy.png'),
+    },
+    {
+      id: 8,
+      name: 'Terms & Conditions',
+      image: require('./images/Terms.png'),
+    },
+    {
+      id: 9,
+      name: 'Logout',
+      image: require('./images/Logout.png'),
+    },
+  ];
+
   return (
-    <View>
-      <Text>Profile</Text>
-    </View>
+    <ImageBackground
+      source={require('../../../assets/images/LoginPage/ImgBg.png')}
+      style={[styles.imageBackground, {paddingTop: inset.top}]}>
+      <BackNavigationWithTitle
+        title="Profile"
+        onPress={() => navigation.goBack()}
+        extraStyle={styles.backNavigationExtraStyle}
+      />
+      <ScrollView
+        contentContainerStyle={styles.scrollViewContainer}
+        showsVerticalScrollIndicator={false}>
+        <View style={styles.profileHeader}>
+          <Image
+            source={require('./images/profile.png')}
+            style={styles.profileImage}
+          />
+          <Text style={styles.profileName}>William Anderson</Text>
+        </View>
+        <View style={styles.milestoneContainer}>
+          <Image
+            source={require('./images/barcode.png')}
+            style={styles.barcodeImage}
+          />
+          <View style={styles.milestoneTextContainer}>
+            <Text style={styles.milestoneTitle}>
+              Receive Your Milestone score
+            </Text>
+            <Text style={styles.milestoneUserId}>User Id: WA@1234</Text>
+          </View>
+          <Entypo name="chevron-thin-right" size={20} color={Colors.black} />
+        </View>
+        <View style={styles.optionsContainer}>
+          <FlatList
+            data={data}
+            scrollEnabled={false}
+            contentContainerStyle={styles.flatListContainer}
+            renderItem={({item, index}) => {
+              return (
+                <View style={styles.optionItem}>
+                  <Image
+                    source={item?.image}
+                    style={styles.optionImage}
+                    resizeMode="contain"
+                  />
+                  <Text
+                    style={[
+                      styles.optionText,
+                      {
+                        color:
+                          index == data.length - 1 ? Colors.red : Colors.black,
+                      },
+                    ]}>
+                    {item?.name}
+                  </Text>
+                  {index !== data.length - 1 && (
+                    <Entypo
+                      name="chevron-thin-right"
+                      size={20}
+                      color={Colors.black}
+                    />
+                  )}
+                </View>
+              );
+            }}
+          />
+        </View>
+      </ScrollView>
+    </ImageBackground>
   );
 };
 
 export default Profile;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  imageBackground: {
+    flex: 1,
+  },
+  backNavigationExtraStyle: {
+    borderBottomWidth: 0,
+  },
+  scrollViewContainer: {
+    paddingBottom: 80,
+    padding: 20,
+    gap: 20,
+  },
+  profileHeader: {
+    alignItems: 'center',
+    gap: 20,
+  },
+  profileImage: {
+    height: 90,
+    width: 90,
+  },
+  profileName: {
+    fontSize: 18,
+    color: Colors.red,
+    fontFamily: Fonts.InterMedium,
+    fontWeight: '600',
+  },
+  milestoneContainer: {
+    padding: 10,
+    backgroundColor: Colors.lightPink,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 15,
+  },
+  barcodeImage: {
+    height: 40,
+    width: 40,
+  },
+  milestoneTextContainer: {
+    gap: 5,
+    flex: 1,
+  },
+  milestoneTitle: {
+    fontSize: 14,
+    color: Colors.black,
+    fontFamily: Fonts.InterMedium,
+    fontWeight: '600',
+  },
+  milestoneUserId: {
+    fontSize: 12,
+    color: Colors.gray7,
+    fontFamily: Fonts.InterRegular,
+    fontWeight: '600',
+  },
+  optionsContainer: {
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    backgroundColor: '#fff',
+    elevation: 5,
+    padding: 10,
+    borderRadius: 10,
+  },
+  flatListContainer: {
+    gap: 10,
+  },
+  optionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 20,
+    paddingVertical: 10,
+  },
+  optionImage: {
+    height: 25,
+    width: 25,
+    marginLeft: 5,
+  },
+  optionText: {
+    fontSize: 14,
+    color: Colors.black,
+    fontFamily: Fonts.InterRegular,
+    fontWeight: '600',
+    flex: 1,
+  },
+});

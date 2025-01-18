@@ -20,6 +20,7 @@ export const Colors = {
   red2: '#AC1C2B',
   yellow: '#F8C832',
   blue: '#0F1627',
+  lightPink: '#F4E4E6',
 };
 
 export const Fonts = {
