@@ -35,10 +35,12 @@ const Home = () => {
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <View style={styles.header}>
-        <Image
-          source={require('./images/profile.png')}
-          style={styles.profileImage}
-        />
+        <Pressable onPress={() => navigation.navigate('Profile')}>
+          <Image
+            source={require('./images/profile.png')}
+            style={styles.profileImage}
+          />
+        </Pressable>
         <View style={styles.userInfo}>
           <Text style={styles.userName}>William Anderson</Text>
           <View style={styles.userLocationContainer}>
@@ -50,11 +52,18 @@ const Home = () => {
           </View>
         </View>
         <View style={styles.actionIcons}>
-          <Image source={require('./images/scanner.png')} style={styles.icon} />
-          <Image
-            source={require('./images/notification.png')}
-            style={styles.icon}
-          />
+          <Pressable onPress={() => navigation.navigate('ScanCode')}>
+            <Image
+              source={require('./images/scanner.png')}
+              style={styles.icon}
+            />
+          </Pressable>
+          <Pressable onPress={() => navigation.navigate('Notifications')}>
+            <Image
+              source={require('./images/notification.png')}
+              style={styles.icon}
+            />
+          </Pressable>
         </View>
       </View>
       <ScrollView

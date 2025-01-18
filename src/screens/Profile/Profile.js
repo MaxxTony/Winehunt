@@ -2,6 +2,7 @@ import {
   FlatList,
   Image,
   ImageBackground,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -23,46 +24,55 @@ const Profile = () => {
       id: 1,
       name: 'Edit Profile',
       image: require('./images/userIcon.png'),
+      screen: 'EditProfile',
     },
     {
       id: 2,
       name: 'Favorite',
       image: require('./images/heart.png'),
+      screen: 'Favorite',
     },
     {
       id: 3,
       name: 'My Address list',
       image: require('./images/file.png'),
+      screen: 'AddressList',
     },
     {
       id: 4,
       name: 'Change Password',
       image: require('./images/password.png'),
+      screen: 'ChangePassword',
     },
     {
       id: 5,
       name: 'Notification',
       image: require('./images/notification.png'),
+      screen: 'Notifications',
     },
     {
       id: 6,
       name: 'Help & Support',
       image: require('./images/help.png'),
+      screen: 'HelpSupport',
     },
     {
       id: 7,
       name: 'Privacy Policy',
       image: require('./images/privacy.png'),
+      screen: 'PrivacyPolicy',
     },
     {
       id: 8,
       name: 'Terms & Conditions',
       image: require('./images/Terms.png'),
+      screen: 'TermsCondition',
     },
     {
       id: 9,
       name: 'Logout',
       image: require('./images/Logout.png'),
+      screen: null,
     },
   ];
 
@@ -105,7 +115,13 @@ const Profile = () => {
             contentContainerStyle={styles.flatListContainer}
             renderItem={({item, index}) => {
               return (
-                <View style={styles.optionItem}>
+                <Pressable
+                  style={styles.optionItem}
+                  onPress={() => {
+                    if (item?.screen !== null) {
+                      navigation.navigate(item.screen);
+                    }
+                  }}>
                   <Image
                     source={item?.image}
                     style={styles.optionImage}
@@ -128,7 +144,7 @@ const Profile = () => {
                       color={Colors.black}
                     />
                   )}
-                </View>
+                </Pressable>
               );
             }}
           />

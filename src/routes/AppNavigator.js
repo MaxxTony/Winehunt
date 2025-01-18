@@ -8,6 +8,14 @@ import Otp from '../screens/Auth/Otp';
 import Register from '../screens/Auth/Register';
 import Welcome from '../screens/Welcome/Welcome';
 import TabNavigator from './TabNavigator';
+import ScanCode from '../screens/ScanCode/ScanCode';
+import Notifications from '../screens/Notifications/Notifications';
+import EditProfile from '../screens/Profile/EditProfile';
+import AddressList from '../screens/Profile/AddressList';
+import ChangePassword from '../screens/Auth/ChangePassword';
+import HelpSupport from '../screens/Profile/HelpSupport';
+import PrivacyPolicy from '../screens/Profile/PrivacyPolicy';
+import TermsCondition from '../screens/Profile/TermsCondition';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +31,14 @@ const AppNavigator = () => {
       <Stack.Screen name="Register" component={Register} />
       <Stack.Screen name="Welcome" component={Welcome} />
       <Stack.Screen name="TabNavigator" component={TabNavigator} />
+      <Stack.Screen name="ScanCode" component={ScanCode} />
+      <Stack.Screen name="Notifications" component={Notifications} />
+      <Stack.Screen name="EditProfile" component={EditProfile} />
+      <Stack.Screen name="AddressList" component={AddressList} />
+      <Stack.Screen name="ChangePassword" component={ChangePassword} />
+      <Stack.Screen name="HelpSupport" component={HelpSupport} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+      <Stack.Screen name="TermsCondition" component={TermsCondition} />
     </Stack.Navigator>
   );
 };
