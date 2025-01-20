@@ -377,6 +377,9 @@ PODS:
   - React-jsinspector (0.72.7)
   - React-logger (0.72.7):
     - glog
+  - react-native-image-picker (7.2.3):
+    - RCT-Folly (= 2021.07.22.00)
+    - React-Core
   - react-native-multiswitch-selector (1.0.4):
     - React
   - react-native-safe-area-context (5.1.0):
@@ -576,6 +579,7 @@ DEPENDENCIES:
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
+  - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-multiswitch-selector (from `../node_modules/react-native-multiswitch-selector`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
@@ -666,6 +670,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
   React-logger:
     :path: "../node_modules/react-native/ReactCommon/logger"
+  react-native-image-picker:
+    :path: "../node_modules/react-native-image-picker"
   react-native-multiswitch-selector:
     :path: "../node_modules/react-native-multiswitch-selector"
   react-native-safe-area-context:
@@ -754,6 +760,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: c49502e5d02112247ee4526bc3ccfc891ae3eb9b
   React-jsinspector: 8baadae51f01d867c3921213a25ab78ab4fbcd91
   React-logger: 8edc785c47c8686c7962199a307015e2ce9a0e4f
+  react-native-image-picker: 2f6958ad0491529269cc9ed4e185927ae9cd4433
   react-native-multiswitch-selector: 2349fa558fbe1e392871da626efdaee79bde0b58
   react-native-safe-area-context: 04803a01f39f31cc6605a5531280b477b48f8a88
   React-NativeModulesApple: b6868ee904013a7923128892ee4a032498a1024a

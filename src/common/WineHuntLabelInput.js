@@ -53,7 +53,7 @@ const WineHuntLabelInput = props => {
           value={props?.value}
           onChangeText={props?.onChangeText}
           secureTextEntry={secureTextEntry}
-          style={{flex: 1}}
+          style={[{flex: 1}, props?.extraInputStyle]}
           placeholder={props?.placeholder}
           placeholderTextColor={Colors.gray4}
           {...props}

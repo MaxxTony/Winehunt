@@ -35,8 +35,18 @@
 			</dict>
 		</dict>
 	</dict>
+			<key>NSCameraUsageDescription</key>
+	<string>WineHunt needs access to your camera to update your profile picture.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app requires access to your location to display nearby master places based on your current location.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app requires access to your location to display nearby master places based on your current location.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string/>
+	<string>This app requires access to your location to determine your current address and to display nearby master places.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>WineHunt needs write-only access to your photo library so you can update your profile picture.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>WineHunt would like access to your photo library to update your profile picture.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Philosopher-Bold</string>

@@ -34,7 +34,7 @@ const Profile = () => {
     },
     {
       id: 3,
-      name: 'My Address list',
+      name: 'My Address List',
       image: require('./images/file.png'),
       screen: 'AddressList',
     },
