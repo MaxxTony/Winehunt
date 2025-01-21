@@ -8,16 +8,18 @@ import {
   Text,
   View,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {Colors, Fonts} from '../../constant/Styles';
 import Entypo from 'react-native-vector-icons/Entypo';
+import LogoutModal from '../../Modal/LogoutModal';
 
 const Profile = () => {
   const navigation = useNavigation();
   const inset = useSafeAreaInsets();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const data = [
     {
@@ -95,7 +97,9 @@ const Profile = () => {
           />
           <Text style={styles.profileName}>William Anderson</Text>
         </View>
-        <View style={styles.milestoneContainer}>
+        <Pressable
+          style={styles.milestoneContainer}
+          onPress={() => navigation.navigate('MileStone')}>
           <Image
             source={require('./images/barcode.png')}
             style={styles.barcodeImage}
@@ -107,7 +111,7 @@ const Profile = () => {
             <Text style={styles.milestoneUserId}>User Id: WA@1234</Text>
           </View>
           <Entypo name="chevron-thin-right" size={20} color={Colors.black} />
-        </View>
+        </Pressable>
         <View style={styles.optionsContainer}>
           <FlatList
             data={data}
@@ -120,6 +124,8 @@ const Profile = () => {
                   onPress={() => {
                     if (item?.screen !== null) {
                       navigation.navigate(item.screen);
+                    } else {
+                      setShowLogoutModal(true);
                     }
                   }}>
                   <Image
@@ -150,6 +156,15 @@ const Profile = () => {
           />
         </View>
       </ScrollView>
+      {showLogoutModal && (
+        <LogoutModal
+          onCancel={() => setShowLogoutModal(false)}
+          onLogout={() => {
+            setShowLogoutModal(false);
+            navigation.navigate('Onboarding');
+          }}
+        />
+      )}
     </ImageBackground>
   );
 };

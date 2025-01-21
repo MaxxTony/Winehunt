@@ -26,7 +26,7 @@ const HeadingWithLink = props => {
           fontWeight: '500',
           fontSize: 15,
         }}
-        onPress={() => Alert.alert('Coming Soon !!!')}>
+        onPress={props?.onPress}>
         See all
       </Text>
     </View>

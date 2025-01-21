@@ -133,7 +133,10 @@ const Home = () => {
             ]}
             renderItem={() => <FeatureWindeCard />}
           />
-          <HeadingWithLink title="New Arrival" />
+          <HeadingWithLink
+            title="New Arrival"
+            onPress={() => navigation.navigate('NewArrival')}
+          />
           <FlatList
             data={Array.from({length: 10})}
             horizontal

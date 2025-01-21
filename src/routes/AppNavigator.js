@@ -16,6 +16,8 @@ import ChangePassword from '../screens/Auth/ChangePassword';
 import HelpSupport from '../screens/Profile/HelpSupport';
 import PrivacyPolicy from '../screens/Profile/PrivacyPolicy';
 import TermsCondition from '../screens/Profile/TermsCondition';
+import MileStone from '../screens/Profile/MileStone';
+import NewArrival from '../screens/Home/screens/NewArrival';
 
 const Stack = createNativeStackNavigator();
 
@@ -39,6 +41,8 @@ const AppNavigator = () => {
       <Stack.Screen name="HelpSupport" component={HelpSupport} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
       <Stack.Screen name="TermsCondition" component={TermsCondition} />
+      <Stack.Screen name="MileStone" component={MileStone} />
+      <Stack.Screen name="NewArrival" component={NewArrival} />
     </Stack.Navigator>
   );
 };
