@@ -23,19 +23,19 @@
 		7D1D57D1675243508EA67574 /* Inter_18pt-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 13F0E3939CDE49B39BF7EB6B /* Inter_18pt-Light.ttf */; };
 		7D678107ADAA45D7BCAD6C8C /* Inter_18pt-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A5442A1511D74665AB909648 /* Inter_18pt-BlackItalic.ttf */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		99C29004569B74994E4F1B4B /* libPods-WineHunt-WineHuntTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A0054A8F79092085D19C21C5 /* libPods-WineHunt-WineHuntTests.a */; };
 		9C52ABDF018A4046BCA2B47C /* Inter_18pt-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0C3E2E6346F44CCEA359233F /* Inter_18pt-ExtraBold.ttf */; };
 		9F71AA5702244D85ABB14456 /* Inter_18pt-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 15ED08A9287C4BD2B69C886B /* Inter_18pt-Italic.ttf */; };
 		A392F5642BBF4EB6B48628C6 /* Inter_18pt-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BEFED3031D3341719477B325 /* Inter_18pt-Medium.ttf */; };
 		AA63AF32690C43A98C739DC2 /* Philosopher-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5C7DF2C67A29400DB7432538 /* Philosopher-Italic.ttf */; };
-		BF60AA8EEA1233477168DC44 /* libPods-WineHunt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FCA3116C66888E1E82A699D9 /* libPods-WineHunt.a */; };
 		C97F36979FF74751879A9450 /* Inter_18pt-ExtraLightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 70A9520CE4354859BCF79649 /* Inter_18pt-ExtraLightItalic.ttf */; };
+		CED6F2DD955D41AA0EC193F3 /* libPods-WineHunt-WineHuntTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 89E7674AE7E7349FF4AC01CF /* libPods-WineHunt-WineHuntTests.a */; };
 		D2F758C39FF6472FA3AF17EA /* Philosopher-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 016FB789A2E24DB9850CA373 /* Philosopher-Bold.ttf */; };
 		D6786100274D4827B75A2292 /* Inter_18pt-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 90322CF2988D4C228E407C73 /* Inter_18pt-MediumItalic.ttf */; };
 		E2627BBDE60C4539B16359DC /* Inter_18pt-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B95CC216AB684DED8781952A /* Inter_18pt-ThinItalic.ttf */; };
 		E69200EE0FCA4C77AA1586DA /* Inter_18pt-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 91D15D03EA6F425BA2F0BE84 /* Inter_18pt-ExtraBoldItalic.ttf */; };
 		E695D32A888D4E9792C3B1B7 /* Inter_18pt-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2EEF105979C04A47A0040FBB /* Inter_18pt-LightItalic.ttf */; };
 		F7F0EE19113E43578102F6D8 /* Philosopher-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 37FC7497A90E4E959EBADDAA /* Philosopher-BoldItalic.ttf */; };
+		FFC08C4CDD8D39D8534878EB /* libPods-WineHunt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AC77912C69561BBA22E7D104 /* libPods-WineHunt.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,7 +53,6 @@
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* WineHuntTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WineHuntTests.m; sourceTree = "<group>"; };
 		016FB789A2E24DB9850CA373 /* Philosopher-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Philosopher-Bold.ttf"; path = "../assets/fonts/Philosopher-Bold.ttf"; sourceTree = "<group>"; };
-		092633635EF21865AD343AD0 /* Pods-WineHunt-WineHuntTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WineHunt-WineHuntTests.release.xcconfig"; path = "Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests.release.xcconfig"; sourceTree = "<group>"; };
 		0C3E2E6346F44CCEA359233F /* Inter_18pt-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-ExtraBold.ttf"; path = "../assets/fonts/Inter_18pt-ExtraBold.ttf"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* WineHunt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WineHunt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = WineHunt/AppDelegate.h; sourceTree = "<group>"; };
@@ -63,31 +62,32 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = WineHunt/main.m; sourceTree = "<group>"; };
 		13F0E3939CDE49B39BF7EB6B /* Inter_18pt-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-Light.ttf"; path = "../assets/fonts/Inter_18pt-Light.ttf"; sourceTree = "<group>"; };
 		15ED08A9287C4BD2B69C886B /* Inter_18pt-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-Italic.ttf"; path = "../assets/fonts/Inter_18pt-Italic.ttf"; sourceTree = "<group>"; };
+		1EB4BA2D629BA07A9268EA08 /* Pods-WineHunt.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WineHunt.debug.xcconfig"; path = "Target Support Files/Pods-WineHunt/Pods-WineHunt.debug.xcconfig"; sourceTree = "<group>"; };
 		2125C883257B42AC99680501 /* Inter_18pt-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-BoldItalic.ttf"; path = "../assets/fonts/Inter_18pt-BoldItalic.ttf"; sourceTree = "<group>"; };
 		2EEF105979C04A47A0040FBB /* Inter_18pt-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-LightItalic.ttf"; path = "../assets/fonts/Inter_18pt-LightItalic.ttf"; sourceTree = "<group>"; };
 		37FC7497A90E4E959EBADDAA /* Philosopher-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Philosopher-BoldItalic.ttf"; path = "../assets/fonts/Philosopher-BoldItalic.ttf"; sourceTree = "<group>"; };
-		3CB189DB2818CB293092B9F7 /* Pods-WineHunt.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WineHunt.debug.xcconfig"; path = "Target Support Files/Pods-WineHunt/Pods-WineHunt.debug.xcconfig"; sourceTree = "<group>"; };
+		4AC8CF023AD68FD223565BD1 /* Pods-WineHunt.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WineHunt.release.xcconfig"; path = "Target Support Files/Pods-WineHunt/Pods-WineHunt.release.xcconfig"; sourceTree = "<group>"; };
 		4C2C7D94A1924154AC2EC978 /* Inter_18pt-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-Bold.ttf"; path = "../assets/fonts/Inter_18pt-Bold.ttf"; sourceTree = "<group>"; };
 		5C7DF2C67A29400DB7432538 /* Philosopher-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Philosopher-Italic.ttf"; path = "../assets/fonts/Philosopher-Italic.ttf"; sourceTree = "<group>"; };
 		70A9520CE4354859BCF79649 /* Inter_18pt-ExtraLightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-ExtraLightItalic.ttf"; path = "../assets/fonts/Inter_18pt-ExtraLightItalic.ttf"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = WineHunt/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		89E7674AE7E7349FF4AC01CF /* libPods-WineHunt-WineHuntTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WineHunt-WineHuntTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		90322CF2988D4C228E407C73 /* Inter_18pt-MediumItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-MediumItalic.ttf"; path = "../assets/fonts/Inter_18pt-MediumItalic.ttf"; sourceTree = "<group>"; };
 		91D15D03EA6F425BA2F0BE84 /* Inter_18pt-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-ExtraBoldItalic.ttf"; path = "../assets/fonts/Inter_18pt-ExtraBoldItalic.ttf"; sourceTree = "<group>"; };
-		A0054A8F79092085D19C21C5 /* libPods-WineHunt-WineHuntTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WineHunt-WineHuntTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A110B3A8294B49DCB81DE9B4 /* Inter_18pt-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-Black.ttf"; path = "../assets/fonts/Inter_18pt-Black.ttf"; sourceTree = "<group>"; };
 		A5442A1511D74665AB909648 /* Inter_18pt-BlackItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-BlackItalic.ttf"; path = "../assets/fonts/Inter_18pt-BlackItalic.ttf"; sourceTree = "<group>"; };
+		AC77912C69561BBA22E7D104 /* libPods-WineHunt.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WineHunt.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF65AC642AA24733817DB63C /* Inter_18pt-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-SemiBold.ttf"; path = "../assets/fonts/Inter_18pt-SemiBold.ttf"; sourceTree = "<group>"; };
-		B55FEF79DB1438162EE4C200 /* Pods-WineHunt-WineHuntTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WineHunt-WineHuntTests.debug.xcconfig"; path = "Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests.debug.xcconfig"; sourceTree = "<group>"; };
 		B95CC216AB684DED8781952A /* Inter_18pt-ThinItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-ThinItalic.ttf"; path = "../assets/fonts/Inter_18pt-ThinItalic.ttf"; sourceTree = "<group>"; };
 		BB7DCCE7817F4AFBBFE1E4BD /* Inter_18pt-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-SemiBoldItalic.ttf"; path = "../assets/fonts/Inter_18pt-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
 		BD998738742F43DD8608B52C /* Inter_18pt-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-Regular.ttf"; path = "../assets/fonts/Inter_18pt-Regular.ttf"; sourceTree = "<group>"; };
 		BEFED3031D3341719477B325 /* Inter_18pt-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-Medium.ttf"; path = "../assets/fonts/Inter_18pt-Medium.ttf"; sourceTree = "<group>"; };
+		C562F4180CD7E358B6F56530 /* Pods-WineHunt-WineHuntTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WineHunt-WineHuntTests.release.xcconfig"; path = "Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests.release.xcconfig"; sourceTree = "<group>"; };
+		CF7DA6C539DC718F7C1E5185 /* Pods-WineHunt-WineHuntTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WineHunt-WineHuntTests.debug.xcconfig"; path = "Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests.debug.xcconfig"; sourceTree = "<group>"; };
 		D5AA8646A97D4ECCBEA7E31A /* Inter_18pt-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-Thin.ttf"; path = "../assets/fonts/Inter_18pt-Thin.ttf"; sourceTree = "<group>"; };
-		E1FADC8C59FEDCF016CBEE22 /* Pods-WineHunt.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WineHunt.release.xcconfig"; path = "Target Support Files/Pods-WineHunt/Pods-WineHunt.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F8C1544D6C4B4BAD89B6D132 /* Inter_18pt-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter_18pt-ExtraLight.ttf"; path = "../assets/fonts/Inter_18pt-ExtraLight.ttf"; sourceTree = "<group>"; };
 		FBA9DCCC0A584BD6AD6BF484 /* Philosopher-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Philosopher-Regular.ttf"; path = "../assets/fonts/Philosopher-Regular.ttf"; sourceTree = "<group>"; };
-		FCA3116C66888E1E82A699D9 /* libPods-WineHunt.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WineHunt.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,7 +95,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				99C29004569B74994E4F1B4B /* libPods-WineHunt-WineHuntTests.a in Frameworks */,
+				CED6F2DD955D41AA0EC193F3 /* libPods-WineHunt-WineHuntTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,7 +103,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF60AA8EEA1233477168DC44 /* libPods-WineHunt.a in Frameworks */,
+				FFC08C4CDD8D39D8534878EB /* libPods-WineHunt.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -144,8 +144,8 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				FCA3116C66888E1E82A699D9 /* libPods-WineHunt.a */,
-				A0054A8F79092085D19C21C5 /* libPods-WineHunt-WineHuntTests.a */,
+				AC77912C69561BBA22E7D104 /* libPods-WineHunt.a */,
+				89E7674AE7E7349FF4AC01CF /* libPods-WineHunt-WineHuntTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -214,10 +214,10 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				3CB189DB2818CB293092B9F7 /* Pods-WineHunt.debug.xcconfig */,
-				E1FADC8C59FEDCF016CBEE22 /* Pods-WineHunt.release.xcconfig */,
-				B55FEF79DB1438162EE4C200 /* Pods-WineHunt-WineHuntTests.debug.xcconfig */,
-				092633635EF21865AD343AD0 /* Pods-WineHunt-WineHuntTests.release.xcconfig */,
+				1EB4BA2D629BA07A9268EA08 /* Pods-WineHunt.debug.xcconfig */,
+				4AC8CF023AD68FD223565BD1 /* Pods-WineHunt.release.xcconfig */,
+				CF7DA6C539DC718F7C1E5185 /* Pods-WineHunt-WineHuntTests.debug.xcconfig */,
+				C562F4180CD7E358B6F56530 /* Pods-WineHunt-WineHuntTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -229,12 +229,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "WineHuntTests" */;
 			buildPhases = (
-				5A4286DAC3C0286B86041A90 /* [CP] Check Pods Manifest.lock */,
+				4C82349734FB5E67474085AE /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
-				8624B5EFE885001AB929D5BE /* [CP] Embed Pods Frameworks */,
-				4592DDE85922E0C8C74F52BB /* [CP] Copy Pods Resources */,
+				0ECD994E5A91FE61B102F9C4 /* [CP] Embed Pods Frameworks */,
+				9CF1D94D79008B9E2C4B852D /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -250,14 +250,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "WineHunt" */;
 			buildPhases = (
-				921D81F045AD6579639082F8 /* [CP] Check Pods Manifest.lock */,
+				03CF0234D27613BFE0229D52 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F022414F080027D42C /* Start Packager */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				E5E9BDD68B4FD4AC29331FA1 /* [CP] Embed Pods Frameworks */,
-				6D86C2EB9563F7ADF53E53F0 /* [CP] Copy Pods Resources */,
+				CE2AC593D9CDDF877C47F612 /* [CP] Embed Pods Frameworks */,
+				63143E7F5A48C4AC9464EBEB /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -362,80 +362,7 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"../node_modules/react-native/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"../node_modules/react-native/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
-		4592DDE85922E0C8C74F52BB /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		5A4286DAC3C0286B86041A90 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-WineHunt-WineHuntTests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		6D86C2EB9563F7ADF53E53F0 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-WineHunt/Pods-WineHunt-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-WineHunt/Pods-WineHunt-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-WineHunt/Pods-WineHunt-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		8624B5EFE885001AB929D5BE /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		921D81F045AD6579639082F8 /* [CP] Check Pods Manifest.lock */ = {
+		03CF0234D27613BFE0229D52 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -457,7 +384,80 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		E5E9BDD68B4FD4AC29331FA1 /* [CP] Embed Pods Frameworks */ = {
+		0ECD994E5A91FE61B102F9C4 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		4C82349734FB5E67474085AE /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-WineHunt-WineHuntTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		63143E7F5A48C4AC9464EBEB /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-WineHunt/Pods-WineHunt-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-WineHunt/Pods-WineHunt-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-WineHunt/Pods-WineHunt-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		9CF1D94D79008B9E2C4B852D /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-WineHunt-WineHuntTests/Pods-WineHunt-WineHuntTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CE2AC593D9CDDF877C47F612 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -526,7 +526,7 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B55FEF79DB1438162EE4C200 /* Pods-WineHunt-WineHuntTests.debug.xcconfig */;
+			baseConfigurationReference = CF7DA6C539DC718F7C1E5185 /* Pods-WineHunt-WineHuntTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -553,7 +553,7 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 092633635EF21865AD343AD0 /* Pods-WineHunt-WineHuntTests.release.xcconfig */;
+			baseConfigurationReference = C562F4180CD7E358B6F56530 /* Pods-WineHunt-WineHuntTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
@@ -577,7 +577,7 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3CB189DB2818CB293092B9F7 /* Pods-WineHunt.debug.xcconfig */;
+			baseConfigurationReference = 1EB4BA2D629BA07A9268EA08 /* Pods-WineHunt.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -604,7 +604,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E1FADC8C59FEDCF016CBEE22 /* Pods-WineHunt.release.xcconfig */;
+			baseConfigurationReference = 4AC8CF023AD68FD223565BD1 /* Pods-WineHunt.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
