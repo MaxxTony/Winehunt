@@ -4,7 +4,7 @@ import {Colors, Fonts} from '../../../constant/Styles';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
 
-const NearVendorCards = () => {
+const NearVendorCards = ({item}) => {
   return (
     <View style={styles.cardContainer}>
       <Image

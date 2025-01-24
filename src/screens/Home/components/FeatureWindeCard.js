@@ -2,7 +2,7 @@ import {Alert, Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 
-const FeatureWindeCard = () => {
+const FeatureWindeCard = ({item}) => {
   return (
     <View style={styles.cardContainer}>
       <Image
@@ -11,15 +11,15 @@ const FeatureWindeCard = () => {
       />
       <View style={styles.contentRow}>
         <Image
-          source={require('../images/bottle.png')}
+          source={{uri: item?.product_images[0]?.image}}
           style={styles.bottleImage}
           resizeMode="contain"
         />
         <View style={styles.textContainer}>
-          <Text style={styles.title}>Château Margaux</Text>
+          <Text style={styles.title}>{item?.title}</Text>
           <Text style={styles.subtitle}>(Restaurant)</Text>
           <Text style={styles.description}>
-            Taylors <Text style={styles.highlightedText}>(Port Wine)</Text>
+            {item?.name} <Text style={styles.highlightedText}>(Port Wine)</Text>
           </Text>
           <Text style={styles.price}>$ 25.99</Text>
           <Pressable

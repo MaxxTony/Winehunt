@@ -9,7 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Colors, Fonts} from '../../constant/Styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Carousel from 'react-native-reanimated-carousel';
@@ -19,18 +19,66 @@ import NearVendorCards from './components/NearVendorCards';
 import FeatureWindeCard from './components/FeatureWindeCard';
 import NewArrivalCard from './components/NewArrivalCard';
 import {useNavigation} from '@react-navigation/native';
+import Constants from '../../helper/Constant';
+import {showWarning} from '../../helper/Toastify';
+import axios from 'axios';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Home = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
-  const width = Dimensions.get('window').width;
-  const [type, setType] = useState('Wine types');
 
-  const data = [
-    {id: 1, image: require('./images/slider.png')},
-    {id: 2, image: require('./images/slider2.png')},
-    {id: 3, image: require('./images/slider3.png')},
-  ];
+  const width = Dimensions.get('window').width;
+
+  const [type, setType] = useState('Wine types');
+  const [categories, setCategories] = useState([]);
+
+  const [loading, setLoading] = useState(false);
+  const [homeData, setHomeData] = useState([]);
+
+  useEffect(() => {
+    getHomePageData();
+  }, []);
+
+  useEffect(() => {
+    const selectedCategory = homeData?.categories?.find(
+      item => item.name === type,
+    );
+    setCategories(selectedCategory?.categories || []);
+  }, [type, homeData]);
+
+  const getHomePageData = async () => {
+    const data = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(data)?.token;
+
+    const url = Constants.baseUrl2 + Constants.home;
+    setLoading(true);
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.status == 200) {
+        setHomeData(res?.data);
+        const firstType = res?.data?.categories?.[0]?.name || '';
+        setType(firstType);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
@@ -70,18 +118,30 @@ const Home = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}>
         <View style={styles.carouselContainer}>
-          <Carousel
-            loop
-            width={width - 40}
-            height={width / 2}
-            autoPlay={true}
-            data={data}
-            scrollAnimationDuration={1000}
-            pagingEnabled={true}
-            renderItem={({item}) => (
-              <Image source={item.image} style={styles.carouselImage} />
-            )}
-          />
+          {loading ? (
+            <SkeletonPlaceholder borderRadius={10}>
+              <SkeletonPlaceholder.Item
+                width={Dimensions.get('window').width - 40}
+                height={220}
+              />
+            </SkeletonPlaceholder>
+          ) : (
+            <Carousel
+              loop
+              width={width - 40}
+              height={width / 2}
+              autoPlay={true}
+              data={homeData?.banners}
+              scrollAnimationDuration={1000}
+              pagingEnabled={true}
+              renderItem={({item}) => (
+                <Image
+                  source={{uri: item.image}}
+                  style={styles.carouselImage}
+                />
+              )}
+            />
+          )}
         </View>
         <View style={styles.contentContainer}>
           <MultiSwitch
@@ -97,48 +157,48 @@ const Home = () => {
           />
           <View style={styles.listContainer}>
             <FlatList
-              data={Array.from({length: 10})}
+              data={categories}
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.horizontalList}
-              renderItem={({index}) => (
+              renderItem={({index, item}) => (
                 <Pressable
                   style={styles.listItem}
                   key={index}
                   onPress={() => Alert.alert('Coming Soon')}>
                   <Image
-                    source={require('./images/wine.png')}
+                    source={{uri: item.image}}
                     style={styles.listItemImage}
                   />
-                  <Text style={styles.listItemText}>Red</Text>
+                  <Text style={styles.listItemText}>{item?.name}</Text>
                 </Pressable>
               )}
             />
           </View>
           <HeadingWithLink title="Near Vendors for you" />
           <FlatList
-            data={Array.from({length: 10})}
+            data={homeData?.vendors}
             scrollEnabled={false}
             contentContainerStyle={styles.verticalList}
-            renderItem={() => <NearVendorCards />}
+            renderItem={({item}) => <NearVendorCards item={item} />}
           />
           <HeadingWithLink title="Featured Wine" />
           <FlatList
-            data={Array.from({length: 10})}
+            data={homeData?.product}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={[
               styles.horizontalList,
               {marginVertical: 20},
             ]}
-            renderItem={() => <FeatureWindeCard />}
+            renderItem={({item}) => <FeatureWindeCard item={item} />}
           />
           <HeadingWithLink
             title="New Arrival"
             onPress={() => navigation.navigate('NewArrival')}
           />
           <FlatList
-            data={Array.from({length: 10})}
+            data={homeData?.newArrivals}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={[
