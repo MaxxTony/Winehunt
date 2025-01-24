@@ -17,6 +17,11 @@ import {useNavigation} from '@react-navigation/native';
 import CountryPicker from 'react-native-country-picker-modal';
 import {Colors, Fonts} from '../../constant/Styles';
 import WineHuntButton from '../../common/WineHuntButton';
+import {ALERT_TYPE, Toast} from 'react-native-alert-notification';
+import {showSucess, showWarning} from '../../helper/Toastify';
+import axios from 'axios';
+import Constants from '../../helper/Constant';
+import Loader from '../../helper/Loader';
 
 const Login = () => {
   const inset = useSafeAreaInsets();
@@ -25,6 +30,7 @@ const Login = () => {
   const [phoneCountryCode, setPhoneCountryCode] = useState('+91');
   const [showPhoneCountryPicker, setShowPhoneCountryPicker] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleCountrySelect = country => {
     const newPhoneNumber = `+${country.callingCode[0]}`;
@@ -36,12 +42,56 @@ const Login = () => {
     Keyboard.dismiss();
   };
 
+  const onSubmit = async () => {
+    if (!phoneNumber) {
+      showWarning('Please enter your number');
+      return;
+    }
+
+    const data = {
+      phone: phoneNumber,
+      country_code: phoneCountryCode,
+    };
+
+    setLoading(true);
+    const url = Constants.baseUrl + Constants.login;
+
+    try {
+      const res = await axios.post(url, data, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.status == 200) {
+        showSucess(res?.data?.message);
+        const data = {
+          phone: phoneNumber,
+          country_code: phoneCountryCode,
+          otp: res?.data?.otp,
+        };
+        navigation.navigate('Otp', {data: data});
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard}>
       <KeyboardAvoidingView style={styles.container}>
         <ImageBackground
           source={require('../../../assets/images/LoginPage/ImgBg.png')}
           style={[styles.imageBackground, {paddingTop: inset.top}]}>
+          <Loader modalVisible={loading} setModalVisible={setLoading} />
           <Pressable
             style={styles.backButton}
             onPress={() => navigation.goBack()}>
@@ -83,10 +133,7 @@ const Login = () => {
             withAlphaFilter
           />
           <View style={styles.footer}>
-            <WineHuntButton
-              text="Send OTP"
-              onPress={() => navigation.navigate('Otp')}
-            />
+            <WineHuntButton text="Send OTP" onPress={() => onSubmit()} />
           </View>
         </ImageBackground>
       </KeyboardAvoidingView>

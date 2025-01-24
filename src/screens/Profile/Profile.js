@@ -15,6 +15,7 @@ import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {Colors, Fonts} from '../../constant/Styles';
 import Entypo from 'react-native-vector-icons/Entypo';
 import LogoutModal from '../../Modal/LogoutModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Profile = () => {
   const navigation = useNavigation();
@@ -159,8 +160,9 @@ const Profile = () => {
       {showLogoutModal && (
         <LogoutModal
           onCancel={() => setShowLogoutModal(false)}
-          onLogout={() => {
+          onLogout={async () => {
             setShowLogoutModal(false);
+            await AsyncStorage.removeItem('userDetail');
             navigation.navigate('Onboarding');
           }}
         />

@@ -11,7 +11,7 @@ import Entypo from 'react-native-vector-icons/Entypo';
 
 const WineHuntLabelInput = props => {
   const [secureTextEntry, setSecureTextEntry] = useState(
-    props?.isPassword || true,
+    props?.isPassword || false,
   );
 
   const toggleSecureTextEntry = () => {

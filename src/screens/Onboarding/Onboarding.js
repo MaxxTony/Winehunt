@@ -5,6 +5,7 @@ import {
   Animated,
   FlatList,
   Image,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -165,14 +166,14 @@ const styles = StyleSheet.create({
   },
   footer: {
     position: 'absolute',
-    bottom: 40,
+    bottom: Platform.OS == 'ios' ? 40 : 20,
     width: '100%',
     paddingHorizontal: 20,
   },
   indicatorContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginVertical: 20,
   },
   indicator: {
     width: 10,

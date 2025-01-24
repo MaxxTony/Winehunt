@@ -20,10 +20,16 @@ import {
   useBlurOnFulfill,
   useClearByFocusCell,
 } from 'react-native-confirmation-code-field';
+import {showError, showSucess, showWarning} from '../../helper/Toastify';
+import Constants from '../../helper/Constant';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CELL_COUNT = 4;
 
-const Otp = () => {
+const Otp = ({route}) => {
+  const Info = route.params?.data;
+
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
 
@@ -33,9 +39,58 @@ const Otp = () => {
     value,
     setValue,
   });
+  const [loading, setLoading] = useState(false);
 
   const dismissKeyboard = () => {
     Keyboard.dismiss();
+  };
+
+  const onSubmit = async () => {
+    if (!value) {
+      showWarning('Please enter your otp');
+      return;
+    }
+    if (value !== Info?.otp) {
+      showError('Incorrect otp');
+    }
+
+    const data = {
+      phone: Info?.phone,
+      country_code: Info?.country_code,
+      otp: value,
+    };
+    setLoading(true);
+    const url = Constants.baseUrl + Constants.verifyOtp;
+    try {
+      const res = await axios.post(url, data, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (res?.status == 200) {
+        showSucess(res?.data?.message);
+        console.log(res?.data, 'otp ka res');
+
+        if (res?.data?.is_new_user) {
+          navigation.navigate('Register', {data: res?.data});
+        } else {
+          await AsyncStorage.setItem('userDetail', JSON.stringify(res?.data));
+          navigation.navigate('TabNavigator');
+        }
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,7 +105,7 @@ const Otp = () => {
             <Fontisto name="angle-left" size={20} color={Colors.black} />
           </Pressable>
           <View style={styles.content}>
-            <Text style={styles.title}>Verify Your Phone</Text>
+            <Text style={styles.title}>Verify Your Phone {Info?.otp}</Text>
             <Text style={styles.subtitle}>
               We have sent a text message with a one time code to verify your
               phone number. Enter the code below
@@ -82,10 +137,7 @@ const Otp = () => {
               Didn't receive the OTP?{' '}
               <Text style={{color: Colors.red}}>Resend OTP</Text>
             </Text>
-            <WineHuntButton
-              text="Send OTP"
-              onPress={() => navigation.navigate('Register')}
-            />
+            <WineHuntButton text="Verify OTP" onPress={() => onSubmit()} />
             <WineHuntButton
               text="Use a different number"
               onPress={() => navigation.goBack()}
@@ -143,8 +195,8 @@ const styles = StyleSheet.create({
   },
   codeFieldRoot: {
     marginTop: 20,
-    width: 280,
     marginLeft: 'auto',
+    width: 280,
     marginRight: 'auto',
   },
   cellRoot: {

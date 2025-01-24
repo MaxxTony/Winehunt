@@ -1,5 +1,5 @@
 import {StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Login from '../screens/Auth/Login';
 import Onboarding from '../screens/Onboarding/Onboarding';
@@ -18,14 +18,39 @@ import PrivacyPolicy from '../screens/Profile/PrivacyPolicy';
 import TermsCondition from '../screens/Profile/TermsCondition';
 import MileStone from '../screens/Profile/MileStone';
 import NewArrival from '../screens/Home/screens/NewArrival';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
+  const [firstScreen, setFirstScreen] = useState(null);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const user = await AsyncStorage.getItem('userDetail');
+        const data = JSON.parse(user);
+        if (data) {
+          setFirstScreen('TabNavigator');
+        } else {
+          setFirstScreen('Onboarding');
+        }
+      } catch (error) {
+        console.error('Failed to fetch user details:', error);
+        setFirstScreen('Onboarding');
+      }
+    };
+    fetchUserDetails();
+  }, []);
+
+  if (!firstScreen) {
+    return;
+  }
+
   return (
     <Stack.Navigator
       screenOptions={{headerShown: false}}
-      initialRouteName="TabNavigator">
+      initialRouteName={firstScreen}>
       <Stack.Screen name="Onboarding" component={Onboarding} />
       <Stack.Screen name="AuthType" component={AuthType} />
       <Stack.Screen name="Login" component={Login} />

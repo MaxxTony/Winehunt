@@ -28,13 +28,16 @@
 	<dict>
 		<key>NSExceptionDomains</key>
 		<dict>
-			<key>localhost</key>
+			<key>13.48.249.80</key>
 			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
 				<true/>
 			</dict>
 		</dict>
 	</dict>
+	
 			<key>NSCameraUsageDescription</key>
 	<string>WineHunt needs access to your camera to update your profile picture.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
