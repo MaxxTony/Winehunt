@@ -113,7 +113,11 @@ const Home = () => {
               source={require('./images/location.png')}
               style={styles.locationIcon}
             />
-            <Text style={styles.userLocationText}>Sector 7 HSR, Ohio USA</Text>
+            <Text style={styles.userLocationText} numberOfLines={1}>
+              {userData?.address.length > 20
+                ? userData?.address.slice(0, 25)
+                : userData?.address}
+            </Text>
           </View>
         </View>
         <View style={styles.actionIcons}>
@@ -261,6 +265,7 @@ const styles = StyleSheet.create({
   userInfo: {
     flex: 1,
     marginHorizontal: 10,
+    gap: 5,
   },
   userName: {
     fontSize: 16,
@@ -271,6 +276,7 @@ const styles = StyleSheet.create({
   userLocationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 5,
   },
   locationIcon: {
     height: 16,

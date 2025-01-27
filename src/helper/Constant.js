@@ -12,6 +12,7 @@ const Constants = {
   home: 'get-home',
   profile: 'get-profile',
   editProfile: 'edit-profile',
+  changePassword: 'change-password',
 };
 
 export default Constants;
