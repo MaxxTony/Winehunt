@@ -12,12 +12,12 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {Colors, Fonts} from '../../constant/Styles';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
+import Geolocation from '@react-native-community/geolocation';
 import WineHuntLabelInput from '../../common/WineHuntLabelInput';
 import WineHuntButton from '../../common/WineHuntButton';
 import * as ImagePicker from 'react-native-image-picker';
@@ -28,9 +28,12 @@ import axios from 'axios';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import Loader from '../../helper/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Geocoding from 'react-native-geocoding';
+import Key from '../../utils/Key';
 
 const Register = ({route}) => {
   const Info = route.params?.data;
+  const isFocused = useIsFocused();
 
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -47,10 +50,50 @@ const Register = ({route}) => {
   const [fileUri, setFileUri] = useState('');
 
   const [loading, setLoading] = useState(false);
+  const [coordinates, setCoordinates] = useState([]);
+  const [currentAddress, setCurrentAddress] = useState('');
 
   const dismissKeyboard = () => {
     Keyboard.dismiss();
   };
+
+  useEffect(() => {
+    Geocoding.init(Key.apiKey);
+    const getLocation = async () => {
+      try {
+        Geolocation.getCurrentPosition(
+          position => {
+            const {latitude, longitude} = position.coords;
+            setCoordinates({latitude: latitude, longitude: longitude});
+            Geocoding.from({latitude, longitude})
+              .then(json => {
+                const res = json.results;
+                const filteredAddress = res
+                  .filter(
+                    component =>
+                      component.types.includes('political') &&
+                      component.types.includes('sublocality') &&
+                      component.types.includes('sublocality_level_2'),
+                  )
+                  .map(comp => setCurrentAddress(comp?.formatted_address));
+                return filteredAddress;
+              })
+              .catch(error => console.log(error));
+          },
+          error => {
+            console.error('Error getting location:', error);
+          },
+          {
+            enableHighAccuracy: Platform.OS === 'ios' ? true : false,
+            timeout: 10000,
+          },
+        );
+      } catch (error) {
+        console.error('Error getting location:', error);
+      }
+    };
+    getLocation();
+  }, [isFocused]);
 
   const requestCameraPermission = async () => {
     if (Platform.OS === 'android') {
@@ -159,6 +202,7 @@ const Register = ({route}) => {
       showWarning('You must agree to the terms and conditions.');
       return;
     }
+
     const formData = new FormData();
     formData.append('first_name', firstName);
     formData.append('last_name', lastName);
@@ -166,6 +210,9 @@ const Register = ({route}) => {
     formData.append('password', password);
     formData.append('phone', Info?.user?.phone);
     formData.append('country_code', Info?.user?.country_code);
+    formData.append('latitude', coordinates?.latitude.toString());
+    formData.append('longitude', coordinates?.longitude.toString());
+    formData.append('address', currentAddress);
     if (filePath) {
       formData.append('image', {
         uri: filePath.uri,

@@ -1,10 +1,11 @@
 import {useNavigation} from '@react-navigation/native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Alert,
   Animated,
   FlatList,
   Image,
+  PermissionsAndroid,
   Platform,
   StyleSheet,
   Text,
@@ -13,6 +14,8 @@ import {
   View,
 } from 'react-native';
 import {Colors} from '../../constant/Styles';
+import messaging from '@react-native-firebase/messaging';
+import Geolocation from 'react-native-geolocation-service';
 
 const data = [
   {
@@ -44,6 +47,64 @@ const Onboarding = () => {
   const scrollX = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef(null);
   const navigation = useNavigation();
+
+  useEffect(() => {
+    requestPermissions();
+  }, []);
+
+  const requestPermissions = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const permissionsToRequest = [
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        ];
+        const granted = await PermissionsAndroid.requestMultiple(
+          permissionsToRequest,
+        );
+
+        if (
+          granted['android.permission.ACCESS_FINE_LOCATION'] ===
+            PermissionsAndroid.RESULTS.GRANTED &&
+          granted['android.permission.POST_NOTIFICATIONS'] ===
+            PermissionsAndroid.RESULTS.GRANTED
+        ) {
+          console.log('Permissions granted for both');
+        } else {
+          console.log('Permissions denied for one or both of them');
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    } else {
+      requestIOSPermissions();
+    }
+  };
+
+  const requestIOSPermissions = async () => {
+    try {
+      const notificationAuthStatus = await messaging().requestPermission();
+      const isNotificationAuthorized =
+        notificationAuthStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        notificationAuthStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+      if (isNotificationAuthorized) {
+        console.log('Notification permissions granted');
+      } else {
+        console.log('Notification permissions denied');
+      }
+      const locationAuthStatus = await Geolocation.requestAuthorization(
+        'whenInUse',
+      );
+      if (locationAuthStatus === 'granted') {
+        console.log('Location permissions granted');
+      } else {
+        console.log('Location permissions denied');
+      }
+    } catch (error) {
+      console.error('Error requesting permissions:', error);
+    }
+  };
 
   const goToNextSlide = () => {
     if (currentSlideIndex < data.length - 1) {
@@ -200,6 +261,7 @@ const styles = StyleSheet.create({
   btnText: {
     fontSize: 15,
     fontWeight: 'bold',
+    color: Colors.black,
   },
   transparentBtn: {
     backgroundColor: 'transparent',

@@ -30,7 +30,7 @@ const Profile = () => {
   const isFoused = useIsFocused();
 
   const dispatch = useDispatch();
-  const {userData, loading} = useSelector(state => state.profile);
+  const {userData} = useSelector(state => state.profile);
 
   const data = [
     {
@@ -93,32 +93,6 @@ const Profile = () => {
     dispatch(fetchProfile());
   }, [isFoused]);
 
-  const getProfile = async () => {
-    const data = await AsyncStorage.getItem('userDetail');
-    const token = JSON.parse(data)?.token;
-    const url = Constants.baseUrl3 + Constants.profile;
-    try {
-      const res = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      if (res?.status == 200) {
-        setUserData(res?.data?.user);
-      }
-    } catch (error) {
-      if (error.response) {
-        console.log('Server Error:', error.response.data);
-        showWarning(error.response.data?.message);
-      } else if (error.request) {
-        console.log('No Response:', error.request);
-      } else {
-        console.log('Request Error:', error.message);
-      }
-    }
-  };
-
   return (
     <ImageBackground
       source={require('../../../assets/images/LoginPage/ImgBg.png')}
@@ -133,7 +107,11 @@ const Profile = () => {
         showsVerticalScrollIndicator={false}>
         <View style={styles.profileHeader}>
           <Image
-            source={require('./images/profile.png')}
+            source={
+              userData && userData?.image !== null
+                ? {uri: userData?.image}
+                : require('./images/profile.png')
+            }
             style={styles.profileImage}
           />
           <Text style={styles.profileName}>
@@ -235,6 +213,7 @@ const styles = StyleSheet.create({
   profileImage: {
     height: 90,
     width: 90,
+    borderRadius: 100,
   },
   profileName: {
     fontSize: 18,

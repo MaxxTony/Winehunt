@@ -522,6 +522,11 @@ PODS:
   - React-jsinspector (0.72.7)
   - React-logger (0.72.7):
     - glog
+  - react-native-geolocation (3.4.0):
+    - RCT-Folly (= 2021.07.22.00)
+    - React-Core
+  - react-native-geolocation-service (5.3.1):
+    - React
   - react-native-image-picker (7.1.2):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
@@ -735,6 +740,8 @@ DEPENDENCIES:
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
+  - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
+  - react-native-geolocation-service (from `../node_modules/react-native-geolocation-service`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-multiswitch-selector (from `../node_modules/react-native-multiswitch-selector`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -851,6 +858,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
   React-logger:
     :path: "../node_modules/react-native/ReactCommon/logger"
+  react-native-geolocation:
+    :path: "../node_modules/@react-native-community/geolocation"
+  react-native-geolocation-service:
+    :path: "../node_modules/react-native-geolocation-service"
   react-native-image-picker:
     :path: "../node_modules/react-native-image-picker"
   react-native-multiswitch-selector:
@@ -969,6 +980,8 @@ SPEC CHECKSUMS:
   React-jsiexecutor: c49502e5d02112247ee4526bc3ccfc891ae3eb9b
   React-jsinspector: 8baadae51f01d867c3921213a25ab78ab4fbcd91
   React-logger: 8edc785c47c8686c7962199a307015e2ce9a0e4f
+  react-native-geolocation: 2d8f71eb7d0c9a0c52f336d4634444488669371d
+  react-native-geolocation-service: 608e1da71a1ac31b4de64d9ef2815f697978c55b
   react-native-image-picker: 51fdb07f7ef722988c8a219e1416153760a25e4d
   react-native-multiswitch-selector: 2349fa558fbe1e392871da626efdaee79bde0b58
   react-native-safe-area-context: 141eca0fd4e4191288dfc8b96a7c7e1c2983447a

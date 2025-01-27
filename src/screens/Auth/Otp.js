@@ -70,7 +70,6 @@ const Otp = ({route}) => {
 
       if (res?.status == 200) {
         showSucess(res?.data?.message);
-        console.log(res?.data, 'otp ka res');
 
         if (res?.data?.is_new_user) {
           navigation.navigate('Register', {data: res?.data});
@@ -90,6 +89,41 @@ const Otp = ({route}) => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onResend = async () => {
+    const data = {
+      phone: Info?.phone,
+      country_code: Info?.country_code,
+    };
+
+    const url = Constants.baseUrl + Constants.login;
+
+    try {
+      const res = await axios.post(url, data, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.status == 200) {
+        showSucess(res?.data?.message);
+        const data = {
+          phone: Info?.phone,
+          country_code: Info?.country_code,
+          otp: res?.data?.otp,
+        };
+        navigation.replace('Otp', {data: data});
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
     }
   };
 
@@ -130,12 +164,14 @@ const Otp = ({route}) => {
                 </View>
               )}
             />
-            <Text style={styles.otptimer}>0:10</Text>
+            {/* <Text style={styles.otptimer}>0:10</Text> */}
           </View>
           <View style={styles.footer}>
             <Text style={styles.footerText}>
               Didn't receive the OTP?{' '}
-              <Text style={{color: Colors.red}}>Resend OTP</Text>
+              <Text style={{color: Colors.red}} onPress={() => onResend()}>
+                Resend OTP
+              </Text>
             </Text>
             <WineHuntButton text="Verify OTP" onPress={() => onSubmit()} />
             <WineHuntButton

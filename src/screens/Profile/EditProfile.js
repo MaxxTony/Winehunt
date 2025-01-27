@@ -23,13 +23,10 @@ import CountryPicker from 'react-native-country-picker-modal';
 import WineHuntButton from '../../common/WineHuntButton';
 import * as ImagePicker from 'react-native-image-picker';
 import ImageUploadModal from '../../Modal/ImageUploadModal';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from '../../helper/Constant';
-import axios from 'axios';
-import {showSucess, showWarning} from '../../helper/Toastify';
 import Loader from '../../helper/Loader';
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchProfile} from '../../redux/slices/profileSlice';
+import {editProfile} from '../../redux/slices/editProfileSlice';
 
 const EditProfile = () => {
   const inset = useSafeAreaInsets();
@@ -55,7 +52,9 @@ const EditProfile = () => {
   const [isImageModal, setIsImageModal] = useState(false);
 
   const [filePath, setFilePath] = useState(null);
-  const [fileUri, setFileUri] = useState('');
+  const [fileUri, setFileUri] = useState(
+    userData && userData?.image !== null ? userData?.image : '',
+  );
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -108,7 +107,6 @@ const EditProfile = () => {
       };
 
       ImagePicker.launchCamera(options, response => {
-        console.log(options, response);
         if (!response.errorCode && !response.didCancel) {
           setFilePath(response.assets[0]);
           setFileUri(response.assets[0]?.uri);
@@ -126,7 +124,6 @@ const EditProfile = () => {
     const options = {
       mediaType: 'photo',
     };
-
     ImagePicker.launchImageLibrary(options, response => {
       if (!response.errorCode && !response.didCancel) {
         setFilePath(response.assets[0]);
@@ -137,61 +134,18 @@ const EditProfile = () => {
   };
 
   const onSubmit = async () => {
-    if (!firstName) {
-      showWarning('First Name can not be empty');
-    }
-    if (!lastName) {
-      showWarning('Last Name can not be empty');
-    }
-    if (!email) {
-      showWarning('Email can not be empty');
-    }
-    if (!phoneNumber) {
-      showWarning('Phone Number can not be empty');
-    }
-    const data = await AsyncStorage.getItem('userDetail');
-    const token = JSON.parse(data)?.token;
-
-    const formData = new FormData();
-    formData.append('first_name', firstName);
-    formData.append('last_name', lastName);
-    formData.append('email', email);
-    formData.append('phone', phoneNumber);
-    formData.append('country_code', phoneCountryCode);
-    if (filePath) {
-      formData.append('image', {
-        uri: filePath.uri,
-        type: filePath.type,
-        name: 'index.jpg',
-      });
-    }
-
-    setLoading(true);
-    const url = Constants.baseUrl3 + Constants.editProfile;
-    try {
-      const res = await axios.post(url, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (res?.status == 200) {
-        showSucess(res?.data?.message);
-        navigation.goBack();
-      }
-    } catch (error) {
-      if (error.response) {
-        console.log('Server Error:', error.response.data);
-        showWarning(error.response.data?.message);
-      } else if (error.request) {
-        console.log('No Response:', error.request);
-      } else {
-        console.log('Request Error:', error.message);
-      }
-    } finally {
-      setLoading(false);
-    }
+    dispatch(
+      editProfile({
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        phoneCountryCode,
+        filePath,
+        setLoading,
+        navigation,
+      }),
+    );
   };
 
   return (

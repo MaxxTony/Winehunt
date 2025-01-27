@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Colors, Fonts} from '../../constant/Styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Carousel from 'react-native-reanimated-carousel';
@@ -19,12 +19,14 @@ import HeadingWithLink from '../../components/HeadingWithLink';
 import NearVendorCards from './components/NearVendorCards';
 import FeatureWindeCard from './components/FeatureWindeCard';
 import NewArrivalCard from './components/NewArrivalCard';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import Constants from '../../helper/Constant';
 import {showWarning} from '../../helper/Toastify';
 import axios from 'axios';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useDispatch, useSelector} from 'react-redux';
+import {fetchProfile} from '../../redux/slices/profileSlice';
 
 const Home = () => {
   const inset = useSafeAreaInsets();
@@ -37,12 +39,18 @@ const Home = () => {
 
   const [loading, setLoading] = useState(false);
   const [homeData, setHomeData] = useState([]);
-  const [userData, setUserData] = useState([]);
+  const dispatch = useDispatch();
+  const {userData} = useSelector(state => state.profile);
 
   useEffect(() => {
     getHomePageData();
-    getProfile();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchProfile());
+    }, [dispatch]),
+  );
 
   useEffect(() => {
     const selectedCategory = homeData?.categories?.find(
@@ -83,38 +91,16 @@ const Home = () => {
     }
   };
 
-  const getProfile = async () => {
-    const data = await AsyncStorage.getItem('userDetail');
-    const token = JSON.parse(data)?.token;
-    const url = Constants.baseUrl3 + Constants.profile;
-    try {
-      const res = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      if (res?.status == 200) {
-        setUserData(res?.data?.user);
-      }
-    } catch (error) {
-      if (error.response) {
-        console.log('Server Error:', error.response.data);
-        showWarning(error.response.data?.message);
-      } else if (error.request) {
-        console.log('No Response:', error.request);
-      } else {
-        console.log('Request Error:', error.message);
-      }
-    }
-  };
-
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <View style={styles.header}>
         <Pressable onPress={() => navigation.navigate('Profile')}>
           <Image
-            source={require('./images/profile.png')}
+            source={
+              userData && userData?.image !== null
+                ? {uri: userData?.image}
+                : require('./images/profile.png')
+            }
             style={styles.profileImage}
           />
         </Pressable>
@@ -270,6 +256,7 @@ const styles = StyleSheet.create({
   profileImage: {
     height: 40,
     width: 40,
+    borderRadius: 50,
   },
   userInfo: {
     flex: 1,
