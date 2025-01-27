@@ -6,6 +6,8 @@ import AppNavigator from './src/routes/AppNavigator';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {NavigationContainer} from '@react-navigation/native';
 import {AlertNotificationRoot} from 'react-native-alert-notification';
+import {Provider} from 'react-redux';
+import store from './src/redux/store';
 
 const App = () => {
   LogBox.ignoreAllLogs();
@@ -13,9 +15,11 @@ const App = () => {
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <AlertNotificationRoot theme="dark">
-        <NavigationContainer>
-          <AppNavigator />
-        </NavigationContainer>
+        <Provider store={store}>
+          <NavigationContainer>
+            <AppNavigator />
+          </NavigationContainer>
+        </Provider>
       </AlertNotificationRoot>
     </GestureHandlerRootView>
   );

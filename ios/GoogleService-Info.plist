@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>974351416688-gd93b3gt1bkbe7pdla85i3jhea4b85hg.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.974351416688-gd93b3gt1bkbe7pdla85i3jhea4b85hg</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCdJBCs2jk4nawz07VBHKBAM54mwdv1pjo</string>
+	<key>GCM_SENDER_ID</key>
+	<string>974351416688</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.winehunt</string>
+	<key>PROJECT_ID</key>
+	<string>winehunt-e9650</string>
+	<key>STORAGE_BUCKET</key>
+	<string>winehunt-e9650.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:974351416688:ios:6051054227af6e7b7563b5</string>
+</dict>
+</plist>

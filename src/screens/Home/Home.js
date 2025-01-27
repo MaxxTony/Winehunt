@@ -4,6 +4,7 @@ import {
   FlatList,
   Image,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -36,9 +37,11 @@ const Home = () => {
 
   const [loading, setLoading] = useState(false);
   const [homeData, setHomeData] = useState([]);
+  const [userData, setUserData] = useState([]);
 
   useEffect(() => {
     getHomePageData();
+    getProfile();
   }, []);
 
   useEffect(() => {
@@ -80,6 +83,32 @@ const Home = () => {
     }
   };
 
+  const getProfile = async () => {
+    const data = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(data)?.token;
+    const url = Constants.baseUrl3 + Constants.profile;
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.status == 200) {
+        setUserData(res?.data?.user);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    }
+  };
+
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <View style={styles.header}>
@@ -90,7 +119,9 @@ const Home = () => {
           />
         </Pressable>
         <View style={styles.userInfo}>
-          <Text style={styles.userName}>William Anderson</Text>
+          <Text style={styles.userName}>
+            {userData?.first_name} {userData?.last_name}
+          </Text>
           <View style={styles.userLocationContainer}>
             <Image
               source={require('./images/location.png')}
@@ -116,7 +147,15 @@ const Home = () => {
       </View>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}>
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={() => getHomePageData()}
+            colors={['#ff6347']}
+            tintColor={Colors.red}
+          />
+        }>
         <View style={styles.carouselContainer}>
           {loading ? (
             <SkeletonPlaceholder borderRadius={10}>
@@ -315,7 +354,7 @@ const styles = StyleSheet.create({
   listItem: {
     alignItems: 'center',
     gap: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
   listItemImage: {
     height: 60,

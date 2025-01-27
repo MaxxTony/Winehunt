@@ -11,7 +11,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
@@ -23,21 +23,44 @@ import CountryPicker from 'react-native-country-picker-modal';
 import WineHuntButton from '../../common/WineHuntButton';
 import * as ImagePicker from 'react-native-image-picker';
 import ImageUploadModal from '../../Modal/ImageUploadModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from '../../helper/Constant';
+import axios from 'axios';
+import {showSucess, showWarning} from '../../helper/Toastify';
+import Loader from '../../helper/Loader';
+import {useDispatch, useSelector} from 'react-redux';
+import {fetchProfile} from '../../redux/slices/profileSlice';
 
 const EditProfile = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
 
-  const [phoneCountryCode, setPhoneCountryCode] = useState('+91');
+  const dispatch = useDispatch();
+  const {userData} = useSelector(state => state.profile);
+
+  const [firstName, setFirstName] = useState(
+    userData ? userData?.first_name : '',
+  );
+  const [lastName, setLastName] = useState(userData ? userData?.last_name : '');
+  const [email, setEmail] = useState(userData ? userData?.email : '');
+
+  const [phoneCountryCode, setPhoneCountryCode] = useState(
+    userData ? userData?.country_code : '+91',
+  );
   const [showPhoneCountryPicker, setShowPhoneCountryPicker] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(
+    userData ? userData?.phone : '',
+  );
 
   const [isImageModal, setIsImageModal] = useState(false);
 
   const [filePath, setFilePath] = useState(null);
   const [fileUri, setFileUri] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchProfile());
+  }, []);
 
   const handleCountrySelect = country => {
     const newPhoneNumber = `+${country.callingCode[0]}`;
@@ -113,10 +136,70 @@ const EditProfile = () => {
     });
   };
 
+  const onSubmit = async () => {
+    if (!firstName) {
+      showWarning('First Name can not be empty');
+    }
+    if (!lastName) {
+      showWarning('Last Name can not be empty');
+    }
+    if (!email) {
+      showWarning('Email can not be empty');
+    }
+    if (!phoneNumber) {
+      showWarning('Phone Number can not be empty');
+    }
+    const data = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(data)?.token;
+
+    const formData = new FormData();
+    formData.append('first_name', firstName);
+    formData.append('last_name', lastName);
+    formData.append('email', email);
+    formData.append('phone', phoneNumber);
+    formData.append('country_code', phoneCountryCode);
+    if (filePath) {
+      formData.append('image', {
+        uri: filePath.uri,
+        type: filePath.type,
+        name: 'index.jpg',
+      });
+    }
+
+    setLoading(true);
+    const url = Constants.baseUrl3 + Constants.editProfile;
+    try {
+      const res = await axios.post(url, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res?.status == 200) {
+        showSucess(res?.data?.message);
+        navigation.goBack();
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard}>
       <KeyboardAvoidingView style={styles.container}>
         <View style={[styles.container, {paddingTop: inset.top}]}>
+          <Loader modalVisible={loading} setModalVisible={setLoading} />
+
           <BackNavigationWithTitle
             title="Edit Profile"
             onPress={() => navigation.goBack()}
@@ -141,10 +224,20 @@ const EditProfile = () => {
             <View style={styles.inputContainer}>
               <FontAwesome6 name="user-large" size={16} color={Colors.red} />
               <TextInput
-                value={name}
-                onChangeText={e => setName(e)}
+                value={firstName}
+                onChangeText={e => setFirstName(e)}
                 style={styles.textInput}
-                placeholder="User Name"
+                placeholder="User First Name"
+                placeholderTextColor={Colors.gray4}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <FontAwesome6 name="user-large" size={16} color={Colors.red} />
+              <TextInput
+                value={lastName}
+                onChangeText={e => setLastName(e)}
+                style={styles.textInput}
+                placeholder="User Last Name"
                 placeholderTextColor={Colors.gray4}
               />
             </View>
@@ -184,10 +277,7 @@ const EditProfile = () => {
             </View>
 
             <View style={styles.updateButtonContainer}>
-              <WineHuntButton
-                text="Update"
-                onPress={() => navigation.goBack()}
-              />
+              <WineHuntButton text="Update" onPress={() => onSubmit()} />
             </View>
           </View>
           <CountryPicker

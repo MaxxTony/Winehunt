@@ -12,7 +12,7 @@ const NearVendorCards = ({item}) => {
         style={styles.vendorImage}
       />
       <View style={styles.textContainer}>
-        <Text style={styles.vendorName}>Vendor shop Name</Text>
+        <Text style={styles.vendorName}>{item?.shop_name}</Text>
         <Text style={styles.vendorDescription}>Best Rated this Month</Text>
         <View style={styles.ratingRow}>
           <AntDesign name="star" size={15} color={Colors.yellow} />

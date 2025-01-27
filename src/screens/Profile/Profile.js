@@ -8,19 +8,29 @@ import {
   Text,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import React, {useEffect, useState} from 'react';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {Colors, Fonts} from '../../constant/Styles';
 import Entypo from 'react-native-vector-icons/Entypo';
 import LogoutModal from '../../Modal/LogoutModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from '../../helper/Constant';
+import axios from 'axios';
+import {showWarning} from '../../helper/Toastify';
+import {useDispatch, useSelector} from 'react-redux';
+import {fetchProfile} from '../../redux/slices/profileSlice';
 
 const Profile = () => {
   const navigation = useNavigation();
   const inset = useSafeAreaInsets();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const isFoused = useIsFocused();
+
+  const dispatch = useDispatch();
+  const {userData, loading} = useSelector(state => state.profile);
 
   const data = [
     {
@@ -79,6 +89,36 @@ const Profile = () => {
     },
   ];
 
+  useEffect(() => {
+    dispatch(fetchProfile());
+  }, [isFoused]);
+
+  const getProfile = async () => {
+    const data = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(data)?.token;
+    const url = Constants.baseUrl3 + Constants.profile;
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.status == 200) {
+        setUserData(res?.data?.user);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    }
+  };
+
   return (
     <ImageBackground
       source={require('../../../assets/images/LoginPage/ImgBg.png')}
@@ -96,7 +136,10 @@ const Profile = () => {
             source={require('./images/profile.png')}
             style={styles.profileImage}
           />
-          <Text style={styles.profileName}>William Anderson</Text>
+          <Text style={styles.profileName}>
+            {' '}
+            {userData?.first_name} {userData?.last_name}
+          </Text>
         </View>
         <Pressable
           style={styles.milestoneContainer}

@@ -1,4 +1,4 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {Image, Platform, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Colors} from '../constant/Styles';
@@ -28,7 +28,6 @@ const TabNavigator = () => {
             shadowOpacity: 0.25,
             shadowRadius: 3.84,
             elevation: 10,
-            // height: 100,
             paddingHorizontal: 10,
             backgroundColor: Colors.white,
           },
@@ -170,12 +169,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flex: 1,
-    marginTop: 20,
+    marginTop: Platform.OS == 'ios' ? 20 : 10,
   },
   tabBarIconImage: {
-    height: 25,
-    width: 25,
-    marginBottom: 5,
+    height: Platform.OS == 'ios' ? 25 : 20,
+    width: Platform.OS == 'ios' ? 25 : 20,
+    marginBottom: Platform.OS == 'ios' ? 5 : 0,
   },
   tabBarIconText: {
     fontSize: 14,
