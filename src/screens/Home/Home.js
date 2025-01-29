@@ -204,14 +204,22 @@ const Home = () => {
               )}
             />
           </View>
-          <HeadingWithLink title="Near Vendors for you" />
+          <HeadingWithLink
+            title="Near Vendors for you"
+            onPress={() =>
+              navigation.navigate('Vendors', {data: homeData?.vendors})
+            }
+          />
           <FlatList
             data={homeData?.vendors}
             scrollEnabled={false}
             contentContainerStyle={styles.verticalList}
             renderItem={({item}) => <NearVendorCards item={item} />}
           />
-          <HeadingWithLink title="Featured Wine" />
+          <HeadingWithLink
+            title="Featured Wine"
+            onPress={() => navigation.navigate('FeatureWine')}
+          />
           <FlatList
             data={homeData?.product}
             horizontal

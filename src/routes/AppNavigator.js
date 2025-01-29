@@ -19,6 +19,8 @@ import TermsCondition from '../screens/Profile/TermsCondition';
 import MileStone from '../screens/Profile/MileStone';
 import NewArrival from '../screens/Home/screens/NewArrival';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import FeatureWine from '../screens/Home/screens/FeatureWine';
+import Vendors from '../screens/Home/screens/Vendors';
 
 const Stack = createNativeStackNavigator();
 
@@ -68,6 +70,8 @@ const AppNavigator = () => {
       <Stack.Screen name="TermsCondition" component={TermsCondition} />
       <Stack.Screen name="MileStone" component={MileStone} />
       <Stack.Screen name="NewArrival" component={NewArrival} />
+      <Stack.Screen name="FeatureWine" component={FeatureWine} />
+      <Stack.Screen name="Vendors" component={Vendors} />
     </Stack.Navigator>
   );
 };
