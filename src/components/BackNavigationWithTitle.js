@@ -1,4 +1,4 @@
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Platform, Pressable, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {Colors, Fonts} from '../constant/Styles';
 import Fontisto from 'react-native-vector-icons/Fontisto';
@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
     gap: 10,
     borderBottomWidth: 2,
     paddingBottom: 10,
+    paddingTop: Platform.OS == 'android' ? 10 : 0,
     borderColor: Colors.gray2,
     justifyContent: 'space-between',
   },

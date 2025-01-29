@@ -114,9 +114,11 @@ const Home = () => {
               style={styles.locationIcon}
             />
             <Text style={styles.userLocationText} numberOfLines={1}>
-              {userData?.address.length > 20
-                ? userData?.address.slice(0, 25)
-                : userData?.address}
+              {userData?.address
+                ? userData.address.length > 20
+                  ? userData.address.slice(0, 25)
+                  : userData.address
+                : 'Default Address'}
             </Text>
           </View>
         </View>

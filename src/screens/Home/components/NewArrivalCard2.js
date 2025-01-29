@@ -1,4 +1,12 @@
-import {Alert, Image, Pressable, StyleSheet, Text, View} from 'react-native';
+import {
+  Alert,
+  Image,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import React from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 
@@ -37,7 +45,7 @@ export default NewArrivalCard2;
 
 const styles = StyleSheet.create({
   cardContainer: {
-    padding: 15,
+    padding: Platform.OS == 'android' ? 10 : 15,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

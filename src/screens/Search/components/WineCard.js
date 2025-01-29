@@ -2,7 +2,7 @@ import {Alert, Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 
-const WineCard = () => {
+const WineCard = ({item}) => {
   return (
     <View style={styles.cardContainer}>
       <Image
@@ -16,12 +16,17 @@ const WineCard = () => {
           resizeMode="contain"
         />
         <View style={styles.textContainer}>
-          <Text style={styles.title}>Château Margaux</Text>
-          <Text style={styles.subtitle}>(Restaurant)</Text>
-          <Text style={styles.description}>
-            Taylors <Text style={styles.highlightedText}>(Port Wine)</Text>
+          <Text style={styles.title}>{item?.title}</Text>
+          <Text style={styles.subtitle}>
+            (
+            {item?.user?.shop_name !== ''
+              ? item?.user?.shop_name
+              : 'Restaurant'}
+            )
           </Text>
-          <Text style={styles.price}>$ 25.99</Text>
+          <Text style={styles.description}>{item?.name}</Text>
+          <Text style={styles.highlightedText}>({item?.title})</Text>
+          <Text style={styles.price}>$ {item?.small_size_price}</Text>
           <Pressable
             style={styles.button}
             onPress={() => Alert.alert('Coming soon')}>
@@ -63,7 +68,7 @@ const styles = StyleSheet.create({
   contentRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 30,
+    gap: 20,
   },
   bottleImage: {
     width: 30,
@@ -91,7 +96,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   highlightedText: {
+    fontSize: 11,
     color: Colors.red,
+    fontFamily: Fonts.InterRegular,
+    fontWeight: '600',
   },
   price: {
     fontSize: 18,

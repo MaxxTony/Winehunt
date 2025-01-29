@@ -27,6 +27,7 @@ const TabNavigator = () => {
             },
             shadowOpacity: 0.25,
             shadowRadius: 3.84,
+            ...(Platform.OS === 'android' && {height: 60}),
             elevation: 10,
             paddingHorizontal: 10,
             backgroundColor: Colors.white,

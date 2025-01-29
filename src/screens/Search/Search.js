@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   Platform,
@@ -8,32 +9,42 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import React, {useMemo, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Colors, Fonts} from '../../constant/Styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {MultiSwitch} from 'react-native-multiswitch-selector';
 import WineCard from './components/WineCard';
-import BottomSheet, {BottomSheetScrollView} from '@gorhom/bottom-sheet';
-import WineHuntButton from '../../common/WineHuntButton';
+
 import VendorLocationFilter from './Modal/VendorLocationFilter';
 import FilterModal from './Modal/FilterModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from '../../helper/Constant';
+import axios from 'axios';
+import {showWarning} from '../../helper/Toastify';
 
 const Search = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
   const bottomSheetModalRef = useRef(null);
-  const snapPoints = useMemo(() => ['45%'], []);
+  const snapPoints = useMemo(
+    () => (Platform.OS === 'ios' ? ['45%'] : ['55%']),
+    [],
+  );
 
   const [searchText, setSearchText] = useState('');
   const [type, setType] = useState('Popular');
   const [selectedVendor, setSelectedVendor] = useState(null);
 
   const bottomSheetModalRef2 = useRef(null);
-  const snapPoints2 = useMemo(() => ['80%'], []);
+  const snapPoints2 = useMemo(
+    () => (Platform.OS === 'ios' ? ['80%'] : ['100%']),
+    [],
+  );
+  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState([]);
 
   const vendorLocation = [
     {
@@ -58,6 +69,49 @@ const Search = () => {
     },
   ];
 
+  useEffect(() => {
+    getProducts();
+  }, [searchText]);
+
+  const getProducts = async () => {
+    const data = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(data)?.token;
+
+    const url = Constants.baseUrl4 + Constants.searchProducts;
+    setLoading(true);
+    const info = {
+      search_name: searchText,
+      shop_type: '',
+      product_type: '',
+      categories: '',
+      price_range: '',
+      latest: true,
+      filter_by: 'top_rated',
+    };
+    try {
+      const res = await axios.post(url, info, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.status == 200) {
+        setProducts(res?.data?.products);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <BackNavigationWithTitle
@@ -69,7 +123,7 @@ const Search = () => {
         <View style={[styles.searchBox, styles.flex1]}>
           <TextInput
             value={searchText}
-            onChangeText={setSearchText}
+            onChangeText={e => setSearchText(e)}
             style={styles.searchInput}
             placeholder="Search by cultivars/wines/vendors"
             placeholderTextColor={Colors.gray9}
@@ -120,18 +174,26 @@ const Search = () => {
         />
       </View>
 
-      <FlatList
-        data={Array.from({length: 10})}
-        numColumns={2}
-        showsVerticalScrollIndicator={false}
-        columnWrapperStyle={{columnGap: 10}}
-        contentContainerStyle={{
-          padding: 20,
-          gap: 10,
-          columnGap: 10,
-        }}
-        renderItem={() => <WineCard />}
-      />
+      {loading ? (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <ActivityIndicator size={'large'} color={Colors.red2} />
+        </View>
+      ) : (
+        <FlatList
+          data={products}
+          numColumns={2}
+          refreshing={loading}
+          onRefresh={getProducts}
+          showsVerticalScrollIndicator={false}
+          columnWrapperStyle={{columnGap: 10}}
+          contentContainerStyle={{
+            padding: 20,
+            gap: 10,
+            columnGap: 10,
+          }}
+          renderItem={({item}) => <WineCard item={item} />}
+        />
+      )}
 
       <VendorLocationFilter
         bottomSheetModalRef={bottomSheetModalRef}
