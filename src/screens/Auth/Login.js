@@ -117,6 +117,7 @@ const Login = () => {
                   onChangeText={setPhoneNumber}
                   placeholder="Enter Mobile Number"
                   keyboardType="number-pad"
+                  placeholderTextColor={Colors.gray}
                   maxLength={14}
                   style={styles.textInput}
                 />
@@ -208,6 +209,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 5,
     paddingHorizontal: 10,
+    color: Colors.black,
   },
   footer: {
     padding: 20,

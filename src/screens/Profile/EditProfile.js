@@ -300,6 +300,7 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     paddingVertical: Platform.OS === 'ios' ? 5 : 0,
+    color: Colors.black,
   },
   phoneInputContainer: {
     padding: 5,
@@ -326,6 +327,7 @@ const styles = StyleSheet.create({
   phoneInput: {
     flex: 1,
     paddingVertical: 5,
+    color: Colors.black,
     paddingHorizontal: 10,
   },
   updateButtonContainer: {

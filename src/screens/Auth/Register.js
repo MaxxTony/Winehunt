@@ -6,6 +6,7 @@ import {
   PermissionsAndroid,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -75,7 +76,10 @@ const Register = ({route}) => {
                       component.types.includes('sublocality') &&
                       component.types.includes('sublocality_level_2'),
                   )
-                  .map(comp => setCurrentAddress(comp?.formatted_address));
+                  .map(comp => {
+                    setCurrentAddress(comp?.formatted_address);
+                    console.log(comp);
+                  });
                 return filteredAddress;
               })
               .catch(error => console.log(error));
@@ -212,7 +216,10 @@ const Register = ({route}) => {
     formData.append('country_code', Info?.user?.country_code);
     formData.append('latitude', coordinates?.latitude.toString());
     formData.append('longitude', coordinates?.longitude.toString());
-    formData.append('address', currentAddress);
+    formData.append(
+      'address',
+      currentAddress ? currentAddress : 'Defaul Address',
+    );
     if (filePath) {
       formData.append('image', {
         uri: filePath.uri,
@@ -265,76 +272,82 @@ const Register = ({route}) => {
             onPress={() => navigation.goBack()}>
             <Fontisto name="angle-left" size={20} color={Colors.black} />
           </Pressable>
-          <Pressable onPress={() => setIsImageModal(true)}>
-            <Image
-              source={
-                filePath && fileUri
-                  ? {uri: fileUri}
-                  : require('../../../assets/images/LoginPage/defaultProfile.png')
-              }
-              style={{
-                height: 128,
-                width: 128,
-                alignSelf: 'center',
-                borderRadius: 100,
-              }}
-            />
-          </Pressable>
-          <View style={{padding: 20, flex: 1, gap: 20}}>
-            <WineHuntLabelInput
-              value={firstName}
-              onChangeText={e => setFirstName(e)}
-              placeholder="Enter Your First Name"
-              label="First Name"
-            />
-            <WineHuntLabelInput
-              value={lastName}
-              onChangeText={e => setLastName(e)}
-              placeholder="Enter Your Last Name"
-              label="Last Name"
-            />
-            <WineHuntLabelInput
-              value={email}
-              onChangeText={e => setEmail(e)}
-              placeholder="Enter Your Email"
-              label="Email"
-              keyboardType="email-address"
-            />
-            <WineHuntLabelInput
-              value={password}
-              onChangeText={e => setPassword(e)}
-              placeholder="Enter Your Password"
-              label="Password"
-              isPassword={true}
-            />
-            <WineHuntLabelInput
-              value={confirmPassword}
-              onChangeText={e => setConfirmPassword(e)}
-              placeholder="Confirm Password"
-              label="Confirm Password"
-              isPassword={true}
-            />
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
-              <MaterialCommunityIcons
-                name={checked ? 'checkbox-outline' : 'checkbox-blank-outline'}
-                size={20}
-                color={Colors.black}
-                onPress={() => setChecked(!checked)}
-              />
-              <Text
+          <ScrollView
+            contentContainerStyle={{flexGrow: 1}}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}>
+            <Pressable onPress={() => setIsImageModal(true)}>
+              <Image
+                source={
+                  filePath && fileUri
+                    ? {uri: fileUri}
+                    : require('../../../assets/images/LoginPage/defaultProfile.png')
+                }
                 style={{
-                  fontSize: 14,
-                  color: Colors.black,
-                  fontFamily: Fonts.InterRegular,
-                  fontWeight: '500',
-                }}>
-                I agree to the Terms & Conditions
-              </Text>
+                  height: 128,
+                  width: 128,
+                  alignSelf: 'center',
+                  borderRadius: 100,
+                }}
+              />
+            </Pressable>
+            <View style={{padding: 20, flex: 1, gap: 10}}>
+              <WineHuntLabelInput
+                value={firstName}
+                onChangeText={e => setFirstName(e)}
+                placeholder="Enter Your First Name"
+                label="First Name"
+              />
+              <WineHuntLabelInput
+                value={lastName}
+                onChangeText={e => setLastName(e)}
+                placeholder="Enter Your Last Name"
+                label="Last Name"
+              />
+              <WineHuntLabelInput
+                value={email}
+                onChangeText={e => setEmail(e)}
+                placeholder="Enter Your Email"
+                label="Email"
+                keyboardType="email-address"
+              />
+              <WineHuntLabelInput
+                value={password}
+                onChangeText={e => setPassword(e)}
+                placeholder="Enter Your Password"
+                label="Password"
+                isPassword={true}
+              />
+              <WineHuntLabelInput
+                value={confirmPassword}
+                onChangeText={e => setConfirmPassword(e)}
+                placeholder="Confirm Password"
+                label="Confirm Password"
+                isPassword={true}
+              />
+              <View
+                style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
+                <MaterialCommunityIcons
+                  name={checked ? 'checkbox-outline' : 'checkbox-blank-outline'}
+                  size={20}
+                  color={Colors.black}
+                  onPress={() => setChecked(!checked)}
+                />
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: Colors.black,
+                    fontFamily: Fonts.InterRegular,
+                    fontWeight: '500',
+                  }}>
+                  I agree to the Terms & Conditions
+                </Text>
+              </View>
+              <View>
+                <WineHuntButton text="Continue" onPress={() => onSubmit()} />
+              </View>
             </View>
-            <View style={{marginTop: 'auto'}}>
-              <WineHuntButton text="Continue" onPress={() => onSubmit()} />
-            </View>
-          </View>
+          </ScrollView>
           <ImageUploadModal
             isImageModal={isImageModal}
             setIsImageModal={setIsImageModal}

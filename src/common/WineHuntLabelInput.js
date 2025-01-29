@@ -1,4 +1,5 @@
 import {
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -33,7 +34,7 @@ const WineHuntLabelInput = props => {
         style={{
           borderWidth: 1,
           padding: 10,
-          paddingVertical: 12,
+          // paddingVertical: 12,
           borderColor: Colors.gray2,
           borderRadius: 5,
           shadowColor: '#000',
@@ -53,7 +54,14 @@ const WineHuntLabelInput = props => {
           value={props?.value}
           onChangeText={props?.onChangeText}
           secureTextEntry={secureTextEntry}
-          style={[{flex: 1}, props?.extraInputStyle]}
+          style={[
+            {
+              flex: 1,
+              color: Colors.black,
+              paddingVertical: Platform.OS == 'android' ? 0 : 5,
+            },
+            props?.extraInputStyle,
+          ]}
           placeholder={props?.placeholder}
           placeholderTextColor={Colors.gray4}
           {...props}

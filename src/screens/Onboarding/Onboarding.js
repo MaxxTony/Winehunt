@@ -107,11 +107,13 @@ const Onboarding = () => {
   };
 
   const goToNextSlide = () => {
-    if (currentSlideIndex < data.length - 1) {
+    const nextIndex = currentSlideIndex + 1;
+    if (nextIndex < data.length) {
       flatListRef.current.scrollToOffset({
-        offset: (currentSlideIndex + 1) * width,
+        offset: nextIndex * width,
         animated: true,
       });
+      setCurrentSlideIndex(nextIndex); // Manually update index
     }
   };
 
@@ -120,6 +122,7 @@ const Onboarding = () => {
       offset: (data.length - 1) * width,
       animated: true,
     });
+    setCurrentSlideIndex(data.length - 1); // Manually update the index
   };
 
   const Indicator = () => {
