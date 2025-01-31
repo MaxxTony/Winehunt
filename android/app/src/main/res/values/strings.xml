@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">WineHunt</string>
+             <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyAvhOv_MIWS7k1W7Fm9UZR-9TGXQCVS91Q</string>
+
 </resources>

@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "974351416688",
+    "project_id": "winehunt-e9650",
+    "storage_bucket": "winehunt-e9650.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:974351416688:android:9c9a50f1e0d595887563b5",
+        "android_client_info": {
+          "package_name": "com.winehunt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "974351416688-65s2rqq806dcnp86jd1p08k1k3u9h1pl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.winehunt",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "974351416688-c0au553ohi7m73rh5g3j51loj8seokhh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.winehunt",
+            "certificate_hash": "b196a9ceca4bedf93c6ecebdb8794f1a981987ca"
+          }
+        },
+        {
+          "client_id": "974351416688-tbaq6pq3egd0rfbuf3nletfnou6l2sal.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnKrXBKia_DPs_0GN0rTWSrlP2MlwL2Ek"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "974351416688-tbaq6pq3egd0rfbuf3nletfnou6l2sal.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "974351416688-gd93b3gt1bkbe7pdla85i3jhea4b85hg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.winehunt"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

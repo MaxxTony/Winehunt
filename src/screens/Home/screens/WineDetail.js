@@ -37,10 +37,10 @@ const WineDetail = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.fixedBackgroundContainer}>
+        <View style={styles.semiCircleContainer}>
           <Image
             source={require('../images/bg.png')}
-            style={styles.fixedBackgroundImage}
+            style={styles.semiCircleImage}
           />
         </View>
         <View style={styles.headerContainer}>
@@ -61,7 +61,27 @@ const WineDetail = () => {
             resizeMode="contain"
           />
           <View style={styles.infoContainer}>
-            <Text style={styles.vendorName}>Vendor shop Name</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Text style={styles.vendorName}>Vendor shop Name</Text>
+              <Pressable
+                style={{
+                  padding: 3,
+                  paddingHorizontal: 5,
+                  backgroundColor: Colors.green,
+                  alignItems: 'center',
+                  borderRadius: 5,
+                }}>
+                <Text
+                  style={{
+                    fontSize: 13,
+                    fontFamily: Fonts.InterMedium,
+                    fontWeight: '600',
+                    color: Colors.white,
+                  }}>
+                  View Detail
+                </Text>
+              </Pressable>
+            </View>
             <Text style={styles.wineName}>Taylors (Red Grape juice)</Text>
             <View style={styles.priceRow}>
               <Text style={styles.priceText}>
@@ -83,7 +103,8 @@ const WineDetail = () => {
           </View>
         </View>
         <View style={{padding: 20}}>
-          <FlatList
+          {/* <CustomTabView /> */}
+          {/* <FlatList
             data={tab}
             horizontal
             scrollEnabled={false}
@@ -112,8 +133,8 @@ const WineDetail = () => {
                 </Pressable>
               );
             }}
-          />
-          {activeTab === 1 ? (
+          /> */}
+          {/* {activeTab === 1 ? (
             <View style={{paddingVertical: 20, gap: 20}}>
               <Text
                 style={{
@@ -148,7 +169,7 @@ const WineDetail = () => {
                 No Review Found yet
               </Text>
             </View>
-          )}
+          )} */}
         </View>
       </ScrollView>
     </View>
@@ -166,17 +187,25 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
   },
 
-  fixedBackgroundContainer: {
+  semiCircleContainer: {
     position: 'absolute',
-    top: '-40%',
+    top: 0,
+    left: 0,
+    right: 0,
     alignItems: 'center',
-    zIndex: -1,
-  },
-  fixedBackgroundImage: {
-    height: 400,
-    width: width,
-    borderRadius: 200,
     overflow: 'hidden',
+    height: 200,
+    width: '100%',
+    backgroundColor: Colors.white,
+    borderBottomLeftRadius: 200,
+    borderBottomRightRadius: 200,
+  },
+  semiCircleImage: {
+    height: 400,
+    width: '100%',
+    borderBottomLeftRadius: 200,
+    borderBottomRightRadius: 200,
+    resizeMode: 'cover',
   },
   headerContainer: {
     flexDirection: 'row',
@@ -190,7 +219,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     paddingHorizontal: 20,
-    borderWidth: 1,
+    paddingTop: 20,
   },
   bottleImage: {
     height: 245,
@@ -205,6 +234,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.InterMedium,
     fontWeight: '800',
     color: Colors.black,
+    flex: 1,
   },
   wineName: {
     fontSize: 16,
