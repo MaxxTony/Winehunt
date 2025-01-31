@@ -191,7 +191,12 @@ const Search = () => {
             gap: 10,
             columnGap: 10,
           }}
-          renderItem={({item}) => <WineCard item={item} />}
+          renderItem={({item}) => (
+            <WineCard
+              item={item}
+              onPress={() => navigation.navigate('WineDetail')}
+            />
+          )}
         />
       )}
 

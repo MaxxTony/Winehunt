@@ -21,6 +21,7 @@ export const Colors = {
   yellow: '#F8C832',
   blue: '#0F1627',
   lightPink: '#F4E4E6',
+  green: '#48B065',
 };
 
 export const Fonts = {

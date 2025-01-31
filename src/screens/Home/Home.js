@@ -196,7 +196,7 @@ const Home = () => {
                 <Pressable
                   style={styles.listItem}
                   key={index}
-                  onPress={() => Alert.alert('Coming Soon')}>
+                  onPress={() => navigation.navigate('WineDetail')}>
                   <Image
                     source={{uri: item.image}}
                     style={styles.listItemImage}
@@ -216,7 +216,9 @@ const Home = () => {
             data={homeData?.vendors}
             scrollEnabled={false}
             contentContainerStyle={styles.verticalList}
-            renderItem={({item}) => <NearVendorCards item={item} />}
+            renderItem={({item}) => (
+              <NearVendorCards item={item} navigation={navigation} />
+            )}
           />
           <HeadingWithLink
             title="Featured Wine"
@@ -230,7 +232,12 @@ const Home = () => {
               styles.horizontalList,
               {marginVertical: 20},
             ]}
-            renderItem={({item}) => <FeatureWindeCard item={item} />}
+            renderItem={({item}) => (
+              <FeatureWindeCard
+                item={item}
+                onPress={() => navigation.navigate('WineDetail')}
+              />
+            )}
           />
           <HeadingWithLink
             title="New Arrival"
@@ -244,7 +251,11 @@ const Home = () => {
               styles.horizontalList,
               {marginVertical: 20},
             ]}
-            renderItem={() => <NewArrivalCard />}
+            renderItem={() => (
+              <NewArrivalCard
+                onPress={() => navigation.navigate('WineDetail')}
+              />
+            )}
           />
         </View>
       </ScrollView>

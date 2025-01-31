@@ -14,13 +14,15 @@ const Vendors = props => {
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <BackNavigationWithTitle
-        title="Vendors ear By You"
+        title="Vendors near By You"
         onPress={() => navigation.goBack()}
       />
       <FlatList
         data={data}
         contentContainerStyle={styles.verticalList}
-        renderItem={({item}) => <NearVendorCards item={item} />}
+        renderItem={({item}) => (
+          <NearVendorCards item={item} navigation={navigation} />
+        )}
       />
     </View>
   );

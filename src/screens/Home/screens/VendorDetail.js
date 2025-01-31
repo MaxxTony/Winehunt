@@ -1,0 +1,275 @@
+import React from 'react';
+import {
+  Dimensions,
+  FlatList,
+  Image,
+  ImageBackground,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import Fontisto from 'react-native-vector-icons/Fontisto';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import {Colors, Fonts} from '../../../constant/Styles';
+import {useNavigation} from '@react-navigation/native';
+
+const screenWidth = Dimensions.get('window').width;
+
+const VendorDetail = props => {
+  const navigation = useNavigation();
+  const data = props?.route?.params?.item;
+
+  const contactOptions = [
+    {id: 1, name: 'Call', image: require('../images/call.png')},
+    {id: 2, name: 'Message', image: require('../images/sms.png')},
+    {id: 3, name: 'View Map', image: require('../images/location2.png')},
+    {id: 4, name: 'Website', image: require('../images/global.png')},
+  ];
+
+  const renderContactOption = ({item}) => (
+    <View style={styles.contactOptionContainer}>
+      <View style={styles.contactOptionIcon}>
+        <Image source={item.image} style={styles.contactImage} />
+      </View>
+      <Text style={styles.contactOptionText}>{item.name}</Text>
+    </View>
+  );
+
+  return (
+    <View style={{flex: 1, backgroundColor: Colors.white}}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.container}>
+        <ImageBackground
+          source={require('../images/bg.png')}
+          style={styles.headerBackground}>
+          <Pressable
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}>
+            <Fontisto name="angle-left" size={20} color={Colors.white} />
+          </Pressable>
+          <View style={styles.headerInfoContainer}>
+            <Image
+              source={require('../images/shopbg.png')}
+              style={styles.shopImage}
+            />
+            <View style={styles.infoContainer}>
+              <View style={styles.infoItem}>
+                <Ionicons
+                  name="navigate-outline"
+                  size={18}
+                  color={Colors.black}
+                />
+                <Text style={styles.infoText}>2.5 km</Text>
+              </View>
+              <View style={styles.infoItem}>
+                <AntDesign name="star" size={18} color={Colors.yellow} />
+                <Text style={styles.infoText}>4.3</Text>
+              </View>
+              <Pressable style={styles.favoriteButton}>
+                <AntDesign name="hearto" size={18} color={Colors.black} />
+              </Pressable>
+            </View>
+          </View>
+        </ImageBackground>
+        <View style={styles.contentContainer}>
+          <Text style={styles.vendorName}>{data?.shop_name}</Text>
+          <View style={styles.locationContainer}>
+            <Ionicons name="location-outline" size={15} color={Colors.gray} />
+            <Text style={styles.locationText}>{data?.address}</Text>
+          </View>
+          <Text style={styles.description}>
+            Putting my best foot forward - in heels - every day Lorem Ipsum is
+            simply dummy text of the
+          </Text>
+          <Text style={styles.openStatus}>
+            Open {'  '}
+            <Text style={styles.openTime}>Friday 10 am to 8 pm</Text>
+          </Text>
+          <FlatList
+            data={contactOptions}
+            horizontal
+            scrollEnabled={false}
+            contentContainerStyle={styles.contactList}
+            renderItem={renderContactOption}
+          />
+          <View style={styles.separator} />
+          <Text style={styles.sectionTitle}>Product for you</Text>
+          <View style={styles.productContainer}>
+            <Image
+              source={require('../images/bottle.png')}
+              style={styles.productImage}
+              resizeMode="contain"
+            />
+            <View style={styles.productDetails}>
+              <View style={styles.productHeader}>
+                <Text style={styles.productTitle}>Eva (White Grape juice)</Text>
+                <Pressable>
+                  <AntDesign name="hearto" size={18} color={Colors.black} />
+                </Pressable>
+              </View>
+              <Text style={styles.productTag}>Best Rated this Month</Text>
+              <View style={styles.productFooter}>
+                <Pressable style={styles.viewMoreButton}>
+                  <Text style={styles.viewMoreText}>View More</Text>
+                </Pressable>
+                <View style={styles.ratingContainer}>
+                  <AntDesign name="star" size={18} color={Colors.yellow} />
+                  <Text style={styles.infoText}>4.3</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+          <Text style={styles.sectionTitle}>Offers</Text>
+
+          <FlatList
+            data={Array.from({length: 10})}
+            horizontal
+            contentContainerStyle={{gap: 10}}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({item, index}) => {
+              return (
+                <View
+                  style={{
+                    padding: 10,
+                    borderWidth: 1,
+                    borderColor: Colors.gray10,
+                    borderRadius: 10,
+                  }}>
+                  <Text>Up To 50% New Offer</Text>
+                </View>
+              );
+            }}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+            <Text style={styles.sectionTitle}>Review (0)</Text>
+            <Text
+              style={{
+                fontSize: 14,
+                fontFamily: Fonts.InterRegular,
+                color: Colors.black,
+              }}>
+              View All
+            </Text>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
+  );
+};
+
+export default VendorDetail;
+
+const styles = StyleSheet.create({
+  container: {backgroundColor: Colors.white, paddingBottom: 80},
+  headerBackground: {width: '100%', height: 250, marginBottom: 100},
+  backButton: {flexDirection: 'row', alignItems: 'center', padding: 20},
+  headerInfoContainer: {
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: -100,
+  },
+  shopImage: {height: 100, width: 100},
+  infoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    borderRightWidth: 1,
+    borderColor: Colors.gray,
+  },
+  infoText: {
+    fontSize: 16,
+    color: Colors.black,
+    fontFamily: Fonts.InterRegular,
+    fontWeight: '600',
+  },
+  favoriteButton: {marginHorizontal: 10},
+  contentContainer: {paddingHorizontal: 20, gap: 10},
+  vendorName: {
+    fontSize: 18,
+    fontFamily: Fonts.PhilosopherBold,
+    color: Colors.black,
+  },
+  locationContainer: {flexDirection: 'row'},
+  locationText: {
+    fontSize: 14,
+    fontFamily: Fonts.InterRegular,
+    color: Colors.gray,
+  },
+  description: {
+    fontSize: 14,
+    fontFamily: Fonts.InterRegular,
+    color: Colors.black,
+  },
+  openStatus: {
+    fontSize: 16,
+    fontFamily: Fonts.InterBold,
+    color: Colors.green,
+    fontWeight: '600',
+  },
+  openTime: {color: Colors.gray4, fontSize: 14, fontWeight: '400'},
+  contactList: {gap: 20},
+  contactOptionContainer: {alignItems: 'center', gap: 5},
+  contactOptionIcon: {
+    padding: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    borderRadius: 100,
+    borderColor: Colors.gray4,
+  },
+  contactImage: {height: 20, width: 20},
+  contactOptionText: {
+    fontSize: 14,
+    fontFamily: Fonts.InterRegular,
+    color: Colors.black,
+  },
+  separator: {height: 1, width: '100%', backgroundColor: Colors.gray4},
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: Fonts.PhilosopherBold,
+    color: Colors.black,
+  },
+  productContainer: {
+    padding: 10,
+
+    backgroundColor: Colors.white,
+    elevation: 5,
+    borderRadius: 5,
+    flexDirection: 'row',
+    gap: 10,
+  },
+  productFooter: {flexDirection: 'row', justifyContent: 'space-between'},
+  productImage: {height: 75, width: 38},
+  productDetails: {flex: 1, gap: 5},
+  productHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  productTitle: {fontSize: 16, color: Colors.black, fontWeight: '700'},
+  productTag: {fontSize: 12, color: Colors.gray, fontWeight: '700'},
+  viewMoreButton: {
+    padding: 5,
+    backgroundColor: Colors.red,
+    borderRadius: 10,
+    paddingHorizontal: 20,
+  },
+  viewMoreText: {fontSize: 12, color: Colors.white, fontWeight: '700'},
+  ratingContainer: {flexDirection: 'row', alignItems: 'center', gap: 5},
+});

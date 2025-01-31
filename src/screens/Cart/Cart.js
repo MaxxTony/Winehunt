@@ -95,6 +95,7 @@ const Cart = () => {
           <TextInput
             value={couponCode}
             onChangeText={e => setCouponCode(e)}
+            placeholderTextColor={Colors.gray4}
             style={{
               flex: 1,
               paddingVertical: Platform.OS == 'ios' ? 5 : 0,

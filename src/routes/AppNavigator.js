@@ -21,6 +21,8 @@ import NewArrival from '../screens/Home/screens/NewArrival';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FeatureWine from '../screens/Home/screens/FeatureWine';
 import Vendors from '../screens/Home/screens/Vendors';
+import VendorDetail from '../screens/Home/screens/VendorDetail';
+import WineDetail from '../screens/Home/screens/WineDetail';
 
 const Stack = createNativeStackNavigator();
 
@@ -72,6 +74,8 @@ const AppNavigator = () => {
       <Stack.Screen name="NewArrival" component={NewArrival} />
       <Stack.Screen name="FeatureWine" component={FeatureWine} />
       <Stack.Screen name="Vendors" component={Vendors} />
+      <Stack.Screen name="VendorDetail" component={VendorDetail} />
+      <Stack.Screen name="WineDetail" component={WineDetail} />
     </Stack.Navigator>
   );
 };

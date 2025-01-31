@@ -1,12 +1,14 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
 
-const NearVendorCards = ({item}) => {
+const NearVendorCards = ({item, navigation}) => {
   return (
-    <View style={styles.cardContainer}>
+    <Pressable
+      style={styles.cardContainer}
+      onPress={() => navigation.navigate('VendorDetail', {item: item})}>
       <Image
         source={require('../images/wine.png')}
         style={styles.vendorImage}
@@ -25,7 +27,7 @@ const NearVendorCards = ({item}) => {
           <Text style={styles.distanceText}>2.5 Km</Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 };
 

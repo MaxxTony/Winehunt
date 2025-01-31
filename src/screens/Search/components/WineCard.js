@@ -2,7 +2,7 @@ import {Alert, Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 
-const WineCard = ({item}) => {
+const WineCard = ({item, onPress}) => {
   return (
     <View style={styles.cardContainer}>
       <Image
@@ -11,7 +11,11 @@ const WineCard = ({item}) => {
       />
       <View style={styles.contentRow}>
         <Image
-          source={require('../images/bottle3.png')}
+          source={
+            item?.product_images[0]?.image
+              ? {uri: item?.product_images[0]?.image}
+              : require('../images/bottle3.png')
+          }
           style={styles.bottleImage}
           resizeMode="contain"
         />
@@ -27,9 +31,7 @@ const WineCard = ({item}) => {
           <Text style={styles.description}>{item?.name}</Text>
           <Text style={styles.highlightedText}>({item?.title})</Text>
           <Text style={styles.price}>$ {item?.small_size_price}</Text>
-          <Pressable
-            style={styles.button}
-            onPress={() => Alert.alert('Coming soon')}>
+          <Pressable style={styles.button} onPress={onPress}>
             <Text style={styles.buttonText}>View More</Text>
           </Pressable>
         </View>

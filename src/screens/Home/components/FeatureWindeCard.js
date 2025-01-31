@@ -2,7 +2,7 @@ import {Alert, Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 
-const FeatureWindeCard = ({item}) => {
+const FeatureWindeCard = ({item, onPress}) => {
   return (
     <View style={styles.cardContainer}>
       <Image
@@ -22,9 +22,7 @@ const FeatureWindeCard = ({item}) => {
             {item?.name} <Text style={styles.highlightedText}>(Port Wine)</Text>
           </Text>
           <Text style={styles.price}>$ 25.99</Text>
-          <Pressable
-            style={styles.button}
-            onPress={() => Alert.alert('Coming soon')}>
+          <Pressable style={styles.button} onPress={onPress}>
             <Text style={styles.buttonText}>View More</Text>
           </Pressable>
         </View>

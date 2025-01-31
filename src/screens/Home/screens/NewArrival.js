@@ -24,9 +24,10 @@ const NewArrival = () => {
         contentContainerStyle={{
           padding: 20,
           gap: 10,
-          // columnGap: 10,
         }}
-        renderItem={() => <NewArrivalCard2 />}
+        renderItem={() => (
+          <NewArrivalCard2 onPress={() => navigation.navigate('WineDetail')} />
+        )}
       />
     </View>
   );

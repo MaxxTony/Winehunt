@@ -29,15 +29,6 @@ const AuthType = () => {
         WineHunt
       </Text>
       <View style={{padding: 20, gap: 10}}>
-        <Text
-          style={{
-            fontSize: 16,
-            color: '#000',
-            fontFamily: 'Inter_18pt-Medium',
-            fontWeight: '600',
-          }}>
-          Continue With Phone
-        </Text>
         <Pressable onPress={() => navigation.navigate('Login')}>
           <Image
             source={require('../../../assets/images/LoginPage/Mobile.png')}

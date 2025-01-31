@@ -10,7 +10,7 @@ import {
 import React from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 
-const NewArrivalCard2 = () => {
+const NewArrivalCard2 = ({onPress}) => {
   return (
     <View style={styles.cardContainer}>
       <Image
@@ -30,9 +30,7 @@ const NewArrivalCard2 = () => {
             Taylors <Text style={styles.highlightedText}>(Port Wine)</Text>
           </Text>
           <Text style={styles.price}>$ 25.99</Text>
-          <Pressable
-            style={styles.button}
-            onPress={() => Alert.alert('Coming soon')}>
+          <Pressable style={styles.button} onPress={onPress}>
             <Text style={styles.buttonText}>View More</Text>
           </Pressable>
         </View>

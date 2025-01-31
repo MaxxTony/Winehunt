@@ -26,7 +26,9 @@ const FeatureWine = () => {
           gap: 10,
           columnGap: 10,
         }}
-        renderItem={() => <NewArrivalCard2 />}
+        renderItem={() => (
+          <NewArrivalCard2 onPress={() => navigation.navigate('WineDetail')} />
+        )}
       />
     </View>
   );

@@ -2,7 +2,7 @@ import {Alert, Image, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 
-const NewArrivalCard = () => {
+const NewArrivalCard = ({onPress}) => {
   return (
     <View style={{alignItems: 'center', gap: 5}}>
       <View
@@ -35,7 +35,7 @@ const NewArrivalCard = () => {
           fontFamily: Fonts.InterRegular,
           fontWeight: '600',
         }}
-        onPress={() => Alert.alert('Comin soon')}>
+        onPress={onPress}>
         View More
       </Text>
     </View>
