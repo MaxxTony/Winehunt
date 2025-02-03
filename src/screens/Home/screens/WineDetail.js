@@ -164,14 +164,17 @@ const WineDetail = props => {
           <View style={styles.infoContainer}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <Text style={styles.vendorName}>{detail?.user?.shop_name}</Text>
-              <Pressable
+              {/* <Pressable
                 style={{
                   padding: 3,
                   paddingHorizontal: 5,
                   backgroundColor: Colors.green,
                   alignItems: 'center',
                   borderRadius: 5,
-                }}>
+                }}
+                onPress={() =>
+                  navigation.navigate('VendorDetail', {item: detail?.user})
+                }>
                 <Text
                   style={{
                     fontSize: 13,
@@ -181,7 +184,7 @@ const WineDetail = props => {
                   }}>
                   View Detail
                 </Text>
-              </Pressable>
+              </Pressable> */}
             </View>
             <Text style={styles.wineName}>
               {detail?.name} ({detail?.title})
@@ -196,10 +199,14 @@ const WineDetail = props => {
               </View>
             </View>
             <View style={styles.buttonContainer}>
-              <Pressable style={styles.button}>
+              <Pressable
+                style={styles.button}
+                onPress={() => setShowModal(true)}>
                 <Text style={styles.buttonText}>Add To Cart</Text>
               </Pressable>
-              <Pressable style={styles.button}>
+              <Pressable
+                style={styles.button}
+                onPress={() => setShowModal(true)}>
                 <Text style={styles.buttonText}>Try Me</Text>
               </Pressable>
             </View>
@@ -261,7 +268,7 @@ const WineDetail = props => {
                 scrollEnabled={false}
                 renderItem={({item, index}) => {
                   return (
-                    <View
+                    <Pressable
                       style={{
                         padding: 10,
                         borderRadius: 8,
@@ -277,7 +284,10 @@ const WineDetail = props => {
                         elevation: 5,
                         gap: 10,
                         margin: 5,
-                      }}>
+                      }}
+                      onPress={() =>
+                        navigation.replace('WineDetail', {item: item?.id})
+                      }>
                       <Image
                         source={
                           item?.image
@@ -340,7 +350,7 @@ const WineDetail = props => {
                           />
                         </Pressable>
                       </View>
-                    </View>
+                    </Pressable>
                   );
                 }}
               />

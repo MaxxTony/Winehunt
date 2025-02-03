@@ -194,7 +194,9 @@ const Search = () => {
           renderItem={({item}) => (
             <WineCard
               item={item}
-              onPress={() => navigation.navigate('WineDetail')}
+              onPress={() =>
+                navigation.navigate('WineDetail', {item: item?.id})
+              }
             />
           )}
         />

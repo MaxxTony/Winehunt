@@ -74,6 +74,8 @@ const VendorDetail = props => {
     }
   };
 
+  console.log(detail);
+
   const openMaps = (latitude, longitude) => {
     const url =
       Platform.OS === 'ios'
@@ -119,7 +121,7 @@ const VendorDetail = props => {
   const contactOptions = [
     {id: 1, name: 'Call', image: require('../images/call.png')},
     {id: 2, name: 'Message', image: require('../images/sms.png')},
-    {id: 3, name: 'View Map', image: require('../images/location2.png')},
+    {id: 3, name: 'View Map', image: require('../images/location.png')},
     {id: 4, name: 'Website', image: require('../images/global.png')},
   ];
 
