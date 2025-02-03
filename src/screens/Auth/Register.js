@@ -78,7 +78,6 @@ const Register = ({route}) => {
                   )
                   .map(comp => {
                     setCurrentAddress(comp?.formatted_address);
-                    console.log(comp);
                   });
                 return filteredAddress;
               })

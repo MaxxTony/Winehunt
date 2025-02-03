@@ -2,7 +2,7 @@ import {Alert, Image, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 
-const NewArrivalCard = ({onPress}) => {
+const NewArrivalCard = ({onPress, item}) => {
   return (
     <View style={{alignItems: 'center', gap: 5}}>
       <View
@@ -14,10 +14,16 @@ const NewArrivalCard = ({onPress}) => {
           alignItems: 'center',
           borderRadius: 100,
         }}>
-        <Image
-          source={require('../images/bottle2.png')}
-          style={{height: 85, width: 24}}
-        />
+        {item?.product_images && (
+          <Image
+            source={
+              item?.product_images[0]?.image
+                ? {uri: item?.product_images[0]?.image}
+                : require('../images/bottle2.png')
+            }
+            style={{height: 85, width: 24}}
+          />
+        )}
       </View>
       <Text
         style={{
@@ -26,7 +32,7 @@ const NewArrivalCard = ({onPress}) => {
           fontFamily: Fonts.InterRegular,
           fontWeight: '600',
         }}>
-        Carlo Rossi
+        {item?.title}
       </Text>
       <Text
         style={{

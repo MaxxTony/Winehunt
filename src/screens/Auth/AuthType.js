@@ -10,10 +10,43 @@ import {
 } from 'react-native';
 import React from 'react';
 import {useNavigation} from '@react-navigation/native';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+import Key from '../../utils/Key';
 
 const AuthType = () => {
   const {width} = useWindowDimensions();
   const navigation = useNavigation();
+
+  GoogleSignin.configure({
+    webClientId: Key.webClientId,
+  });
+
+  const googleLogin = async () => {
+    try {
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
+      const userInfo = await GoogleSignin.signIn();
+
+      if (userInfo) {
+        // googleRegister(userInfo?.user);
+      }
+    } catch (error) {
+      console.log(error, '===>');
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled the login flow
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // operation (e.g. sign in) is in progress already
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // play services not available or outdated
+      } else {
+        // some other error happened
+      }
+    }
+  };
 
   return (
     <ImageBackground
@@ -35,10 +68,12 @@ const AuthType = () => {
             style={{width: width - 40, height: 46, borderRadius: 5}}
           />
         </Pressable>
-        <Image
-          source={require('../../../assets/images/LoginPage/Google.png')}
-          style={{width: width - 40, height: 46, borderRadius: 5}}
-        />
+        <Pressable onPress={() => googleLogin()}>
+          <Image
+            source={require('../../../assets/images/LoginPage/Google.png')}
+            style={{width: width - 40, height: 46, borderRadius: 5}}
+          />
+        </Pressable>
         <Image
           source={require('../../../assets/images/LoginPage/Facebook.png')}
           style={{width: width - 40, height: 46, borderRadius: 5}}

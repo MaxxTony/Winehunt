@@ -16,6 +16,7 @@ const Constants = {
   editProfile: 'edit-profile',
   changePassword: 'change-password',
   searchProducts: 'search-products',
+  wineDetail: 'get-product-by-id',
 };
 
 export default Constants;

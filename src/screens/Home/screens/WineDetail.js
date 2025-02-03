@@ -3,23 +3,80 @@ import {
   FlatList,
   Image,
   ImageBackground,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
+import Modal from 'react-native-modal';
+import WineHuntButton from '../../../common/WineHuntButton';
+import PreferenceModal from '../../../Modal/PreferenceModal';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from '../../../helper/Constant';
+import axios from 'axios';
+import {showWarning} from '../../../helper/Toastify';
 
 const {width} = Dimensions.get('window');
 
-const WineDetail = () => {
+const WineDetail = props => {
+  const id = props?.route?.params.item;
+
   const navigation = useNavigation();
+  const inset = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState([]);
+  const [detail, setDetail] = useState([]);
+
+  useEffect(() => {
+    getProductDetail();
+  }, []);
+
+  const getProductDetail = async () => {
+    const data = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(data)?.token;
+
+    const url = Constants.baseUrl4 + Constants.wineDetail;
+
+    setLoading(true);
+
+    const body = {
+      product_id: id,
+    };
+
+    try {
+      const res = await axios.post(url, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (res?.status === 200) {
+        setDetail(res?.data?.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const tab = [
     {
@@ -32,8 +89,45 @@ const WineDetail = () => {
     },
   ];
 
+  const sizeList = [
+    {
+      id: 1,
+      name: 'Small',
+    },
+    {
+      id: 2,
+      name: 'Regular',
+    },
+    {
+      id: 3,
+      name: 'Large',
+    },
+  ];
+  const [size, setSize] = useState(sizeList[0]?.id);
+
+  const AddonList = [
+    {
+      id: 1,
+      name: 'Black olives',
+    },
+    {
+      id: 2,
+      name: 'Fruits',
+    },
+    {
+      id: 3,
+      name: 'Snacks',
+    },
+  ];
+
+  const [addOn, setAddOn] = useState(AddonList[0]?.id);
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {paddingTop: Platform.OS == 'ios' ? inset.top : 0},
+      ]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}>
@@ -55,14 +149,21 @@ const WineDetail = () => {
         </View>
 
         <View style={styles.contentContainer}>
-          <Image
-            source={require('../images/newbottle.png')}
-            style={styles.bottleImage}
-            resizeMode="contain"
-          />
+          {detail.product_images && (
+            <Image
+              source={
+                detail?.product_images[0]?.image &&
+                detail?.product_images.length > 0
+                  ? {uri: detail?.product_images[0]?.image}
+                  : require('../images/newbottle.png')
+              }
+              style={styles.bottleImage}
+              resizeMode="contain"
+            />
+          )}
           <View style={styles.infoContainer}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={styles.vendorName}>Vendor shop Name</Text>
+              <Text style={styles.vendorName}>{detail?.user?.shop_name}</Text>
               <Pressable
                 style={{
                   padding: 3,
@@ -82,7 +183,9 @@ const WineDetail = () => {
                 </Text>
               </Pressable>
             </View>
-            <Text style={styles.wineName}>Taylors (Red Grape juice)</Text>
+            <Text style={styles.wineName}>
+              {detail?.name} ({detail?.title})
+            </Text>
             <View style={styles.priceRow}>
               <Text style={styles.priceText}>
                 Price <Text style={styles.priceValue}>£12.00</Text>
@@ -103,11 +206,11 @@ const WineDetail = () => {
           </View>
         </View>
         <View style={{padding: 20}}>
-          {/* <CustomTabView /> */}
-          {/* <FlatList
+          <FlatList
             data={tab}
             horizontal
             scrollEnabled={false}
+            showsHorizontalScrollIndicator={false}
             keyExtractor={item => item.id.toString()}
             renderItem={({item, index}) => {
               const isActive = item.id === activeTab;
@@ -118,7 +221,7 @@ const WineDetail = () => {
                     width: width / 2,
                     paddingVertical: 12,
                     alignItems: 'center',
-                    borderBottomWidth: isActive ? 2 : 1,
+                    borderBottomWidth: isActive ? 2 : 2,
                     borderBottomColor: isActive ? Colors.red : Colors.gray,
                     backgroundColor: '#FFF',
                   }}>
@@ -133,20 +236,16 @@ const WineDetail = () => {
                 </Pressable>
               );
             }}
-          /> */}
-          {/* {activeTab === 1 ? (
+          />
+          {activeTab === 1 ? (
             <View style={{paddingVertical: 20, gap: 20}}>
               <Text
                 style={{
                   fontSize: 12,
                   fontFamily: Fonts.InterMedium,
-
                   color: Colors.black,
                 }}>
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry. Lorem Ipsum has been the industry's standard dummy
-                text ever since the 1500s, when an unknown printer took a galley
-                of type and scrambled it to make a type{' '}
+                {detail?.product_desc}
               </Text>
               <Text
                 style={{
@@ -156,7 +255,95 @@ const WineDetail = () => {
                 }}>
                 Suggested for you
               </Text>
-              <Text>NO Suggestion Found </Text>
+              <FlatList
+                data={detail?.suggestions}
+                contentContainerStyle={{gap: 10}}
+                scrollEnabled={false}
+                renderItem={({item, index}) => {
+                  return (
+                    <View
+                      style={{
+                        padding: 10,
+                        borderRadius: 8,
+                        flexDirection: 'row',
+                        shadowColor: '#000',
+                        shadowOffset: {
+                          width: 0,
+                          height: 2,
+                        },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 3.84,
+                        backgroundColor: Colors.white,
+                        elevation: 5,
+                        gap: 10,
+                        margin: 5,
+                      }}>
+                      <Image
+                        source={
+                          item?.image
+                            ? {uri: item?.image}
+                            : require('../images/bottle.png')
+                        }
+                        style={{height: 75, width: 38}}
+                        resizeMode="contain"
+                      />
+                      <View style={{gap: 5, flex: 1}}>
+                        <Text
+                          style={{
+                            fontSize: 15,
+                            fontFamily: Fonts.InterMedium,
+                            color: Colors.black,
+                            fontWeight: '700',
+                          }}>
+                          {item?.name} ({item?.title})
+                        </Text>
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            fontFamily: Fonts.InterMedium,
+                            color: Colors.gray,
+                          }}>
+                          Best Rated this Month
+                        </Text>
+                        <View
+                          style={{
+                            padding: 5,
+                            borderRadius: 5,
+                            backgroundColor: Colors.red,
+                            alignItems: 'center',
+                            alignSelf: 'flex-start',
+                          }}>
+                          <Text
+                            style={{
+                              fontSize: 13,
+                              fontFamily: Fonts.InterMedium,
+                              color: Colors.white,
+                              fontWeight: '700',
+                            }}>
+                            $12.00
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={{justifyContent: 'space-between'}}>
+                        <Pressable>
+                          <AntDesign
+                            name="hearto"
+                            size={25}
+                            color={Colors.gray}
+                          />
+                        </Pressable>
+                        <Pressable onPress={() => setShowModal(true)}>
+                          <Ionicons
+                            name="add-circle"
+                            size={25}
+                            color={Colors.black}
+                          />
+                        </Pressable>
+                      </View>
+                    </View>
+                  );
+                }}
+              />
             </View>
           ) : (
             <View style={{paddingVertical: 20, gap: 20}}>
@@ -169,9 +356,19 @@ const WineDetail = () => {
                 No Review Found yet
               </Text>
             </View>
-          )} */}
+          )}
         </View>
       </ScrollView>
+      <PreferenceModal
+        AddonList={AddonList}
+        addOn={addOn}
+        setAddOn={setAddOn}
+        setShowModal={setShowModal}
+        setSize={setSize}
+        showModal={showModal}
+        size={size}
+        sizeList={sizeList}
+      />
     </View>
   );
 };
@@ -278,7 +475,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     backgroundColor: Colors.red,
     alignItems: 'center',
-    borderRadius: 10,
+    borderRadius: 5,
     flex: 0.43,
   },
   buttonText: {

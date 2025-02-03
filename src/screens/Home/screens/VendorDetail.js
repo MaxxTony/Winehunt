@@ -4,6 +4,7 @@ import {
   FlatList,
   Image,
   ImageBackground,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -15,12 +16,14 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {Colors, Fonts} from '../../../constant/Styles';
 import {useNavigation} from '@react-navigation/native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const screenWidth = Dimensions.get('window').width;
 
 const VendorDetail = props => {
   const navigation = useNavigation();
   const data = props?.route?.params?.item;
+  const inset = useSafeAreaInsets();
 
   const contactOptions = [
     {id: 1, name: 'Call', image: require('../images/call.png')},
@@ -42,7 +45,10 @@ const VendorDetail = props => {
     <View style={{flex: 1, backgroundColor: Colors.white}}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.container}>
+        contentContainerStyle={[
+          styles.container,
+          {paddingTop: Platform.OS == 'ios' ? inset.top : 0},
+        ]}>
         <ImageBackground
           source={require('../images/bg.png')}
           style={styles.headerBackground}>
@@ -192,6 +198,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRightWidth: 1,
     borderColor: Colors.gray,
+    gap: 4,
   },
   infoText: {
     fontSize: 16,

@@ -196,7 +196,9 @@ const Home = () => {
                 <Pressable
                   style={styles.listItem}
                   key={index}
-                  onPress={() => navigation.navigate('WineDetail')}>
+                  onPress={() =>
+                    navigation.navigate('WineDetail', {item: item?.id})
+                  }>
                   <Image
                     source={{uri: item.image}}
                     style={styles.listItemImage}
@@ -222,7 +224,9 @@ const Home = () => {
           />
           <HeadingWithLink
             title="Featured Wine"
-            onPress={() => navigation.navigate('FeatureWine')}
+            onPress={() =>
+              navigation.navigate('FeatureWine', {data: homeData?.product})
+            }
           />
           <FlatList
             data={homeData?.product}
@@ -235,13 +239,17 @@ const Home = () => {
             renderItem={({item}) => (
               <FeatureWindeCard
                 item={item}
-                onPress={() => navigation.navigate('WineDetail')}
+                onPress={() =>
+                  navigation.navigate('WineDetail', {item: item?.id})
+                }
               />
             )}
           />
           <HeadingWithLink
             title="New Arrival"
-            onPress={() => navigation.navigate('NewArrival')}
+            onPress={() =>
+              navigation.navigate('NewArrival', {data: homeData?.newArrivals})
+            }
           />
           <FlatList
             data={homeData?.newArrivals}
@@ -251,9 +259,12 @@ const Home = () => {
               styles.horizontalList,
               {marginVertical: 20},
             ]}
-            renderItem={() => (
+            renderItem={({item}) => (
               <NewArrivalCard
-                onPress={() => navigation.navigate('WineDetail')}
+                item={item}
+                onPress={() =>
+                  navigation.navigate('WineDetail', {item: item?.id})
+                }
               />
             )}
           />

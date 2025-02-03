@@ -22,6 +22,7 @@ import {showSucess, showWarning} from '../../helper/Toastify';
 import axios from 'axios';
 import Constants from '../../helper/Constant';
 import Loader from '../../helper/Loader';
+import Key from '../../utils/Key';
 
 const Login = () => {
   const inset = useSafeAreaInsets();
@@ -31,6 +32,10 @@ const Login = () => {
   const [showPhoneCountryPicker, setShowPhoneCountryPicker] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
+
+  GoogleSignin.configure({
+    webClientId: Key.webClientId,
+  });
 
   const handleCountrySelect = country => {
     const newPhoneNumber = `+${country.callingCode[0]}`;

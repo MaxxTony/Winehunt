@@ -7,7 +7,8 @@ import BackNavigationWithTitle from '../../../components/BackNavigationWithTitle
 import {Colors} from '../../../constant/Styles';
 import NewArrivalCard2 from '../components/NewArrivalCard2';
 
-const NewArrival = () => {
+const NewArrival = props => {
+  const data = props?.route?.params?.data;
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
   return (
@@ -17,7 +18,7 @@ const NewArrival = () => {
         onPress={() => navigation.goBack()}
       />
       <FlatList
-        data={Array.from({length: 10})}
+        data={data}
         numColumns={2}
         showsVerticalScrollIndicator={false}
         columnWrapperStyle={{columnGap: 10}}
@@ -25,8 +26,10 @@ const NewArrival = () => {
           padding: 20,
           gap: 10,
         }}
-        renderItem={() => (
-          <NewArrivalCard2 onPress={() => navigation.navigate('WineDetail')} />
+        renderItem={({item}) => (
+          <NewArrivalCard2
+            onPress={() => navigation.navigate('WineDetail', {item: item?.id})}
+          />
         )}
       />
     </View>
