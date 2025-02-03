@@ -29,6 +29,7 @@ const NewArrival = props => {
         renderItem={({item}) => (
           <NewArrivalCard2
             onPress={() => navigation.navigate('WineDetail', {item: item?.id})}
+            item={item}
           />
         )}
       />

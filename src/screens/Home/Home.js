@@ -197,7 +197,10 @@ const Home = () => {
                   style={styles.listItem}
                   key={index}
                   onPress={() =>
-                    navigation.navigate('WineDetail', {item: item?.id})
+                    navigation.navigate('WineList', {
+                      item: item,
+                      data: homeData?.product,
+                    })
                   }>
                   <Image
                     source={{uri: item.image}}
@@ -362,13 +365,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.InterRegular,
     color: Colors.white,
     fontWeight: '500',
-    fontSize: 14,
+    fontSize: 12,
   },
   inactiveStateText: {
     color: Colors.black,
     fontFamily: Fonts.InterRegular,
     fontWeight: '500',
-    fontSize: 14,
+    fontSize: 12,
   },
   listContainer: {
     paddingVertical: 20,

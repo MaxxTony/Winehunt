@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {Colors, Fonts} from '../../constant/Styles';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
@@ -31,6 +31,7 @@ import {editProfile} from '../../redux/slices/editProfileSlice';
 const EditProfile = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
+  const isFoused = useIsFocused();
 
   const dispatch = useDispatch();
   const {userData} = useSelector(state => state.profile);
@@ -59,7 +60,7 @@ const EditProfile = () => {
 
   useEffect(() => {
     dispatch(fetchProfile());
-  }, []);
+  }, [isFoused]);
 
   const handleCountrySelect = country => {
     const newPhoneNumber = `+${country.callingCode[0]}`;
@@ -225,7 +226,7 @@ const EditProfile = () => {
                 placeholder="Enter Mobile Number"
                 placeholderTextColor={Colors.gray4}
                 keyboardType="number-pad"
-                maxLength={14}
+                maxLength={10}
                 style={styles.phoneInput}
               />
             </View>
@@ -331,7 +332,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   updateButtonContainer: {
-    marginTop: 'auto',
+    // marginTop: 'auto',
     marginBottom: 30,
   },
 });

@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Dimensions,
   FlatList,
   Image,
   ImageBackground,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -17,13 +18,103 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import {Colors, Fonts} from '../../../constant/Styles';
 import {useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import Constants from '../../../helper/Constant';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {showWarning} from '../../../helper/Toastify';
+import axios from 'axios';
 
 const screenWidth = Dimensions.get('window').width;
 
 const VendorDetail = props => {
   const navigation = useNavigation();
   const data = props?.route?.params?.item;
+
   const inset = useSafeAreaInsets();
+  const [loading, setLoading] = useState([]);
+  const [detail, setDetail] = useState([]);
+
+  useEffect(() => {
+    getVendorDetail();
+  }, []);
+
+  const getVendorDetail = async () => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+
+    const url = Constants.baseUrl5 + Constants.vendorDetail;
+
+    setLoading(true);
+
+    const body = {
+      vendor_id: data?.id,
+    };
+
+    try {
+      const res = await axios.post(url, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (res?.status === 200) {
+        setDetail(res?.data?.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openMaps = (latitude, longitude) => {
+    const url =
+      Platform.OS === 'ios'
+        ? `maps://app?saddr=${latitude},${longitude}`
+        : `geo:${latitude},${longitude}?q=${latitude},${longitude}`;
+
+    Linking.openURL(url).catch(err => console.error('An error occurred', err));
+  };
+
+  const handleContactPress = type => {
+    if (!detail) return;
+
+    switch (type) {
+      case 'Call':
+        if (detail.phone) Linking.openURL(`tel:${detail.phone}`);
+        break;
+      case 'Message':
+        if (detail.email) Linking.openURL(`mailto:${detail.email}`);
+        break;
+      case 'View Map':
+        if (detail.latitude && detail.longitude)
+          openMaps(detail.latitude, detail.longitude);
+        break;
+      case 'Website':
+        if (detail.website) Linking.openURL('https://www.isynbus.com/');
+        break;
+      default:
+        break;
+    }
+  };
+
+  const renderContactOption = ({item}) => (
+    <View style={styles.contactOptionContainer}>
+      <Pressable
+        style={styles.contactOptionIcon}
+        onPress={() => handleContactPress(item.name)}>
+        <Image source={item.image} style={styles.contactImage} />
+      </Pressable>
+      <Text style={styles.contactOptionText}>{item.name}</Text>
+    </View>
+  );
 
   const contactOptions = [
     {id: 1, name: 'Call', image: require('../images/call.png')},
@@ -31,15 +122,6 @@ const VendorDetail = props => {
     {id: 3, name: 'View Map', image: require('../images/location2.png')},
     {id: 4, name: 'Website', image: require('../images/global.png')},
   ];
-
-  const renderContactOption = ({item}) => (
-    <View style={styles.contactOptionContainer}>
-      <View style={styles.contactOptionIcon}>
-        <Image source={item.image} style={styles.contactImage} />
-      </View>
-      <Text style={styles.contactOptionText}>{item.name}</Text>
-    </View>
-  );
 
   return (
     <View style={{flex: 1, backgroundColor: Colors.white}}>
@@ -82,15 +164,12 @@ const VendorDetail = props => {
           </View>
         </ImageBackground>
         <View style={styles.contentContainer}>
-          <Text style={styles.vendorName}>{data?.shop_name}</Text>
+          <Text style={styles.vendorName}>{detail?.shop_name}</Text>
           <View style={styles.locationContainer}>
             <Ionicons name="location-outline" size={15} color={Colors.gray} />
-            <Text style={styles.locationText}>{data?.address}</Text>
+            <Text style={styles.locationText}>{detail?.address}</Text>
           </View>
-          <Text style={styles.description}>
-            Putting my best foot forward - in heels - every day Lorem Ipsum is
-            simply dummy text of the
-          </Text>
+          <Text style={styles.description}>{detail?.description}</Text>
           <Text style={styles.openStatus}>
             Open {'  '}
             <Text style={styles.openTime}>Friday 10 am to 8 pm</Text>
@@ -104,31 +183,57 @@ const VendorDetail = props => {
           />
           <View style={styles.separator} />
           <Text style={styles.sectionTitle}>Product for you</Text>
-          <View style={styles.productContainer}>
-            <Image
-              source={require('../images/bottle.png')}
-              style={styles.productImage}
-              resizeMode="contain"
-            />
-            <View style={styles.productDetails}>
-              <View style={styles.productHeader}>
-                <Text style={styles.productTitle}>Eva (White Grape juice)</Text>
-                <Pressable>
-                  <AntDesign name="hearto" size={18} color={Colors.black} />
-                </Pressable>
-              </View>
-              <Text style={styles.productTag}>Best Rated this Month</Text>
-              <View style={styles.productFooter}>
-                <Pressable style={styles.viewMoreButton}>
-                  <Text style={styles.viewMoreText}>View More</Text>
-                </Pressable>
-                <View style={styles.ratingContainer}>
-                  <AntDesign name="star" size={18} color={Colors.yellow} />
-                  <Text style={styles.infoText}>4.3</Text>
+          <FlatList
+            data={detail?.products}
+            renderItem={({item, index}) => {
+              return (
+                <View style={styles.productContainer}>
+                  <Image
+                    source={
+                      item?.product_images[0]?.image
+                        ? {uri: item?.product_images[0]?.image}
+                        : require('../images/bottle.png')
+                    }
+                    style={styles.productImage}
+                    resizeMode="contain"
+                  />
+                  <View style={styles.productDetails}>
+                    <View style={styles.productHeader}>
+                      <Text style={styles.productTitle}>
+                        {item?.name} ({item?.title})
+                      </Text>
+                      <Pressable>
+                        <AntDesign
+                          name="hearto"
+                          size={18}
+                          color={Colors.black}
+                        />
+                      </Pressable>
+                    </View>
+                    <Text style={styles.productTag}>Best Rated this Month</Text>
+                    <View style={styles.productFooter}>
+                      <Pressable
+                        style={styles.viewMoreButton}
+                        onPress={() =>
+                          navigation.navigate('WineDetail', {item: item?.id})
+                        }>
+                        <Text style={styles.viewMoreText}>View More</Text>
+                      </Pressable>
+                      <View style={styles.ratingContainer}>
+                        <AntDesign
+                          name="star"
+                          size={18}
+                          color={Colors.yellow}
+                        />
+                        <Text style={styles.infoText}>4.3</Text>
+                      </View>
+                    </View>
+                  </View>
                 </View>
-              </View>
-            </View>
-          </View>
+              );
+            }}
+          />
+
           <Text style={styles.sectionTitle}>Offers</Text>
 
           <FlatList
@@ -254,10 +359,10 @@ const styles = StyleSheet.create({
   },
   productContainer: {
     padding: 10,
-
+    margin: 3,
     backgroundColor: Colors.white,
     elevation: 5,
-    borderRadius: 5,
+    borderRadius: 8,
     flexDirection: 'row',
     gap: 10,
   },

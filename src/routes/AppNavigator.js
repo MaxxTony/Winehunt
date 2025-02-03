@@ -23,6 +23,7 @@ import FeatureWine from '../screens/Home/screens/FeatureWine';
 import Vendors from '../screens/Home/screens/Vendors';
 import VendorDetail from '../screens/Home/screens/VendorDetail';
 import WineDetail from '../screens/Home/screens/WineDetail';
+import WineList from '../screens/Home/screens/WineList';
 
 const Stack = createNativeStackNavigator();
 
@@ -76,6 +77,7 @@ const AppNavigator = () => {
       <Stack.Screen name="Vendors" component={Vendors} />
       <Stack.Screen name="VendorDetail" component={VendorDetail} />
       <Stack.Screen name="WineDetail" component={WineDetail} />
+      <Stack.Screen name="WineList" component={WineList} />
     </Stack.Navigator>
   );
 };

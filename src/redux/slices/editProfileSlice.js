@@ -3,6 +3,8 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from '../../helper/Constant';
 import {showSucess, showWarning} from '../../helper/Toastify';
+import {parsePhoneNumberFromString} from 'libphonenumber-js';
+import {Alert} from 'react-native';
 
 export const editProfile = createAsyncThunk(
   'profile/editProfile',
@@ -18,16 +20,35 @@ export const editProfile = createAsyncThunk(
   }) => {
     if (!firstName) {
       showWarning('First Name can not be empty');
+      return;
     }
     if (!lastName) {
       showWarning('Last Name can not be empty');
+      return;
     }
     if (!email) {
       showWarning('Email can not be empty');
+      return;
     }
     if (!phoneNumber) {
       showWarning('Phone Number can not be empty');
+      return;
     }
+    if (phoneNumber?.length !== 10) {
+      showWarning('Invalid Phone Number');
+      return;
+    }
+    // const phoneNumberObj = parsePhoneNumberFromString(
+    //   phoneNumber,
+    //   phoneCountryCode,
+    // );
+    // if (phoneNumberObj && phoneNumberObj.isValid()) {
+    //   console.log('Number Valid h ');
+    // } else {
+    //   console.log('Invalid phone number');
+    //   showWarning('Invalid Phone Number');
+    //   return;
+    // }
     const data = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(data)?.token;
 

@@ -1,25 +1,27 @@
 import {FlatList, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-
-import {useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useNavigation} from '@react-navigation/native';
 import BackNavigationWithTitle from '../../../components/BackNavigationWithTitle';
 import {Colors} from '../../../constant/Styles';
+import NearVendorCards from '../components/NearVendorCards';
 import NewArrivalCard2 from '../components/NewArrivalCard2';
 
-const FeatureWine = props => {
-  const data = props?.route?.params?.data;
+const WineList = props => {
+  const data = props?.route?.params?.item;
+  const List = props?.route?.params?.data;
 
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
+
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <BackNavigationWithTitle
-        title="Feature Wine"
+        title={`${data?.name} Wine List`}
         onPress={() => navigation.goBack()}
       />
       <FlatList
-        data={data}
+        data={List}
         numColumns={2}
         showsVerticalScrollIndicator={false}
         columnWrapperStyle={{columnGap: 10}}
@@ -39,11 +41,15 @@ const FeatureWine = props => {
   );
 };
 
-export default FeatureWine;
+export default WineList;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.white,
+  },
+  verticalList: {
+    gap: 10,
+    margin: 15,
   },
 });

@@ -17,12 +17,10 @@ import {useNavigation} from '@react-navigation/native';
 import CountryPicker from 'react-native-country-picker-modal';
 import {Colors, Fonts} from '../../constant/Styles';
 import WineHuntButton from '../../common/WineHuntButton';
-import {ALERT_TYPE, Toast} from 'react-native-alert-notification';
 import {showSucess, showWarning} from '../../helper/Toastify';
 import axios from 'axios';
 import Constants from '../../helper/Constant';
 import Loader from '../../helper/Loader';
-import Key from '../../utils/Key';
 
 const Login = () => {
   const inset = useSafeAreaInsets();
@@ -32,10 +30,6 @@ const Login = () => {
   const [showPhoneCountryPicker, setShowPhoneCountryPicker] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
-
-  GoogleSignin.configure({
-    webClientId: Key.webClientId,
-  });
 
   const handleCountrySelect = country => {
     const newPhoneNumber = `+${country.callingCode[0]}`;

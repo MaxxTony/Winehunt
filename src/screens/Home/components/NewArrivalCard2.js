@@ -10,7 +10,7 @@ import {
 import React from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 
-const NewArrivalCard2 = ({onPress}) => {
+const NewArrivalCard2 = ({onPress, item}) => {
   return (
     <View style={styles.cardContainer}>
       <Image
@@ -19,16 +19,21 @@ const NewArrivalCard2 = ({onPress}) => {
       />
       <View style={styles.contentRow}>
         <Image
-          source={require('../images/bottle2.png')}
+          source={
+            item?.product_images[0]?.image
+              ? {uri: item?.product_images[0]?.image}
+              : require('../images/curve.png')
+          }
           style={styles.bottleImage}
           resizeMode="contain"
         />
         <View style={styles.textContainer}>
-          <Text style={styles.title}>Château Margaux</Text>
-          <Text style={styles.subtitle}>(Restaurant)</Text>
-          <Text style={styles.description}>
-            Taylors <Text style={styles.highlightedText}>(Port Wine)</Text>
+          <Text style={styles.title}>{item?.name}</Text>
+          <Text style={styles.subtitle}>
+            ({item?.user?.shop_name ? item?.user?.shop_name : 'Restaurant'})
           </Text>
+          <Text style={styles.description}>{item?.name} </Text>
+          <Text style={styles.highlightedText}>({item?.title})</Text>
           <Text style={styles.price}>$ 25.99</Text>
           <Pressable style={styles.button} onPress={onPress}>
             <Text style={styles.buttonText}>View More</Text>
@@ -62,45 +67,46 @@ const styles = StyleSheet.create({
     flex: 0.5,
   },
   backgroundImage: {
-    height: 90,
-    width: 60,
+    height: 80,
+    width: 50,
     position: 'absolute',
   },
   contentRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 30,
+    gap: 20,
   },
   bottleImage: {
     width: 30,
     height: 100,
   },
   textContainer: {
-    gap: 10,
+    gap: 5,
   },
   title: {
-    fontSize: 13,
+    fontSize: 11,
     color: Colors.black,
     fontFamily: Fonts.InterRegular,
     fontWeight: '600',
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 11,
     color: Colors.gray8,
     fontFamily: Fonts.InterRegular,
     fontWeight: '600',
   },
   description: {
-    fontSize: 12,
+    fontSize: 11,
     color: Colors.black,
     fontFamily: Fonts.InterRegular,
     fontWeight: '600',
   },
   highlightedText: {
     color: Colors.red,
+    fontSize: 10,
   },
   price: {
-    fontSize: 18,
+    fontSize: 14,
     color: Colors.black,
     fontFamily: Fonts.InterBold,
     fontWeight: '600',
@@ -115,7 +121,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   buttonText: {
-    fontSize: 14,
+    fontSize: 11,
     color: Colors.white,
     fontFamily: Fonts.InterRegular,
     fontWeight: '500',
