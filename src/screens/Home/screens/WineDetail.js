@@ -23,7 +23,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from '../../../helper/Constant';
 import axios from 'axios';
-import {showWarning} from '../../../helper/Toastify';
+import {showSucess, showWarning} from '../../../helper/Toastify';
 
 const {width} = Dimensions.get('window');
 
@@ -36,6 +36,8 @@ const WineDetail = props => {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState([]);
   const [detail, setDetail] = useState([]);
+  const [likedItems, setLikedItems] = useState({});
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     getProductDetail();
@@ -44,9 +46,7 @@ const WineDetail = props => {
   const getProductDetail = async () => {
     const data = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(data)?.token;
-
     const url = Constants.baseUrl4 + Constants.wineDetail;
-
     setLoading(true);
 
     const body = {
@@ -93,14 +93,17 @@ const WineDetail = props => {
     {
       id: 1,
       name: 'Small',
+      price: 10,
     },
     {
       id: 2,
       name: 'Regular',
+      price: 50,
     },
     {
       id: 3,
       name: 'Large',
+      price: 100,
     },
   ];
   const [size, setSize] = useState(sizeList[0]?.id);
@@ -109,18 +112,129 @@ const WineDetail = props => {
     {
       id: 1,
       name: 'Black olives',
+      price: 10,
     },
     {
       id: 2,
       name: 'Fruits',
+      price: 20,
     },
     {
       id: 3,
       name: 'Snacks',
+      price: 60,
     },
   ];
 
   const [addOn, setAddOn] = useState(AddonList[0]?.id);
+
+  const onLike = async id => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl7 + Constants.addToWishList;
+    setLoading(true);
+    const body = {
+      product_id: id,
+      type: 'wines',
+    };
+    try {
+      const res = await axios.post(url, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.data?.status === 200) {
+        setLikedItems(prev => ({...prev, [id]: true}));
+
+        showSucess(res?.data?.message);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onDisLike = async id => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+
+    const url = Constants.baseUrl7 + Constants.removeToWishList;
+    setLoading(true);
+    const body = {
+      id: id,
+      type: 'wines',
+    };
+
+    try {
+      const res = await axios.post(url, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (res?.data?.status === 200) {
+        setLikedItems(prev => ({...prev, [id]: false}));
+        showWarning(res?.data?.message);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onAdd = async () => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+
+    const url = Constants.baseUrl8 + Constants.addToCart;
+
+    const body = {
+      product_id: detail?.id,
+      quantity: quantity,
+    };
+
+    try {
+      const res = await axios.post(url, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (res?.data?.status === 200) {
+        setShowModal(false);
+        showSucess(res?.data?.message);
+        navigation.navigate('Cart');
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    }
+  };
 
   return (
     <View
@@ -143,8 +257,20 @@ const WineDetail = props => {
             onPress={() => navigation.goBack()}>
             <Fontisto name="angle-left" size={20} color={Colors.white} />
           </Pressable>
-          <Pressable style={styles.iconButton}>
-            <AntDesign name="hearto" size={25} color={Colors.white} />
+          <Pressable
+            onPress={() => {
+              if (!likedItems[detail?.id]) {
+                onLike(detail?.id);
+              } else {
+                onDisLike(detail?.id);
+              }
+            }}
+            style={styles.iconButton}>
+            <AntDesign
+              size={25}
+              name={likedItems[detail?.id] ? 'heart' : 'hearto'}
+              color={likedItems[detail?.id] ? Colors.red : Colors.white}
+            />
           </Pressable>
         </View>
 
@@ -164,7 +290,7 @@ const WineDetail = props => {
           <View style={styles.infoContainer}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <Text style={styles.vendorName}>{detail?.user?.shop_name}</Text>
-              {/* <Pressable
+              <Pressable
                 style={{
                   padding: 3,
                   paddingHorizontal: 5,
@@ -172,9 +298,9 @@ const WineDetail = props => {
                   alignItems: 'center',
                   borderRadius: 5,
                 }}
-                onPress={() =>
-                  navigation.navigate('VendorDetail', {item: detail?.user})
-                }>
+                onPress={() => {
+                  navigation.navigate('VendorDetail', {item: detail?.user});
+                }}>
                 <Text
                   style={{
                     fontSize: 13,
@@ -184,7 +310,7 @@ const WineDetail = props => {
                   }}>
                   View Detail
                 </Text>
-              </Pressable> */}
+              </Pressable>
             </View>
             <Text style={styles.wineName}>
               {detail?.name} ({detail?.title})
@@ -335,11 +461,20 @@ const WineDetail = props => {
                         </View>
                       </View>
                       <View style={{justifyContent: 'space-between'}}>
-                        <Pressable>
+                        <Pressable
+                          onPress={() => {
+                            if (!likedItems[item?.id]) {
+                              onLike(item?.id);
+                            } else {
+                              onDisLike(item?.id);
+                            }
+                          }}>
                           <AntDesign
-                            name="hearto"
                             size={25}
-                            color={Colors.gray}
+                            name={likedItems[item?.id] ? 'heart' : 'hearto'}
+                            color={
+                              likedItems[item?.id] ? Colors.red : Colors.black
+                            }
                           />
                         </Pressable>
                         <Pressable onPress={() => setShowModal(true)}>
@@ -378,6 +513,9 @@ const WineDetail = props => {
         showModal={showModal}
         size={size}
         sizeList={sizeList}
+        quantity={quantity}
+        setQuantity={setQuantity}
+        onAdd={() => onAdd()}
       />
     </View>
   );

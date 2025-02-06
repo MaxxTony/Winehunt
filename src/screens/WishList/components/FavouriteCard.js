@@ -3,39 +3,85 @@ import React from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 import WineHuntButton from '../../../common/WineHuntButton';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Feather from 'react-native-vector-icons/Feather';
 
-const FavouriteCard = () => {
+const FavouriteCard = ({item, type, onPress}) => {
   return (
-    <View style={styles.cardContainer}>
-      <Image
-        source={require('../images/bottle4.png')}
-        style={styles.bottleImage}
-        resizeMode="contain"
-      />
-      <View style={styles.cardDetailsContainer}>
-        <Text style={styles.cardTitle}>Eva (White Grape juice)</Text>
-        <Text style={styles.cardPrice}>$12.00</Text>
-        <WineHuntButton
-          text="Add to cart"
-          extraButtonStyle={styles.addToCartButton}
-          extraTextStyle={styles.addToCartText}
-          onPress={() => Alert.alert('Product Added !!')}
-        />
-      </View>
-      <View style={styles.cardActionsContainer}>
-        <Pressable onPress={() => Alert.alert('Delete from list')}>
+    <>
+      {type == 'Vendors' ? (
+        <View style={styles.cardContainer}>
           <Image
-            source={require('../images/delete.png')}
-            style={styles.deleteIcon}
+            source={require('../images/wine.png')}
+            style={styles.vendorImage}
+          />
+          <View style={styles.textContainer}>
+            <Text style={styles.vendorName}>{item?.vendor?.shop_name}</Text>
+            <Text style={styles.vendorDescription}>Best Rated this Month</Text>
+            <View style={styles.ratingRow}>
+              <AntDesign name="star" size={15} color={Colors.yellow} />
+              <Text style={styles.ratingText}>4.3 | 120 Review</Text>
+            </View>
+          </View>
+          <View
+            style={{
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+              flexDirection: 'column',
+            }}>
+            <Pressable onPress={onPress}>
+              <Image
+                source={require('../images/delete.png')}
+                style={styles.deleteIcon}
+                resizeMode="contain"
+              />
+            </Pressable>
+            <View style={styles.distanceRow}>
+              <Feather name="navigation" size={15} color={Colors.black} />
+              <Text style={styles.distanceText}>2.5 Km</Text>
+            </View>
+          </View>
+        </View>
+      ) : (
+        <View style={styles.cardContainer}>
+          <Image
+            source={
+              item?.product?.product_images[0]?.image
+                ? {uri: item?.product?.product_images[0]?.image}
+                : require('../images/bottle4.png')
+            }
+            style={styles.bottleImage}
             resizeMode="contain"
           />
-        </Pressable>
-        <View style={styles.ratingContainer}>
-          <AntDesign name="star" size={18} color={Colors.yellow} />
-          <Text style={styles.ratingText}>4.3</Text>
+
+          <View style={styles.cardDetailsContainer}>
+            <Text style={styles.cardTitle}>
+              {item?.product?.name} ({item?.product?.title})
+            </Text>
+            <Text style={styles.cardPrice}>$12.00</Text>
+            {/* <WineHuntButton
+              text="Add to cart"
+              extraButtonStyle={styles.addToCartButton}
+              extraTextStyle={styles.addToCartText}
+              onPress={() => Alert.alert('Product Added !!')}
+            /> */}
+          </View>
+
+          <View style={styles.cardActionsContainer}>
+            <Pressable onPress={onPress}>
+              <Image
+                source={require('../images/delete.png')}
+                style={styles.deleteIcon}
+                resizeMode="contain"
+              />
+            </Pressable>
+            <View style={styles.ratingContainer}>
+              <AntDesign name="star" size={18} color={Colors.yellow} />
+              <Text style={styles.ratingText}>4.3</Text>
+            </View>
+          </View>
         </View>
-      </View>
-    </View>
+      )}
+    </>
   );
 };
 
@@ -91,7 +137,7 @@ const styles = StyleSheet.create({
   },
   cardActionsContainer: {
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     flexDirection: 'column',
   },
   deleteIcon: {
@@ -106,5 +152,48 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 14,
     color: Colors.black,
+  },
+
+  vendorImage: {
+    height: 65,
+    width: 65,
+  },
+  textContainer: {
+    gap: 5,
+    flex: 1,
+  },
+  vendorName: {
+    color: Colors.black,
+    fontFamily: Fonts.InterMedium,
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  vendorDescription: {
+    color: Colors.gray7,
+    fontFamily: Fonts.InterRegular,
+    fontWeight: '400',
+    fontSize: 12,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  ratingText: {
+    color: Colors.gray7,
+    fontFamily: Fonts.InterRegular,
+    fontWeight: '400',
+    fontSize: 12,
+  },
+  distanceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  distanceText: {
+    color: Colors.black,
+    fontSize: 12,
+    fontFamily: Fonts.InterRegular,
+    fontWeight: '400',
   },
 });

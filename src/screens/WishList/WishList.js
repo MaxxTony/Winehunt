@@ -1,26 +1,125 @@
-import {
-  Alert,
-  FlatList,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import React, {useState} from 'react';
+import {FlatList, StyleSheet, Text, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {Colors, Fonts} from '../../constant/Styles';
 import {MultiSwitch} from 'react-native-multiswitch-selector';
-import WineHuntButton from '../../common/WineHuntButton';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 import FavouriteCard from './components/FavouriteCard';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from '../../helper/Constant';
+import axios from 'axios';
+import {showSucess} from '../../helper/Toastify';
 
 const WishList = () => {
   const navigation = useNavigation();
   const inset = useSafeAreaInsets();
   const [type, setType] = useState('Vendors');
+  const [loading, setLoading] = useState(false);
+  const [vendors, setVendors] = useState([]);
+  const [wines, setWines] = useState([]);
+
+  useEffect(() => {
+    getWishList();
+  }, []);
+
+  const getWishList = async () => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl7 + Constants.getWishList;
+    setLoading(true);
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (res?.data?.status === 200) {
+        setVendors(res?.data?.data?.vendors || []);
+        setWines(res?.data?.data?.wines || []);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onDelete = async item => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl7 + Constants.removeToWishList;
+    setLoading(true);
+    const body = {
+      id: item?.id,
+      type: type === 'Vendors' ? 'vendors' : 'wines',
+    };
+    try {
+      const res = await axios.post(url, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.data?.status === 200) {
+        showSucess(res?.data?.message);
+        getWishList();
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onClearAll = async () => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl7 + Constants.clearWishList;
+    setLoading(true);
+    const body = {
+      type: type === 'Vendors' ? 'vendors' : 'wines',
+    };
+    try {
+      const res = await axios.post(url, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.data?.status === 200) {
+        showSucess(res?.data?.message);
+        getWishList();
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
@@ -29,7 +128,7 @@ const WishList = () => {
         onPress={() => navigation.goBack()}
         rightIcon={true}
         rightText="Clear All"
-        onPressRightIcon={() => Alert.alert('Clearing all done !!')}
+        onPressRightIcon={() => onClearAll()}
         extraStyle={styles.backNavigationExtraStyle}
       />
       <View style={styles.switchContainer}>
@@ -46,15 +145,24 @@ const WishList = () => {
         />
       </View>
       <FlatList
-        data={Array.from({length: 20})}
+        data={type === 'Vendors' ? vendors : wines}
+        refreshing={loading}
+        onRefresh={getWishList}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           padding: 20,
           gap: 10,
         }}
-        renderItem={() => {
-          return <FavouriteCard />;
-        }}
+        renderItem={({item, index}) => (
+          <FavouriteCard
+            item={item}
+            type={type}
+            onPress={() => onDelete(item)}
+          />
+        )}
+        ListEmptyComponent={
+          !loading ? <Text style={styles.noDataText}>No data found</Text> : null
+        }
       />
     </View>
   );
@@ -101,5 +209,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.InterRegular,
     fontWeight: '500',
     fontSize: 14,
+  },
+  noDataText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: Colors.black,
+    marginTop: 20,
+    fontFamily: Fonts.InterRegular,
+    flex: 1,
   },
 });

@@ -1,4 +1,5 @@
 import {
+  FlatList,
   Image,
   Platform,
   ScrollView,
@@ -9,32 +10,83 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors, Fonts} from '../../constant/Styles';
 import Entypo from 'react-native-vector-icons/Entypo';
 import WineHuntButton from '../../common/WineHuntButton';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from '../../helper/Constant';
+import {showWarning} from '../../helper/Toastify';
+import axios from 'axios';
 
 const Cart = () => {
   const navigation = useNavigation();
   const inset = useSafeAreaInsets();
+  const isFocused = useIsFocused();
   const {width} = useWindowDimensions();
-  const [quantity, setQuantity] = useState(1);
+  const [cartData, setCartData] = useState([]);
   const [couponCode, setCouponCode] = useState('');
+  const DELIVERY_FEE = 100;
 
-  const increaseQuantity = () => {
-    if (quantity < 20) {
-      setQuantity(quantity + 1);
+  useEffect(() => {
+    if (isFocused) getCartData();
+  }, [isFocused]);
+
+  const getCartData = async () => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl8 + Constants.getCart;
+
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      setCartData(res?.data || []);
+    } catch (error) {
+      showWarning(error.response?.data?.message || 'Error fetching cart');
     }
   };
 
-  const decreaseQuantity = () => {
-    if (quantity > 1) {
-      setQuantity(quantity - 1);
+  const updateQuantity = async (productId, newQuantity) => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl8 + Constants.updateCart;
+    const data = {
+      id: productId,
+      quantity: newQuantity,
+    };
+
+    try {
+      const res = await axios.post(url, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.data?.status == 200) {
+        getCartData();
+      }
+    } catch (error) {
+      showWarning(error.response?.data?.message || 'Error updating cart');
     }
   };
+
+  const calculateSubtotal = () => {
+    return cartData.reduce(
+      (acc, item) =>
+        acc + item.quantity * (item?.product?.price_mappings[2]?.price || 0),
+      0,
+    );
+  };
+
+  const subtotal = calculateSubtotal();
+  const grandTotal = subtotal + DELIVERY_FEE;
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
@@ -42,163 +94,112 @@ const Cart = () => {
         title="Add to cart"
         onPress={() => navigation.goBack()}
       />
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}>
         <Image
           source={require('./images/cartBG.png')}
           style={[styles.cartImage, {width: width - 40}]}
         />
-        <View style={styles.cartItemContainer}>
-          <Image
-            source={require('./images/cartBottle.png')}
-            style={styles.bottleImage}
-          />
-          <View style={styles.cartDetailsContainer}>
-            <Text style={styles.itemName}>Eva (White Grape juice)</Text>
-            <Text style={styles.itemDescription}>Best Rated this Month</Text>
-            <View style={styles.priceQuantityContainer}>
-              <View style={styles.priceTag}>
-                <Text style={styles.priceText}>$12.00</Text>
+        <FlatList
+          data={cartData}
+          scrollEnabled={false}
+          contentContainerStyle={{gap: 5, paddingBottom: 10}}
+          renderItem={({item, index}) => {
+            return (
+              <View style={styles.cartItemContainer} key={index}>
+                <Image
+                  source={
+                    item?.product?.product_images[0]?.image
+                      ? {uri: item?.product?.product_images[0]?.image}
+                      : require('./images/cartBottle.png')
+                  }
+                  style={styles.bottleImage}
+                  resizeMode="contain"
+                />
+                <View style={styles.cartDetailsContainer}>
+                  <Text style={styles.itemName}>
+                    {item?.product?.name} ({item?.product?.title})
+                  </Text>
+                  <Text style={styles.itemDescription}>
+                    Best Rated this Month
+                  </Text>
+                  <View style={styles.priceQuantityContainer}>
+                    <View style={styles.priceTag}>
+                      <Text style={styles.priceText}>
+                        ${item?.product?.price_mappings[2]?.price}
+                      </Text>
+                    </View>
+                    <View style={styles.quantityContainer}>
+                      <TouchableOpacity
+                        onPress={() =>
+                          updateQuantity(item.id, item.quantity + 1)
+                        }>
+                        <Entypo
+                          name="squared-plus"
+                          color={Colors.red}
+                          size={25}
+                        />
+                      </TouchableOpacity>
+                      <Text style={styles.quantityText}>{item?.quantity}</Text>
+                      <TouchableOpacity
+                        onPress={() =>
+                          item.quantity > 1 &&
+                          updateQuantity(item.id, item.quantity - 1)
+                        }>
+                        <Entypo
+                          name="squared-minus"
+                          color={Colors.red}
+                          size={25}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
               </View>
-              <View style={styles.quantityContainer}>
-                <TouchableOpacity onPress={increaseQuantity}>
-                  <Entypo name="squared-plus" color={Colors.red} size={40} />
-                </TouchableOpacity>
-                <Text style={styles.quantityText}>{quantity}</Text>
-                <TouchableOpacity onPress={decreaseQuantity}>
-                  <Entypo name="squared-minus" color={Colors.red} size={40} />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </View>
-        <View
-          style={{
-            padding: 10,
-            borderWidth: 1,
-            borderColor: Colors.gray13,
-            shadowColor: '#000',
-            shadowOffset: {width: 0, height: 1},
-            shadowOpacity: 0.2,
-            shadowRadius: 1.41,
-            backgroundColor: '#fff',
-            elevation: 2,
-            borderRadius: 10,
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 10,
-          }}>
+            );
+          }}
+        />
+
+        <View style={styles.couponContainer}>
           <Image
             source={require('./images/coupon.png')}
-            style={{height: 18, width: 28}}
+            style={styles.couponImage}
             resizeMode="contain"
           />
           <TextInput
             value={couponCode}
-            onChangeText={e => setCouponCode(e)}
+            onChangeText={setCouponCode}
             placeholderTextColor={Colors.gray4}
-            style={{
-              flex: 1,
-              paddingVertical: Platform.OS == 'ios' ? 5 : 0,
-              color: Colors.black,
-            }}
+            style={styles.couponInput}
             placeholder="Enter Promo Code/ Milestone reward"
           />
           <WineHuntButton
             text="Apply"
-            extraButtonStyle={{
-              padding: 10,
-              backgroundColor: couponCode.length > 0 ? Colors.red : Colors.gray,
-            }}
-            disabled={couponCode.length > 0 ? false : true}
+            extraButtonStyle={[
+              styles.applyButton,
+              {
+                backgroundColor:
+                  couponCode.length > 0 ? Colors.red : Colors.gray,
+              },
+            ]}
+            disabled={couponCode.length === 0}
           />
         </View>
       </ScrollView>
 
-      <View
-        style={{
-          padding: 20,
-          shadowColor: '#000',
-          shadowOffset: {width: 0, height: 4},
-          shadowOpacity: 0.5,
-          shadowRadius: 6,
-          backgroundColor: '#fff',
-          elevation: 8,
-          gap: 10,
-        }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}>
-          <Text
-            style={{
-              fontFamily: Fonts.InterMedium,
-              color: Colors.black,
-              fontWeight: '600',
-              fontSize: 16,
-            }}>
-            Sub Total
-          </Text>
-          <Text
-            style={{
-              fontFamily: Fonts.InterMedium,
-              color: Colors.gray14,
-              fontWeight: '600',
-              fontSize: 16,
-            }}>
-            $68
-          </Text>
+      <View style={styles.summaryContainer}>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Sub Total</Text>
+          <Text style={styles.summaryValue}>${subtotal.toFixed(2)}</Text>
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}>
-          <Text
-            style={{
-              fontFamily: Fonts.InterMedium,
-              color: Colors.black,
-              fontWeight: '600',
-              fontSize: 16,
-            }}>
-            Deivery
-          </Text>
-          <Text
-            style={{
-              fontFamily: Fonts.InterMedium,
-              color: Colors.gray14,
-              fontWeight: '600',
-              fontSize: 16,
-            }}>
-            $100
-          </Text>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Delivery</Text>
+          <Text style={styles.summaryValue}>${DELIVERY_FEE}</Text>
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}>
-          <Text
-            style={{
-              fontFamily: Fonts.InterMedium,
-              color: Colors.black,
-              fontWeight: '800',
-              fontSize: 17,
-            }}>
-            Grand Total
-          </Text>
-          <Text
-            style={{
-              fontFamily: Fonts.InterMedium,
-              color: Colors.black,
-              fontWeight: '700',
-              fontSize: 16,
-            }}>
-            $168
-          </Text>
+        <View style={styles.summaryRow}>
+          <Text style={styles.totalLabel}>Grand Total</Text>
+          <Text style={styles.totalValue}>${grandTotal.toFixed(2)}</Text>
         </View>
         <WineHuntButton text="Next" />
       </View>
@@ -226,10 +227,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderWidth: 1,
     borderColor: Colors.gray13,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
     backgroundColor: '#fff',
     elevation: 2,
     borderRadius: 10,
@@ -263,7 +260,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   priceTag: {
-    padding: 8,
+    padding: 5,
     paddingHorizontal: 10,
     backgroundColor: Colors.red,
     alignItems: 'center',
@@ -273,7 +270,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.InterMedium,
     color: Colors.white,
     fontWeight: '700',
-    fontSize: 14,
+    fontSize: 12,
   },
   quantityContainer: {
     flexDirection: 'row',
@@ -284,6 +281,60 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.InterMedium,
     color: Colors.black,
     fontWeight: '600',
-    fontSize: 18,
+    fontSize: 15,
+  },
+  couponContainer: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: Colors.gray13,
+    backgroundColor: '#fff',
+    elevation: 2,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  couponImage: {
+    height: 18,
+    width: 28,
+  },
+  couponInput: {
+    flex: 1,
+    paddingVertical: Platform.OS === 'ios' ? 5 : 0,
+    color: Colors.black,
+  },
+  applyButton: {
+    padding: 10,
+  },
+  summaryContainer: {
+    padding: 20,
+    backgroundColor: '#fff',
+    elevation: 8,
+    gap: 10,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  summaryLabel: {
+    fontFamily: Fonts.InterMedium,
+    color: Colors.black,
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  summaryValue: {
+    fontFamily: Fonts.InterMedium,
+    color: Colors.gray14,
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  totalLabel: {
+    fontWeight: '800',
+    fontSize: 17,
+  },
+  totalValue: {
+    fontWeight: '700',
+    fontSize: 16,
   },
 });

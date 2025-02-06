@@ -20,7 +20,7 @@ import {useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Constants from '../../../helper/Constant';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {showWarning} from '../../../helper/Toastify';
+import {showSucess, showWarning} from '../../../helper/Toastify';
 import axios from 'axios';
 
 const screenWidth = Dimensions.get('window').width;
@@ -32,6 +32,8 @@ const VendorDetail = props => {
   const inset = useSafeAreaInsets();
   const [loading, setLoading] = useState([]);
   const [detail, setDetail] = useState([]);
+  const [like, setLike] = useState(false);
+  const [likedItems, setLikedItems] = useState({});
 
   useEffect(() => {
     getVendorDetail();
@@ -40,15 +42,11 @@ const VendorDetail = props => {
   const getVendorDetail = async () => {
     const info = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(info)?.token;
-
     const url = Constants.baseUrl5 + Constants.vendorDetail;
-
     setLoading(true);
-
     const body = {
       vendor_id: data?.id,
     };
-
     try {
       const res = await axios.post(url, body, {
         headers: {
@@ -56,7 +54,6 @@ const VendorDetail = props => {
           'Content-Type': 'application/json',
         },
       });
-
       if (res?.status === 200) {
         setDetail(res?.data?.data);
       }
@@ -73,8 +70,6 @@ const VendorDetail = props => {
       setLoading(false);
     }
   };
-
-  console.log(detail);
 
   const openMaps = (latitude, longitude) => {
     const url =
@@ -125,6 +120,76 @@ const VendorDetail = props => {
     {id: 4, name: 'Website', image: require('../images/global.png')},
   ];
 
+  const onLike = async (id, str) => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl7 + Constants.addToWishList;
+    setLoading(true);
+    const body = {
+      type: str === 'vendors' ? 'vendors' : 'wines',
+      [str === 'vendors' ? 'vendor_id' : 'product_id']: id,
+    };
+    try {
+      const res = await axios.post(url, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.data?.status === 200) {
+        setLikedItems(prev => ({...prev, [id]: true}));
+        showSucess(res?.data?.message);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onDisLike = async (id, str) => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl7 + Constants.removeToWishList;
+    setLoading(true);
+    const body = {
+      id: id,
+      type: str == 'vendors' ? 'vendors' : 'wines',
+    };
+
+    try {
+      const res = await axios.post(url, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (res?.data?.status === 200) {
+        setLikedItems(prev => ({...prev, [id]: false}));
+        showWarning(res?.data?.message);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={{flex: 1, backgroundColor: Colors.white}}>
       <ScrollView
@@ -159,8 +224,20 @@ const VendorDetail = props => {
                 <AntDesign name="star" size={18} color={Colors.yellow} />
                 <Text style={styles.infoText}>4.3</Text>
               </View>
-              <Pressable style={styles.favoriteButton}>
-                <AntDesign name="hearto" size={18} color={Colors.black} />
+              <Pressable
+                style={styles.favoriteButton}
+                onPress={() => {
+                  if (!likedItems[detail?.id]) {
+                    onLike(detail?.id, 'vendors');
+                  } else {
+                    onDisLike(detail?.id, 'vendors');
+                  }
+                }}>
+                <AntDesign
+                  size={18}
+                  name={likedItems[detail?.id] ? 'heart' : 'hearto'}
+                  color={likedItems[detail?.id] ? Colors.red : Colors.black}
+                />
               </Pressable>
             </View>
           </View>
@@ -204,11 +281,20 @@ const VendorDetail = props => {
                       <Text style={styles.productTitle}>
                         {item?.name} ({item?.title})
                       </Text>
-                      <Pressable>
+                      <Pressable
+                        onPress={() => {
+                          if (!likedItems[item?.id]) {
+                            onLike(item?.id, 'wines');
+                          } else {
+                            onDisLike(item?.id, 'wines');
+                          }
+                        }}>
                         <AntDesign
-                          name="hearto"
                           size={18}
-                          color={Colors.black}
+                          name={likedItems[item?.id] ? 'heart' : 'hearto'}
+                          color={
+                            likedItems[item?.id] ? Colors.red : Colors.black
+                          }
                         />
                       </Pressable>
                     </View>
