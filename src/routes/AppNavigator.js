@@ -24,6 +24,9 @@ import Vendors from '../screens/Home/screens/Vendors';
 import VendorDetail from '../screens/Home/screens/VendorDetail';
 import WineDetail from '../screens/Home/screens/WineDetail';
 import WineList from '../screens/Home/screens/WineList';
+import Quiz from '../screens/Profile/Quiz';
+import Subscription from '../screens/Profile/Subscription';
+import Quizquestion from '../screens/Profile/Quizquestion';
 
 const Stack = createNativeStackNavigator();
 
@@ -78,6 +81,9 @@ const AppNavigator = () => {
       <Stack.Screen name="VendorDetail" component={VendorDetail} />
       <Stack.Screen name="WineDetail" component={WineDetail} />
       <Stack.Screen name="WineList" component={WineList} />
+      <Stack.Screen name="Quiz" component={Quiz} />
+      <Stack.Screen name="Subscription" component={Subscription} />
+      <Stack.Screen name="Quizquestion" component={Quizquestion} />
     </Stack.Navigator>
   );
 };
