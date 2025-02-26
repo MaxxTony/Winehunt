@@ -213,8 +213,8 @@ const Register = ({route}) => {
     formData.append('password', password);
     formData.append('phone', Info?.user?.phone);
     formData.append('country_code', Info?.user?.country_code);
-    formData.append('latitude', coordinates?.latitude.toString());
-    formData.append('longitude', coordinates?.longitude.toString());
+    // formData.append('latitude', coordinates?.latitude.toString());
+    // formData.append('longitude', coordinates?.longitude.toString());
     formData.append(
       'address',
       currentAddress ? currentAddress : 'Defaul Address',

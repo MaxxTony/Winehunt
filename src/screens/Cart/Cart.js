@@ -39,7 +39,6 @@ const Cart = () => {
     const info = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(info)?.token;
     const url = Constants.baseUrl8 + Constants.getCart;
-
     try {
       const res = await axios.get(url, {
         headers: {
@@ -47,7 +46,7 @@ const Cart = () => {
           'Content-Type': 'application/json',
         },
       });
-      setCartData(res?.data || []);
+      setCartData(Array.isArray(res?.data) ? res.data : []);
     } catch (error) {
       showWarning(error.response?.data?.message || 'Error fetching cart');
     }
@@ -78,6 +77,7 @@ const Cart = () => {
   };
 
   const calculateSubtotal = () => {
+    if (!Array.isArray(cartData)) return 0; // Ensure cartData is an array
     return cartData.reduce(
       (acc, item) =>
         acc + item.quantity * (item?.product?.price_mappings[2]?.price || 0),
