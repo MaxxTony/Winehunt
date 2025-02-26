@@ -22,18 +22,37 @@ import Constants from '../../../helper/Constant';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showSucess, showWarning} from '../../../helper/Toastify';
 import axios from 'axios';
+import haversine from 'haversine';
 
 const screenWidth = Dimensions.get('window').width;
+
+const formatNumber = num => {
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(num);
+};
+
+const formatTime = time => {
+  const [hour, minute] = time.split(':').map(Number);
+  const suffix = hour >= 12 ? 'PM' : 'AM';
+  const formattedHour = hour % 12 || 12; // Convert 24-hour format to 12-hour
+  return `${formattedHour} ${suffix}`;
+};
 
 const VendorDetail = props => {
   const navigation = useNavigation();
   const data = props?.route?.params?.item;
+
+  const userCoords = props?.route?.params?.userCoordinates;
 
   const inset = useSafeAreaInsets();
   const [loading, setLoading] = useState([]);
   const [detail, setDetail] = useState([]);
   const [like, setLike] = useState(false);
   const [likedItems, setLikedItems] = useState({});
+
+  const [vendorCoordinates, setVendorCoordinates] = useState({});
 
   useEffect(() => {
     getVendorDetail();
@@ -55,7 +74,16 @@ const VendorDetail = props => {
         },
       });
       if (res?.status === 200) {
-        setDetail(res?.data?.data);
+        const vendorData = res?.data?.data;
+        setDetail(vendorData);
+        setVendorCoordinates({
+          latitude: res?.data?.data?.latitude,
+          longitude: res?.data?.data?.longitude,
+        });
+        setLikedItems(prev => ({
+          ...prev,
+          [vendorData?.id]: vendorData?.is_wishlist,
+        }));
       }
     } catch (error) {
       if (error.response) {
@@ -190,6 +218,11 @@ const VendorDetail = props => {
     }
   };
 
+  const distance = haversine(userCoords, vendorCoordinates, {
+    unit: 'km',
+  });
+  const formattedDistance = formatNumber(distance);
+
   return (
     <View style={{flex: 1, backgroundColor: Colors.white}}>
       <ScrollView
@@ -218,11 +251,11 @@ const VendorDetail = props => {
                   size={18}
                   color={Colors.black}
                 />
-                <Text style={styles.infoText}>2.5 km</Text>
+                <Text style={styles.infoText}>{formattedDistance} km</Text>
               </View>
               <View style={styles.infoItem}>
                 <AntDesign name="star" size={18} color={Colors.yellow} />
-                <Text style={styles.infoText}>4.3</Text>
+                <Text style={styles.infoText}>{detail?.total_reviews}</Text>
               </View>
               <Pressable
                 style={styles.favoriteButton}
@@ -249,10 +282,18 @@ const VendorDetail = props => {
             <Text style={styles.locationText}>{detail?.address}</Text>
           </View>
           <Text style={styles.description}>{detail?.description}</Text>
-          <Text style={styles.openStatus}>
-            Open {'  '}
-            <Text style={styles.openTime}>Friday 10 am to 8 pm</Text>
-          </Text>
+          <View>
+            {detail &&
+              detail?.business_hours?.map(item => (
+                <Text key={item.id} style={styles.openStatus}>
+                  Open {'  '}
+                  <Text style={styles.openTime}>
+                    {item.weekday} {formatTime(item.open_time)} to{' '}
+                    {formatTime(item.close_time)}
+                  </Text>
+                </Text>
+              ))}
+          </View>
           <FlatList
             data={contactOptions}
             horizontal
@@ -406,9 +447,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.PhilosopherBold,
     color: Colors.black,
   },
-  locationContainer: {flexDirection: 'row'},
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   locationText: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: Fonts.InterRegular,
     color: Colors.gray,
   },
@@ -418,12 +462,12 @@ const styles = StyleSheet.create({
     color: Colors.black,
   },
   openStatus: {
-    fontSize: 16,
+    fontSize: 13,
     fontFamily: Fonts.InterBold,
     color: Colors.green,
     fontWeight: '600',
   },
-  openTime: {color: Colors.gray4, fontSize: 14, fontWeight: '400'},
+  openTime: {color: Colors.gray4, fontSize: 12, fontWeight: '400'},
   contactList: {gap: 20},
   contactOptionContainer: {alignItems: 'center', gap: 5},
   contactOptionIcon: {

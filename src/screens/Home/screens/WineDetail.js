@@ -209,6 +209,7 @@ const WineDetail = props => {
     const body = {
       product_id: detail?.id,
       quantity: quantity,
+      price_id: 1,
     };
 
     try {
@@ -317,11 +318,14 @@ const WineDetail = props => {
             </Text>
             <View style={styles.priceRow}>
               <Text style={styles.priceText}>
-                Price <Text style={styles.priceValue}>£12.00</Text>
+                Price{' '}
+                <Text style={styles.priceValue}>
+                  £{detail?.price_mappings?.[0]?.price ?? '0.00'}
+                </Text>
               </Text>
               <View style={styles.ratingContainer}>
                 <AntDesign name="star" size={18} color={Colors.yellow} />
-                <Text style={styles.ratingText}>4.3</Text>
+                <Text style={styles.ratingText}>0</Text>
               </View>
             </View>
             <View style={styles.buttonContainer}>
@@ -332,7 +336,7 @@ const WineDetail = props => {
               </Pressable>
               <Pressable
                 style={styles.button}
-                onPress={() => setShowModal(true)}>
+                onPress={() => navigation.navigate('ScanWineCode')}>
                 <Text style={styles.buttonText}>Try Me</Text>
               </Pressable>
             </View>
@@ -456,7 +460,7 @@ const WineDetail = props => {
                               color: Colors.white,
                               fontWeight: '700',
                             }}>
-                            $12.00
+                            £{item?.price_mappings?.[0]?.price ?? '0.00'}
                           </Text>
                         </View>
                       </View>

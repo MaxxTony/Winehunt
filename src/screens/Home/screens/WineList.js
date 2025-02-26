@@ -4,7 +4,6 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import BackNavigationWithTitle from '../../../components/BackNavigationWithTitle';
 import {Colors} from '../../../constant/Styles';
-import NearVendorCards from '../components/NearVendorCards';
 import NewArrivalCard2 from '../components/NewArrivalCard2';
 
 const WineList = props => {

@@ -17,11 +17,12 @@ const FeatureWindeCard = ({item, onPress}) => {
         />
         <View style={styles.textContainer}>
           <Text style={styles.title}>{item?.title}</Text>
-          <Text style={styles.subtitle}>(Restaurant)</Text>
+          <Text style={styles.subtitle}>{item?.user?.shop_name}</Text>
           <Text style={styles.description}>
-            {item?.name} <Text style={styles.highlightedText}>(Port Wine)</Text>
+            {item?.name}{' '}
+            <Text style={styles.highlightedText}>{item?.type?.name}</Text>
           </Text>
-          <Text style={styles.price}>$ 25.99</Text>
+          <Text style={styles.price}>$ {item?.price_mappings[0]?.price}</Text>
           <Pressable style={styles.button} onPress={onPress}>
             <Text style={styles.buttonText}>View More</Text>
           </Pressable>

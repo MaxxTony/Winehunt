@@ -46,7 +46,8 @@ const Cart = () => {
           'Content-Type': 'application/json',
         },
       });
-      setCartData(Array.isArray(res?.data) ? res.data : []);
+
+      setCartData(res?.data?.cart);
     } catch (error) {
       showWarning(error.response?.data?.message || 'Error fetching cart');
     }
@@ -60,7 +61,6 @@ const Cart = () => {
       id: productId,
       quantity: newQuantity,
     };
-
     try {
       const res = await axios.post(url, data, {
         headers: {
@@ -72,21 +72,45 @@ const Cart = () => {
         getCartData();
       }
     } catch (error) {
+      console.log(error);
       showWarning(error.response?.data?.message || 'Error updating cart');
     }
   };
 
   const calculateSubtotal = () => {
-    if (!Array.isArray(cartData)) return 0; // Ensure cartData is an array
+    if (!Array.isArray(cartData)) return 0;
     return cartData.reduce(
       (acc, item) =>
-        acc + item.quantity * (item?.product?.price_mappings[2]?.price || 0),
+        acc + item.quantity * (item?.product?.price_mappings?.price || 0),
       0,
     );
   };
 
   const subtotal = calculateSubtotal();
   const grandTotal = subtotal + DELIVERY_FEE;
+
+  const deleteCart = async productId => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl8 + Constants.deleteCart;
+    const data = {
+      id: productId,
+    };
+    try {
+      const res = await axios.post(url, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.data?.status == 200) {
+        getCartData();
+      }
+    } catch (error) {
+      console.log(error);
+      showWarning(error.response?.data?.message || 'Error updating cart');
+    }
+  };
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
@@ -127,7 +151,7 @@ const Cart = () => {
                   <View style={styles.priceQuantityContainer}>
                     <View style={styles.priceTag}>
                       <Text style={styles.priceText}>
-                        ${item?.product?.price_mappings[2]?.price}
+                        ${item?.product?.price_mappings?.price}
                       </Text>
                     </View>
                     <View style={styles.quantityContainer}>
@@ -143,10 +167,13 @@ const Cart = () => {
                       </TouchableOpacity>
                       <Text style={styles.quantityText}>{item?.quantity}</Text>
                       <TouchableOpacity
-                        onPress={() =>
-                          item.quantity > 1 &&
-                          updateQuantity(item.id, item.quantity - 1)
-                        }>
+                        onPress={() => {
+                          if (item?.quantity == 1) {
+                            deleteCart(item?.id);
+                          } else {
+                            updateQuantity(item.id, item.quantity - 1);
+                          }
+                        }}>
                         <Entypo
                           name="squared-minus"
                           color={Colors.red}
@@ -160,49 +187,66 @@ const Cart = () => {
             );
           }}
         />
-
-        <View style={styles.couponContainer}>
-          <Image
-            source={require('./images/coupon.png')}
-            style={styles.couponImage}
-            resizeMode="contain"
-          />
-          <TextInput
-            value={couponCode}
-            onChangeText={setCouponCode}
-            placeholderTextColor={Colors.gray4}
-            style={styles.couponInput}
-            placeholder="Enter Promo Code/ Milestone reward"
-          />
-          <WineHuntButton
-            text="Apply"
-            extraButtonStyle={[
-              styles.applyButton,
-              {
-                backgroundColor:
-                  couponCode.length > 0 ? Colors.red : Colors.gray,
-              },
-            ]}
-            disabled={couponCode.length === 0}
-          />
-        </View>
+        {cartData && cartData.length > 0 ? (
+          <View style={styles.couponContainer}>
+            <Image
+              source={require('./images/coupon.png')}
+              style={styles.couponImage}
+              resizeMode="contain"
+            />
+            <TextInput
+              value={couponCode}
+              onChangeText={setCouponCode}
+              placeholderTextColor={Colors.gray4}
+              style={styles.couponInput}
+              placeholder="Enter Promo Code/ Milestone reward"
+            />
+            <WineHuntButton
+              text="Apply"
+              extraButtonStyle={[
+                styles.applyButton,
+                {
+                  backgroundColor:
+                    couponCode.length > 0 ? Colors.red : Colors.gray,
+                },
+              ]}
+              disabled={couponCode.length === 0}
+            />
+          </View>
+        ) : (
+          <View style={{alignItems: 'center'}}>
+            <Text
+              style={{
+                fontFamily: Fonts.InterMedium,
+                color: Colors.black,
+                fontWeight: '600',
+                fontSize: 16,
+              }}>
+              Your WineHunt Cart is empty
+            </Text>
+          </View>
+        )}
       </ScrollView>
-
-      <View style={styles.summaryContainer}>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Sub Total</Text>
-          <Text style={styles.summaryValue}>${subtotal.toFixed(2)}</Text>
+      {cartData && cartData.length > 0 && (
+        <View style={styles.summaryContainer}>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Sub Total</Text>
+            <Text style={styles.summaryValue}>${subtotal.toFixed(2)}</Text>
+          </View>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Delivery</Text>
+            <Text style={styles.summaryValue}>${DELIVERY_FEE}</Text>
+          </View>
+          <View style={styles.summaryRow}>
+            <Text style={styles.totalLabel}>Grand Total</Text>
+            <Text style={styles.totalValue}>${grandTotal.toFixed(2)}</Text>
+          </View>
+          <WineHuntButton
+            text="Next"
+            onPress={() => navigation.navigate('Payment', {total: grandTotal})}
+          />
         </View>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Delivery</Text>
-          <Text style={styles.summaryValue}>${DELIVERY_FEE}</Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text style={styles.totalLabel}>Grand Total</Text>
-          <Text style={styles.totalValue}>${grandTotal.toFixed(2)}</Text>
-        </View>
-        <WineHuntButton text="Next" />
-      </View>
+      )}
     </View>
   );
 };

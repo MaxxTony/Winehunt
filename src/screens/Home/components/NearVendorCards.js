@@ -3,12 +3,40 @@ import React from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
+import haversine from 'haversine';
 
-const NearVendorCards = ({item, navigation}) => {
+const formatNumber = num => {
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(num);
+};
+
+const NearVendorCards = ({item, navigation, userCoordinates}) => {
+  const vendorCoordinates = {
+    latitude: parseFloat(item?.latitude),
+    longitude: parseFloat(item?.longitude),
+  };
+
+  const userCoords = {
+    latitude: parseFloat(userCoordinates?.latitude),
+    longitude: parseFloat(userCoordinates?.longitude),
+  };
+
+  const distance = haversine(userCoords, vendorCoordinates, {
+    unit: 'km',
+  });
+  const formattedDistance = formatNumber(distance);
+
   return (
     <Pressable
       style={styles.cardContainer}
-      onPress={() => navigation.navigate('VendorDetail', {item: item})}>
+      onPress={() =>
+        navigation.navigate('VendorDetail', {
+          item: item,
+          userCoordinates: userCoords,
+        })
+      }>
       <Image
         source={require('../images/wine.png')}
         style={styles.vendorImage}
@@ -17,14 +45,14 @@ const NearVendorCards = ({item, navigation}) => {
         <Text style={styles.vendorName}>{item?.shop_name}</Text>
         <Text style={styles.vendorDescription}>Best Rated this Month</Text>
         <View style={styles.ratingRow}>
-          <AntDesign name="star" size={15} color={Colors.yellow} />
-          <Text style={styles.ratingText}>4.3 | 120 Review</Text>
+          {/* <AntDesign name="star" size={15} color={Colors.yellow} /> */}
+          {/* <Text style={styles.ratingText}>4.3 | 120 Review</Text> */}
         </View>
       </View>
       <View>
         <View style={styles.distanceRow}>
           <Feather name="navigation" size={15} color={Colors.black} />
-          <Text style={styles.distanceText}>2.5 Km</Text>
+          <Text style={styles.distanceText}>{formattedDistance} Km</Text>
         </View>
       </View>
     </Pressable>

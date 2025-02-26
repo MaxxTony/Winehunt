@@ -32,6 +32,7 @@ const Constants = {
   clearWishList: 'clear-wishlist',
   getWishList: 'get-wishlist',
   addToCart: 'add-to-cart',
+  deleteCart: 'delete-cart',
   getCart: 'get-cart',
   updateCart: 'update-cart',
 };

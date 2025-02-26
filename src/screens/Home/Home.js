@@ -31,12 +31,9 @@ import {fetchProfile} from '../../redux/slices/profileSlice';
 const Home = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
-
   const width = Dimensions.get('window').width;
-
   const [type, setType] = useState('Wine types');
   const [categories, setCategories] = useState([]);
-
   const [loading, setLoading] = useState(false);
   const [homeData, setHomeData] = useState([]);
   const dispatch = useDispatch();
@@ -112,11 +109,12 @@ const Home = () => {
             <Image
               source={require('./images/location.png')}
               style={styles.locationIcon}
+              resizeMode="contain"
             />
             <Text style={styles.userLocationText} numberOfLines={1}>
               {userData?.address
                 ? userData.address.length > 20
-                  ? userData.address.slice(0, 25)
+                  ? userData.address.slice(0, 25).concat('...')
                   : userData.address
                 : 'Default Address'}
             </Text>
@@ -217,14 +215,23 @@ const Home = () => {
               navigation.navigate('Vendors', {data: homeData?.vendors})
             }
           />
+
           <FlatList
-            data={homeData?.vendors}
+            data={homeData?.vendors?.slice(0, 5)}
             scrollEnabled={false}
             contentContainerStyle={styles.verticalList}
             renderItem={({item}) => (
-              <NearVendorCards item={item} navigation={navigation} />
+              <NearVendorCards
+                item={item}
+                navigation={navigation}
+                userCoordinates={{
+                  latitude: userData?.latitude,
+                  longitude: userData?.longitude,
+                }}
+              />
             )}
           />
+
           <HeadingWithLink
             title="Featured Wine"
             onPress={() =>
@@ -255,7 +262,7 @@ const Home = () => {
             }
           />
           <FlatList
-            data={homeData?.newArrivals}
+            data={homeData?.newArrivals?.slice(0, 5)}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={[
@@ -300,7 +307,6 @@ const styles = StyleSheet.create({
   userInfo: {
     flex: 1,
     marginHorizontal: 10,
-    gap: 5,
   },
   userName: {
     fontSize: 16,
@@ -311,11 +317,11 @@ const styles = StyleSheet.create({
   userLocationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 3,
   },
   locationIcon: {
-    height: 16,
-    width: 16,
+    height: 15,
+    width: 15,
   },
   userLocationText: {
     fontSize: 14,

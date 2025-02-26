@@ -24,6 +24,11 @@ import Vendors from '../screens/Home/screens/Vendors';
 import VendorDetail from '../screens/Home/screens/VendorDetail';
 import WineDetail from '../screens/Home/screens/WineDetail';
 import WineList from '../screens/Home/screens/WineList';
+import Payment from '../screens/Order/Payment';
+import Checkout from '../screens/Order/Checkout';
+import ThankYou from '../screens/Order/ThankYou';
+import TrackOrder from '../screens/Order/TrackOrder';
+import ScanWineCode from '../screens/ScanCode/ScanWineCode';
 
 const Stack = createNativeStackNavigator();
 
@@ -64,6 +69,7 @@ const AppNavigator = () => {
       <Stack.Screen name="Welcome" component={Welcome} />
       <Stack.Screen name="TabNavigator" component={TabNavigator} />
       <Stack.Screen name="ScanCode" component={ScanCode} />
+      <Stack.Screen name="ScanWineCode" component={ScanWineCode} />
       <Stack.Screen name="Notifications" component={Notifications} />
       <Stack.Screen name="EditProfile" component={EditProfile} />
       <Stack.Screen name="AddressList" component={AddressList} />
@@ -78,6 +84,10 @@ const AppNavigator = () => {
       <Stack.Screen name="VendorDetail" component={VendorDetail} />
       <Stack.Screen name="WineDetail" component={WineDetail} />
       <Stack.Screen name="WineList" component={WineList} />
+      <Stack.Screen name="Payment" component={Payment} />
+      <Stack.Screen name="Checkout" component={Checkout} />
+      <Stack.Screen name="ThankYou" component={ThankYou} />
+      <Stack.Screen name="TrackOrder" component={TrackOrder} />
     </Stack.Navigator>
   );
 };

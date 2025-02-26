@@ -29,6 +29,7 @@
     "@react-navigation/stack": "^6.3.20",
     "@reduxjs/toolkit": "^2.1.0",
     "axios": "^1.6.5",
+    "haversine": "^1.1.1",
     "libphonenumber-js": "^1.11.19",
     "lottie-react-native": "^6.5.1",
     "patch-package": "^8.0.0",
