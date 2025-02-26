@@ -117,7 +117,7 @@ const Login = () => {
                   placeholder="Enter Mobile Number"
                   keyboardType="number-pad"
                   placeholderTextColor={Colors.gray}
-                  maxLength={14}
+                  maxLength={10}
                   style={styles.textInput}
                 />
               </View>

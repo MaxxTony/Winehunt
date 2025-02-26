@@ -69,17 +69,7 @@ const Register = ({route}) => {
             Geocoding.from({latitude, longitude})
               .then(json => {
                 const res = json.results;
-                const filteredAddress = res
-                  .filter(
-                    component =>
-                      component.types.includes('political') &&
-                      component.types.includes('sublocality') &&
-                      component.types.includes('sublocality_level_2'),
-                  )
-                  .map(comp => {
-                    setCurrentAddress(comp?.formatted_address);
-                  });
-                return filteredAddress;
+                setCurrentAddress(res[0]?.formatted_address);
               })
               .catch(error => console.log(error));
           },
@@ -87,7 +77,7 @@ const Register = ({route}) => {
             console.error('Error getting location:', error);
           },
           {
-            enableHighAccuracy: Platform.OS === 'ios' ? true : false,
+            enableHighAccuracy: true,
             timeout: 10000,
           },
         );
@@ -213,12 +203,9 @@ const Register = ({route}) => {
     formData.append('password', password);
     formData.append('phone', Info?.user?.phone);
     formData.append('country_code', Info?.user?.country_code);
-    // formData.append('latitude', coordinates?.latitude.toString());
-    // formData.append('longitude', coordinates?.longitude.toString());
-    formData.append(
-      'address',
-      currentAddress ? currentAddress : 'Defaul Address',
-    );
+    formData.append('latitude', coordinates?.latitude.toString());
+    formData.append('longitude', coordinates?.longitude.toString());
+    formData.append('address', currentAddress);
     if (filePath) {
       formData.append('image', {
         uri: filePath.uri,
