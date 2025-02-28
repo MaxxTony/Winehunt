@@ -46,6 +46,8 @@ const VendorDetail = props => {
 
   const userCoords = props?.route?.params?.userCoordinates;
 
+  console.log(userCoords);
+
   const inset = useSafeAreaInsets();
   const [loading, setLoading] = useState([]);
   const [detail, setDetail] = useState([]);

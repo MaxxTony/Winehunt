@@ -71,18 +71,30 @@ const Profile = () => {
     },
     {
       id: 7,
+      name: 'Subscription Plan',
+      image: require('./images/Terms.png'),
+      screen: 'Subscription',
+    },
+    {
+      id: 8,
+      name: 'Quiz',
+      image: require('./images/file.png'),
+      screen: 'Quiz',
+    },
+    {
+      id: 9,
       name: 'Privacy Policy',
       image: require('./images/privacy.png'),
       screen: 'PrivacyPolicy',
     },
     {
-      id: 8,
+      id: 10,
       name: 'Terms & Conditions',
       image: require('./images/Terms.png'),
       screen: 'TermsCondition',
     },
     {
-      id: 9,
+      id: 11,
       name: 'Logout',
       image: require('./images/Logout.png'),
       screen: null,

@@ -10,12 +10,12 @@ import {
   Text,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import Modal from 'react-native-modal';
 import WineHuntButton from '../../../common/WineHuntButton';
 import PreferenceModal from '../../../Modal/PreferenceModal';
@@ -24,6 +24,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from '../../../helper/Constant';
 import axios from 'axios';
 import {showSucess, showWarning} from '../../../helper/Toastify';
+import {useDispatch, useSelector} from 'react-redux';
+import {fetchProfile} from '../../../redux/slices/profileSlice';
 
 const {width} = Dimensions.get('window');
 
@@ -39,9 +41,18 @@ const WineDetail = props => {
   const [likedItems, setLikedItems] = useState({});
   const [quantity, setQuantity] = useState(1);
 
+  const dispatch = useDispatch();
+  const {userData} = useSelector(state => state.profile);
+
   useEffect(() => {
     getProductDetail();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchProfile());
+    }, [dispatch]),
+  );
 
   const getProductDetail = async () => {
     const data = await AsyncStorage.getItem('userDetail');
@@ -300,7 +311,13 @@ const WineDetail = props => {
                   borderRadius: 5,
                 }}
                 onPress={() => {
-                  navigation.navigate('VendorDetail', {item: detail?.user});
+                  navigation.navigate('VendorDetail', {
+                    item: detail?.user,
+                    userCoordinates: {
+                      latitude: userData?.latitude,
+                      longitude: userData?.longitude,
+                    },
+                  });
                 }}>
                 <Text
                   style={{
