@@ -68,6 +68,7 @@ const FilterModal = ({bottomSheetModalRef2, snapPoints2}) => {
       index={-1}
       snapPoints={snapPoints2}
       enableOverDrag={false}
+      enablePanDownToClose={true}
       handleStyle={styles.bottomSheetHandle}
       handleIndicatorStyle={styles.handleIndicator}>
       <BottomSheetScrollView

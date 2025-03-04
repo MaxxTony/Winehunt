@@ -38,7 +38,9 @@ const NearVendorCards = ({item, navigation, userCoordinates}) => {
         })
       }>
       <Image
-        source={require('../images/wine.png')}
+        source={
+          item?.image ? {uri: item?.image} : require('../images/wine.png')
+        }
         style={styles.vendorImage}
       />
       <View style={styles.textContainer}>
@@ -81,6 +83,7 @@ const styles = StyleSheet.create({
   vendorImage: {
     height: 65,
     width: 65,
+    borderRadius: 10,
   },
   textContainer: {
     gap: 5,

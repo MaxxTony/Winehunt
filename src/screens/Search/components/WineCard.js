@@ -14,23 +14,22 @@ const WineCard = ({item, onPress}) => {
           source={
             item?.product_images[0]?.image
               ? {uri: item?.product_images[0]?.image}
-              : require('../images/bottle3.png')
+              : require('../images/curve.png')
           }
           style={styles.bottleImage}
-          resizeMode="contain"
         />
         <View style={styles.textContainer}>
-          <Text style={styles.title}>{item?.title}</Text>
-          <Text style={styles.subtitle}>
-            (
-            {item?.user?.shop_name !== ''
-              ? item?.user?.shop_name
-              : 'Restaurant'}
-            )
+          <Text style={styles.title} numberOfLines={1}>
+            {item?.name}
           </Text>
-          <Text style={styles.description}>{item?.name}</Text>
+          <Text style={styles.subtitle}>
+            ({item?.user?.shop_name ? item?.user?.shop_name : 'Restaurant'})
+          </Text>
+          <Text style={styles.description} numberOfLines={1}>
+            {item?.name}{' '}
+          </Text>
           <Text style={styles.highlightedText}>({item?.title})</Text>
-          <Text style={styles.price}>$ {item?.small_size_price}</Text>
+          <Text style={styles.price}>$ {item?.price_mappings[0]?.price}</Text>
           <Pressable style={styles.button} onPress={onPress}>
             <Text style={styles.buttonText}>View More</Text>
           </Pressable>
@@ -44,7 +43,7 @@ export default WineCard;
 
 const styles = StyleSheet.create({
   cardContainer: {
-    padding: 15,
+    padding: Platform.OS == 'android' ? 10 : 15,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -63,8 +62,8 @@ const styles = StyleSheet.create({
     flex: 0.5,
   },
   backgroundImage: {
-    height: 90,
-    width: 60,
+    height: 80,
+    width: 50,
     position: 'absolute',
   },
   contentRow: {
@@ -74,37 +73,37 @@ const styles = StyleSheet.create({
   },
   bottleImage: {
     width: 30,
-    height: 100,
+    height: 120,
   },
   textContainer: {
-    gap: 10,
+    gap: 5,
   },
   title: {
-    fontSize: 13,
+    fontSize: 10,
     color: Colors.black,
     fontFamily: Fonts.InterRegular,
     fontWeight: '600',
+    width: 100,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 11,
     color: Colors.gray8,
     fontFamily: Fonts.InterRegular,
     fontWeight: '600',
   },
   description: {
-    fontSize: 12,
+    fontSize: 10,
     color: Colors.black,
     fontFamily: Fonts.InterRegular,
     fontWeight: '600',
+    width: 100,
   },
   highlightedText: {
-    fontSize: 11,
     color: Colors.red,
-    fontFamily: Fonts.InterRegular,
-    fontWeight: '600',
+    fontSize: 10,
   },
   price: {
-    fontSize: 18,
+    fontSize: 14,
     color: Colors.black,
     fontFamily: Fonts.InterBold,
     fontWeight: '600',
@@ -119,7 +118,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   buttonText: {
-    fontSize: 14,
+    fontSize: 11,
     color: Colors.white,
     fontFamily: Fonts.InterRegular,
     fontWeight: '500',

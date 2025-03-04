@@ -13,16 +13,21 @@ const FeatureWindeCard = ({item, onPress}) => {
         <Image
           source={{uri: item?.product_images[0]?.image}}
           style={styles.bottleImage}
-          resizeMode="contain"
         />
         <View style={styles.textContainer}>
-          <Text style={styles.title}>{item?.title}</Text>
-          <Text style={styles.subtitle}>{item?.user?.shop_name}</Text>
-          <Text style={styles.description}>
+          <Text style={styles.title} numberOfLines={1}>
+            {item?.title}
+          </Text>
+          <Text style={styles.subtitle} numberOfLines={1}>
+            {item?.user?.shop_name}
+          </Text>
+          <Text style={styles.description} numberOfLines={1}>
             {item?.name}{' '}
             <Text style={styles.highlightedText}>{item?.type?.name}</Text>
           </Text>
-          <Text style={styles.price}>$ {item?.price_mappings[0]?.price}</Text>
+          <Text style={styles.price} numberOfLines={1}>
+            $ {item?.price_mappings[0]?.price}
+          </Text>
           <Pressable style={styles.button} onPress={onPress}>
             <Text style={styles.buttonText}>View More</Text>
           </Pressable>
@@ -51,7 +56,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EFEFEF',
     gap: 10,
-    minHeight: 130,
+    minHeight: 140,
+    width: 250,
+    margin: 5,
   },
   backgroundImage: {
     height: 90,
@@ -61,51 +68,59 @@ const styles = StyleSheet.create({
   contentRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 30,
+    gap: 15,
+    flex: 1,
   },
   bottleImage: {
-    width: 30,
-    height: 100,
+    width: 40,
+    height: 120,
+    backgroundColor: 'transparent',
   },
   textContainer: {
-    gap: 10,
+    flex: 1,
+    gap: 6,
   },
   title: {
-    fontSize: 16,
+    fontSize: 13,
     color: Colors.black,
     fontFamily: Fonts.InterRegular,
     fontWeight: '600',
+    flexShrink: 1,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 12,
     color: Colors.gray8,
     fontFamily: Fonts.InterRegular,
     fontWeight: '600',
+    flexShrink: 1,
   },
   description: {
-    fontSize: 15,
+    fontSize: 12,
     color: Colors.black,
     fontFamily: Fonts.InterRegular,
     fontWeight: '600',
+    flexShrink: 1,
   },
   highlightedText: {
     color: Colors.red,
   },
   price: {
-    fontSize: 18,
+    fontSize: 16,
     color: Colors.black,
     fontFamily: Fonts.InterBold,
     fontWeight: '600',
   },
   button: {
-    padding: 5,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     backgroundColor: Colors.red,
     alignItems: 'center',
-    borderRadius: 20,
+    borderRadius: 15,
     borderBottomLeftRadius: 0,
+    alignSelf: 'flex-start',
   },
   buttonText: {
-    fontSize: 14,
+    fontSize: 12,
     color: Colors.white,
     fontFamily: Fonts.InterRegular,
     fontWeight: '500',

@@ -31,7 +31,8 @@ const NewArrivalCard = ({onPress, item}) => {
           color: Colors.black,
           fontFamily: Fonts.InterRegular,
           fontWeight: '600',
-        }}>
+        }}
+        numberOfLines={1}>
         {item?.title}
       </Text>
       <Text

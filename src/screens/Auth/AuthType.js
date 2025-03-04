@@ -1,6 +1,7 @@
 import {
   Image,
   ImageBackground,
+  Platform,
   Pressable,
   SafeAreaView,
   StyleSheet,
@@ -78,16 +79,18 @@ const AuthType = () => {
           source={require('../../../assets/images/LoginPage/Facebook.png')}
           style={{width: width - 40, height: 46, borderRadius: 5}}
         />
-        <Image
-          source={require('../../../assets/images/LoginPage/Apple.png')}
-          style={{
-            width: width - 40,
-            height: 46,
-            borderRadius: 5,
-            borderWidth: 1,
-            borderColor: '#E4E3E3',
-          }}
-        />
+        {Platform.OS == 'ios' && (
+          <Image
+            source={require('../../../assets/images/LoginPage/Apple.png')}
+            style={{
+              width: width - 40,
+              height: 46,
+              borderRadius: 5,
+              borderWidth: 1,
+              borderColor: '#E4E3E3',
+            }}
+          />
+        )}
       </View>
     </ImageBackground>
   );

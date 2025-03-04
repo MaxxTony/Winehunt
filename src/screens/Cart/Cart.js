@@ -243,7 +243,12 @@ const Cart = () => {
           </View>
           <WineHuntButton
             text="Next"
-            onPress={() => navigation.navigate('Payment', {total: grandTotal})}
+            onPress={() =>
+              navigation.navigate('Payment', {
+                total: grandTotal,
+                cartData: cartData,
+              })
+            }
           />
         </View>
       )}

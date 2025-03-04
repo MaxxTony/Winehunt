@@ -50,6 +50,7 @@ const Login = () => {
     const data = {
       phone: phoneNumber,
       country_code: phoneCountryCode,
+      app_type: 'user',
     };
 
     setLoading(true);

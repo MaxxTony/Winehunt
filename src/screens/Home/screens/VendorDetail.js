@@ -46,8 +46,6 @@ const VendorDetail = props => {
 
   const userCoords = props?.route?.params?.userCoordinates;
 
-  console.log(userCoords);
-
   const inset = useSafeAreaInsets();
   const [loading, setLoading] = useState([]);
   const [detail, setDetail] = useState([]);
@@ -243,7 +241,11 @@ const VendorDetail = props => {
           </Pressable>
           <View style={styles.headerInfoContainer}>
             <Image
-              source={require('../images/shopbg.png')}
+              source={
+                detail?.image
+                  ? {uri: detail?.image}
+                  : require('../images/shopbg.png')
+              }
               style={styles.shopImage}
             />
             <View style={styles.infoContainer}>
@@ -321,7 +323,7 @@ const VendorDetail = props => {
                   />
                   <View style={styles.productDetails}>
                     <View style={styles.productHeader}>
-                      <Text style={styles.productTitle}>
+                      <Text style={styles.productTitle} numberOfLines={1}>
                         {item?.name} ({item?.title})
                       </Text>
                       <Pressable
@@ -356,7 +358,9 @@ const VendorDetail = props => {
                           size={18}
                           color={Colors.yellow}
                         />
-                        <Text style={styles.infoText}>4.3</Text>
+                        <Text style={styles.infoText}>
+                          {item?.average_rating}
+                        </Text>
                       </View>
                     </View>
                   </View>
@@ -367,25 +371,38 @@ const VendorDetail = props => {
 
           <Text style={styles.sectionTitle}>Offers</Text>
 
-          <FlatList
-            data={Array.from({length: 10})}
-            horizontal
-            contentContainerStyle={{gap: 10}}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({item, index}) => {
-              return (
-                <View
-                  style={{
-                    padding: 10,
-                    borderWidth: 1,
-                    borderColor: Colors.gray10,
-                    borderRadius: 10,
-                  }}>
-                  <Text>Up To 50% New Offer</Text>
-                </View>
-              );
-            }}
-          />
+          {detail && detail?.length > 0 && detail?.offers.length > 0 ? (
+            <FlatList
+              data={detail?.offers}
+              horizontal
+              contentContainerStyle={{gap: 10}}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({item, index}) => {
+                return (
+                  <View
+                    style={{
+                      padding: 10,
+                      borderWidth: 1,
+                      borderColor: Colors.gray10,
+                      borderRadius: 10,
+                    }}>
+                    <Text>{item?.name}</Text>
+                  </View>
+                );
+              }}
+            />
+          ) : (
+            <Text
+              style={{
+                fontSize: 16,
+                color: Colors.black,
+                fontFamily: Fonts.InterBold,
+                fontWeight: '400',
+                textAlign: 'center',
+              }}>
+              No offers at this time{' '}
+            </Text>
+          )}
           <View
             style={{
               flexDirection: 'row',
@@ -393,15 +410,29 @@ const VendorDetail = props => {
               justifyContent: 'space-between',
             }}>
             <Text style={styles.sectionTitle}>Review (0)</Text>
-            <Text
+            {/* <Text
               style={{
                 fontSize: 14,
                 fontFamily: Fonts.InterRegular,
                 color: Colors.black,
               }}>
               View All
-            </Text>
+            </Text> */}
           </View>
+          {detail && detail?.length > 0 && detail?.reviews.length > 0 ? (
+            <Text>There is a review</Text>
+          ) : (
+            <Text
+              style={{
+                fontSize: 16,
+                color: Colors.black,
+                fontFamily: Fonts.InterBold,
+                fontWeight: '400',
+                textAlign: 'center',
+              }}>
+              No review at this time{' '}
+            </Text>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -421,7 +452,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -100,
   },
-  shopImage: {height: 100, width: 100},
+  shopImage: {height: 100, width: 100, borderRadius: 10},
   infoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -451,12 +482,15 @@ const styles = StyleSheet.create({
   },
   locationContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    gap: 5,
   },
   locationText: {
     fontSize: 13,
     fontFamily: Fonts.InterRegular,
     color: Colors.gray,
+    flex: 1,
+    flexWrap: 'wrap',
   },
   description: {
     fontSize: 14,
@@ -508,7 +542,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  productTitle: {fontSize: 16, color: Colors.black, fontWeight: '700'},
+  productTitle: {fontSize: 13, color: Colors.black, fontWeight: '700'},
   productTag: {fontSize: 12, color: Colors.gray, fontWeight: '700'},
   viewMoreButton: {
     padding: 5,

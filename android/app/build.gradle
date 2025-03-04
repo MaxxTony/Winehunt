@@ -116,6 +116,8 @@ dependencies {
      implementation ('com.google.android.gms:play-services-location:21.0.1')
      implementation('com.google.firebase:firebase-analytics')
      implementation("com.google.firebase:firebase-auth-ktx:22.1.2")
+     implementation 'com.stripe:stripe-android:20.48.4'
+
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
     debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {

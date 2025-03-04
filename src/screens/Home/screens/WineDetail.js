@@ -300,7 +300,11 @@ const WineDetail = props => {
             />
           )}
           <View style={styles.infoContainer}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
               <Text style={styles.vendorName}>{detail?.user?.shop_name}</Text>
               <Pressable
                 style={{
@@ -330,9 +334,12 @@ const WineDetail = props => {
                 </Text>
               </Pressable>
             </View>
-            <Text style={styles.wineName}>
-              {detail?.name} ({detail?.title})
-            </Text>
+            <View>
+              <Text style={styles.wineName} numberOfLines={1}>
+                {detail?.name}
+              </Text>
+              <Text style={styles.wineName}>({detail?.title})</Text>
+            </View>
             <View style={styles.priceRow}>
               <Text style={styles.priceText}>
                 Price{' '}
@@ -346,16 +353,21 @@ const WineDetail = props => {
               </View>
             </View>
             <View style={styles.buttonContainer}>
-              <Pressable
-                style={styles.button}
-                onPress={() => setShowModal(true)}>
-                <Text style={styles.buttonText}>Add To Cart</Text>
-              </Pressable>
-              <Pressable
-                style={styles.button}
-                onPress={() => navigation.navigate('ScanWineCode')}>
-                <Text style={styles.buttonText}>Try Me</Text>
-              </Pressable>
+              {detail?.cart_type?.includes(1) && (
+                <Pressable
+                  style={styles.button}
+                  onPress={() => setShowModal(true)}>
+                  <Text style={styles.buttonText}>Add To Cart</Text>
+                </Pressable>
+              )}
+
+              {detail?.cart_type?.includes(2) && (
+                <Pressable
+                  style={styles.button}
+                  onPress={() => navigation.navigate('ScanWineCode')}>
+                  <Text style={styles.buttonText}>Try Me</Text>
+                </Pressable>
+              )}
             </View>
           </View>
         </View>
@@ -447,11 +459,12 @@ const WineDetail = props => {
                       <View style={{gap: 5, flex: 1}}>
                         <Text
                           style={{
-                            fontSize: 15,
+                            fontSize: 12,
                             fontFamily: Fonts.InterMedium,
                             color: Colors.black,
                             fontWeight: '700',
-                          }}>
+                          }}
+                          numberOfLines={1}>
                           {item?.name} ({item?.title})
                         </Text>
                         <Text
@@ -585,7 +598,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 40,
   },
   bottleImage: {
     height: 245,
@@ -596,14 +609,14 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   vendorName: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: Fonts.InterMedium,
     fontWeight: '800',
     color: Colors.black,
     flex: 1,
   },
   wineName: {
-    fontSize: 16,
+    fontSize: 12,
     fontFamily: Fonts.InterMedium,
     fontWeight: '800',
     color: Colors.black,

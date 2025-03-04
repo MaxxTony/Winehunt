@@ -11,6 +11,7 @@ import React from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 
 const NewArrivalCard2 = ({onPress, item}) => {
+  console.log(item);
   return (
     <View style={styles.cardContainer}>
       <Image
@@ -25,14 +26,17 @@ const NewArrivalCard2 = ({onPress, item}) => {
               : require('../images/curve.png')
           }
           style={styles.bottleImage}
-          resizeMode="contain"
         />
         <View style={styles.textContainer}>
-          <Text style={styles.title}>{item?.name}</Text>
+          <Text style={styles.title} numberOfLines={1}>
+            {item?.name}
+          </Text>
           <Text style={styles.subtitle}>
             ({item?.user?.shop_name ? item?.user?.shop_name : 'Restaurant'})
           </Text>
-          <Text style={styles.description}>{item?.name} </Text>
+          <Text style={styles.description} numberOfLines={1}>
+            {item?.name}{' '}
+          </Text>
           <Text style={styles.highlightedText}>({item?.title})</Text>
           <Text style={styles.price}>$ 25.99</Text>
           <Pressable style={styles.button} onPress={onPress}>
@@ -78,16 +82,17 @@ const styles = StyleSheet.create({
   },
   bottleImage: {
     width: 30,
-    height: 100,
+    height: 120,
   },
   textContainer: {
     gap: 5,
   },
   title: {
-    fontSize: 11,
+    fontSize: 10,
     color: Colors.black,
     fontFamily: Fonts.InterRegular,
     fontWeight: '600',
+    width: 100,
   },
   subtitle: {
     fontSize: 11,
@@ -96,10 +101,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   description: {
-    fontSize: 11,
+    fontSize: 10,
     color: Colors.black,
     fontFamily: Fonts.InterRegular,
     fontWeight: '600',
+    width: 100,
   },
   highlightedText: {
     color: Colors.red,

@@ -32,8 +32,19 @@ const AddressList = () => {
         title="Address List"
         onPress={() => navigation.goBack()}
       />
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Text
+          style={{
+            fontSize: 16,
+            color: Colors.black,
+            fontFamily: Fonts.InterMedium,
+            fontWeight: '600',
+          }}>
+          NO Address Found At the Moment
+        </Text>
+      </View>
       <FlatList
-        data={Array.from({length: 5})}
+        data={Array.from({length: 0})}
         renderItem={({item, index}) => {
           return (
             <View
@@ -72,10 +83,10 @@ const AddressList = () => {
         }}
       />
       <View style={{marginTop: 'auto', padding: 20, paddingBottom: 30}}>
-        <WineHuntButton
+        {/* <WineHuntButton
           text="Add New Address"
           onPress={() => setShowAddAddressModal(true)}
-        />
+        /> */}
       </View>
 
       <ActionnModal

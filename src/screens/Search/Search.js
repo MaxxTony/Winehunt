@@ -141,7 +141,7 @@ const Search = () => {
             style={styles.iconSmall}
           />
         </View>
-        <Pressable
+        {/* <Pressable
           style={styles.iconBox}
           onPress={() => bottomSheetModalRef.current?.snapToIndex(0)}>
           <Image
@@ -149,7 +149,7 @@ const Search = () => {
             style={styles.iconLarge}
             resizeMode="contain"
           />
-        </Pressable>
+        </Pressable> */}
         <Pressable
           style={styles.iconBox}
           onPress={() => bottomSheetModalRef2.current?.snapToIndex(0)}>

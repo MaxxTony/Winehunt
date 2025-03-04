@@ -16,6 +16,8 @@ import WineHuntButton from '../../common/WineHuntButton';
 
 const Payment = props => {
   const total = props?.route?.params?.total;
+  const cartData = props?.route?.params?.cartData;
+
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
 
@@ -26,7 +28,7 @@ const Payment = props => {
     {id: 4, name: 'Cash on Delivery', image: require('./images/c4.png')},
   ];
 
-  const [selectedPayment, setSelectedPayment] = useState(types[0].id);
+  const [selectedPayment, setSelectedPayment] = useState(types[0]);
 
   const addresstype = [
     {id: 1, name: 'Home', address: '2464 Royal Ln. Mesa, New Jersey 45463'},
@@ -37,7 +39,7 @@ const Payment = props => {
     },
   ];
 
-  const [selectedAddress, setSelectedAddress] = useState(addresstype[0].id);
+  const [selectedAddress, setSelectedAddress] = useState(addresstype[0]);
 
   return (
     <View style={[styles.container, {paddingTop: insets.top}]}>
@@ -55,15 +57,15 @@ const Payment = props => {
             <TouchableOpacity
               style={[
                 styles.paymentOption,
-                item.id === selectedPayment && styles.selectedOption,
+                item.id === selectedPayment.id && styles.selectedOption,
               ]}
-              onPress={() => setSelectedPayment(item.id)}>
+              onPress={() => setSelectedPayment(item)}>
               <Image source={item.image} style={styles.paymentImage} />
               <Text style={styles.paymentText}>{item.name}</Text>
               <View
                 style={[
                   styles.radioButton,
-                  item.id === selectedPayment && styles.radioButtonSelected,
+                  item.id === selectedPayment.id && styles.radioButtonSelected,
                 ]}
               />
             </TouchableOpacity>
@@ -78,13 +80,13 @@ const Payment = props => {
             <TouchableOpacity
               style={[
                 styles.paymentOption,
-                item.id === selectedAddress && styles.selectedOption,
+                item.id === selectedAddress.id && styles.selectedOption,
               ]}
-              onPress={() => setSelectedAddress(item.id)}>
+              onPress={() => setSelectedAddress(item)}>
               <View
                 style={[
                   styles.radioButton,
-                  item.id === selectedAddress && styles.radioButtonSelected,
+                  item.id === selectedAddress.id && styles.radioButtonSelected,
                 ]}
               />
               <View>
@@ -121,7 +123,15 @@ const Payment = props => {
       <View style={{padding: 20}}>
         <WineHuntButton
           text="Checkout"
-          onPress={() => navigation.navigate('Checkout')}
+          onPress={() => {
+            const data = {
+              paymentType: selectedPayment,
+              address: selectedAddress,
+              amount: total,
+              cartData: cartData,
+            };
+            navigation.navigate('Checkout', {data: data});
+          }}
         />
       </View>
     </View>
