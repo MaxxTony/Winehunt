@@ -142,6 +142,7 @@ const Checkout = props => {
   const createOrder = async () => {
     const datas = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(datas)?.token;
+    console.log(token);
 
     const param = {
       amount: TotalAmount,

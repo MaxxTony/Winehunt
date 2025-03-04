@@ -14,6 +14,7 @@ import {Colors, Fonts} from '../../constant/Styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Feather from 'react-native-vector-icons/Feather';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {MultiSwitch} from 'react-native-multiswitch-selector';
 import WineCard from './components/WineCard';
@@ -37,6 +38,7 @@ const Search = () => {
   const [searchText, setSearchText] = useState('');
   const [type, setType] = useState('Popular');
   const [selectedVendor, setSelectedVendor] = useState(null);
+  const [showMapType, setShowMapType] = useState(false);
 
   const bottomSheetModalRef2 = useRef(null);
   const snapPoints2 = useMemo(
@@ -71,11 +73,12 @@ const Search = () => {
 
   useEffect(() => {
     getProducts();
-  }, [searchText]);
+  }, [searchText, type]);
 
   const getProducts = async () => {
     const data = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(data)?.token;
+    console.log(type);
 
     const url = Constants.baseUrl4 + Constants.searchProducts;
     setLoading(true);
@@ -86,7 +89,7 @@ const Search = () => {
       categories: '',
       price_range: '',
       latest: true,
-      filter_by: 'top_rated',
+      filter_by: type == 'Popular' ? 'popular' : 'top_rated',
     };
     try {
       const res = await axios.post(url, info, {
@@ -143,12 +146,12 @@ const Search = () => {
         </View>
         {/* <Pressable
           style={styles.iconBox}
-          onPress={() => bottomSheetModalRef.current?.snapToIndex(0)}>
-          <Image
-            source={require('./images/map.png')}
-            style={styles.iconLarge}
-            resizeMode="contain"
-          />
+          onPress={() => setShowMapType(!showMapType)}>
+          {showMapType ? (
+            <Feather name="map" size={25} color={Colors.black} />
+          ) : (
+            <Feather name="list" size={25} color={Colors.black} />
+          )}
         </Pressable> */}
         <Pressable
           style={styles.iconBox}
@@ -178,6 +181,32 @@ const Search = () => {
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <ActivityIndicator size={'large'} color={Colors.red2} />
         </View>
+      ) : products.length === 0 ? (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Text style={styles.noProductText}>No products found</Text>
+        </View>
+      ) : showMapType ? (
+        <FlatList
+          data={products}
+          numColumns={2}
+          refreshing={loading}
+          onRefresh={getProducts}
+          showsVerticalScrollIndicator={false}
+          columnWrapperStyle={{columnGap: 10}}
+          contentContainerStyle={{
+            padding: 20,
+            gap: 10,
+            columnGap: 10,
+          }}
+          renderItem={({item}) => (
+            <WineCard
+              item={item}
+              onPress={() =>
+                navigation.navigate('WineDetail', {item: item?.id})
+              }
+            />
+          )}
+        />
       ) : (
         <FlatList
           data={products}
