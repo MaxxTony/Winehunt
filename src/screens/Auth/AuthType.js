@@ -1,12 +1,12 @@
 import {
   Image,
   ImageBackground,
-  Pressable,
-  SafeAreaView,
-  StyleSheet,
+  TouchableOpacity,
   Text,
-  useWindowDimensions,
   View,
+  useWindowDimensions,
+  Platform,
+  StyleSheet,
 } from 'react-native';
 import React from 'react';
 import {useNavigation} from '@react-navigation/native';
@@ -36,58 +36,63 @@ const AuthType = () => {
       }
     } catch (error) {
       console.log(error, '===>');
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled the login flow
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        // operation (e.g. sign in) is in progress already
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        // play services not available or outdated
-      } else {
-        // some other error happened
-      }
     }
+  };
+
+  const SocialLoginButton = ({
+    icon,
+    text,
+    backgroundColor,
+    textColor,
+    onPress,
+  }) => {
+    return (
+      <TouchableOpacity
+        style={[styles.button, {backgroundColor}]}
+        onPress={onPress}>
+        <Image source={icon} style={styles.icon} />
+        <Text style={[styles.text, {color: textColor}]}>{text}</Text>
+      </TouchableOpacity>
+    );
   };
 
   return (
     <ImageBackground
       source={require('../../../assets/images/LoginPage/ImgBg.png')}
-      style={{flex: 1, justifyContent: 'center'}}>
-      <Text
-        style={{
-          fontSize: 45,
-          color: '#AC1C2B',
-          fontFamily: 'Philosopher-Bold',
-          textAlign: 'center',
-        }}>
-        WineHunt
-      </Text>
-      <View style={{padding: 20, gap: 10}}>
-        <Pressable onPress={() => navigation.navigate('Login')}>
-          <Image
-            source={require('../../../assets/images/LoginPage/Mobile.png')}
-            style={{width: width - 40, height: 46, borderRadius: 5}}
+      style={{flex: 1, resizeMode: 'cover', justifyContent: 'center'}}>
+      <Text style={styles.logoText}>WineHunt</Text>
+
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <SocialLoginButton
+            onPress={() => navigation.navigate('Login')}
+            icon={require('../../../assets/images/LoginPage/calls.png')}
+            text="Continue with Mobile Number"
+            backgroundColor="#111"
+            textColor="#fff"
           />
-        </Pressable>
-        <Pressable onPress={() => googleLogin()}>
-          <Image
-            source={require('../../../assets/images/LoginPage/Google.png')}
-            style={{width: width - 40, height: 46, borderRadius: 5}}
+          <SocialLoginButton
+            onPress={googleLogin}
+            icon={require('../../../assets/images/LoginPage/googles.png')}
+            text="Continue with Google"
+            backgroundColor="#EA4335"
+            textColor="#fff"
           />
-        </Pressable>
-        <Image
-          source={require('../../../assets/images/LoginPage/Facebook.png')}
-          style={{width: width - 40, height: 46, borderRadius: 5}}
-        />
-        <Image
-          source={require('../../../assets/images/LoginPage/Apple.png')}
-          style={{
-            width: width - 40,
-            height: 46,
-            borderRadius: 5,
-            borderWidth: 1,
-            borderColor: '#E4E3E3',
-          }}
-        />
+          <SocialLoginButton
+            icon={require('../../../assets/images/LoginPage/facebooks.png')}
+            text="Continue with Facebook"
+            backgroundColor="#1877F2"
+            textColor="#fff"
+          />
+          {Platform.OS === 'ios' && (
+            <SocialLoginButton
+              icon={require('../../../assets/images/LoginPage/apples.png')}
+              text="Continue with Apple"
+              backgroundColor="#fff"
+              textColor="#000"
+            />
+          )}
+        </View>
       </View>
     </ImageBackground>
   );
@@ -95,4 +100,51 @@ const AuthType = () => {
 
 export default AuthType;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  overlay: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  logoText: {
+    fontSize: 40,
+    color: '#AC1C2B',
+    fontFamily: 'Philosopher-Bold',
+    textAlign: 'center',
+    marginBottom: 30,
+  },
+  subHeading: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  container: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    width: '90%',
+    height: 46,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginVertical: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  icon: {
+    width: 24,
+    height: 24,
+    marginRight: 15,
+    marginLeft: 20,
+  },
+  text: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});

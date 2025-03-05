@@ -21,6 +21,7 @@ import axios from 'axios';
 import {showWarning} from '../../helper/Toastify';
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchProfile} from '../../redux/slices/profileSlice';
+import ThankYou from './ThankYou';
 
 const Profile = () => {
   const navigation = useNavigation();
@@ -98,6 +99,12 @@ const Profile = () => {
       name: 'Logout',
       image: require('./images/Logout.png'),
       screen: null,
+    },
+    {
+      id: 12,
+      name: 'Thank You',
+      image: require('./images/Logout.png'),
+      screen: ThankYou,
     },
   ];
 
