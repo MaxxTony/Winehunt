@@ -18,28 +18,29 @@ import Feather from 'react-native-vector-icons/Feather';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {MultiSwitch} from 'react-native-multiswitch-selector';
 import WineCard from './components/WineCard';
-
+import MapView, {
+  Callout,
+  Marker,
+  PROVIDER_DEFAULT,
+  PROVIDER_GOOGLE,
+  Polygon,
+} from 'react-native-maps';
 import VendorLocationFilter from './Modal/VendorLocationFilter';
 import FilterModal from './Modal/FilterModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from '../../helper/Constant';
 import axios from 'axios';
 import {showWarning} from '../../helper/Toastify';
+import Geolocation from '@react-native-community/geolocation';
 
 const Search = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
-  const bottomSheetModalRef = useRef(null);
-  const snapPoints = useMemo(
-    () => (Platform.OS === 'ios' ? ['45%'] : ['55%']),
-    [],
-  );
-
+  const mapViewRef = useRef(null);
+  const [region, setRegion] = useState(null);
   const [searchText, setSearchText] = useState('');
   const [type, setType] = useState('Popular');
-  const [selectedVendor, setSelectedVendor] = useState(null);
   const [showMapType, setShowMapType] = useState(false);
-
   const bottomSheetModalRef2 = useRef(null);
   const snapPoints2 = useMemo(
     () => (Platform.OS === 'ios' ? ['80%'] : ['100%']),
@@ -47,50 +48,55 @@ const Search = () => {
   );
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
-
-  const vendorLocation = [
-    {
-      id: 1,
-      name: 'Restaurant',
-    },
-    {
-      id: 2,
-      name: 'Hotel',
-    },
-    {
-      id: 3,
-      name: 'Winery',
-    },
-    {
-      id: 4,
-      name: 'Wine Bar',
-    },
-    {
-      id: 5,
-      name: 'Wine Shop',
-    },
-  ];
+  const [allMarkers, setAllMarkers] = useState([]);
 
   useEffect(() => {
     getProducts();
   }, [searchText, type]);
 
+  useEffect(() => {
+    getCurrentPosition();
+  }, []);
+
+  const getCurrentPosition = async () => {
+    try {
+      const position = await new Promise((resolve, reject) => {
+        Geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: Platform.OS === 'ios' ? true : true,
+          timeout: 10000,
+        });
+      });
+      const {latitude, longitude} = position.coords;
+
+      const currentRegion = {
+        latitude,
+        longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.003,
+      };
+      setRegion(currentRegion);
+      mapViewRef.current?.animateToRegion(currentRegion, 1000);
+    } catch (error) {
+      console.error('Error getting current position:', error);
+    }
+  };
+
   const getProducts = async () => {
     const data = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(data)?.token;
-    console.log(type);
-
     const url = Constants.baseUrl4 + Constants.searchProducts;
     setLoading(true);
+
     const info = {
       search_name: searchText,
       shop_type: '',
       product_type: '',
       categories: '',
-      price_range: '',
+      price_range: 'high_to_low',
       latest: true,
-      filter_by: type == 'Popular' ? 'popular' : 'top_rated',
+      filter_by: type === 'Popular' ? 'popular' : 'top_rated',
     };
+
     try {
       const res = await axios.post(url, info, {
         headers: {
@@ -98,8 +104,35 @@ const Search = () => {
           'Content-Type': 'application/json',
         },
       });
-      if (res?.status == 200) {
+
+      if (res?.status === 200) {
         setProducts(res?.data?.products);
+
+        const uniqueMarkers = {};
+        res?.data?.products.forEach(item => {
+          const userId = item?.user?.id;
+          if (!uniqueMarkers[userId]) {
+            let latitude = parseFloat(item?.user?.latitude);
+            let longitude = parseFloat(item?.user?.longitude);
+            const shopName = item?.user?.shop_name || 'Unknown Shop';
+
+            if (
+              !latitude ||
+              !longitude ||
+              isNaN(latitude) ||
+              isNaN(longitude)
+            ) {
+              latitude = 28.625986666666666;
+              longitude = 77.38616833333333;
+            }
+
+            uniqueMarkers[userId] = {latitude, longitude, shopName};
+          }
+        });
+
+        const markers = Object.values(uniqueMarkers);
+
+        setAllMarkers(markers);
       }
     } catch (error) {
       if (error.response) {
@@ -114,6 +147,49 @@ const Search = () => {
       setLoading(false);
     }
   };
+
+  // useEffect(() => {
+  //   if (allMarkers.length > 0) {
+  //     let minLatitude = allMarkers[0].latitude;
+  //     let maxLatitude = allMarkers[0].latitude;
+  //     let minLongitude = allMarkers[0].longitude;
+  //     let maxLongitude = allMarkers[0].longitude;
+
+  //     allMarkers.forEach(coord => {
+  //       if (coord.latitude < minLatitude) minLatitude = coord.latitude;
+  //       if (coord.latitude > maxLatitude) maxLatitude = coord.latitude;
+  //       if (coord.longitude < minLongitude) minLongitude = coord.longitude;
+  //       if (coord.longitude > maxLongitude) maxLongitude = coord.longitude;
+  //     });
+  //     const latitudeDelta = (maxLatitude - minLatitude) * 1.5;
+  //     const longitudeDelta = (maxLongitude - minLongitude) * 1.5;
+  //     const midLatitude = (minLatitude + maxLatitude) / 2;
+  //     const midLongitude = (minLongitude + maxLongitude) / 2;
+  //     const updateRegion = {
+  //       latitude: midLatitude,
+  //       longitude: midLongitude,
+  //       latitudeDelta: latitudeDelta,
+  //       longitudeDelta: longitudeDelta,
+  //     };
+
+  //     mapViewRef.current?.animateToRegion(updateRegion, 1000);
+  //   }
+  // }, [allMarkers]);
+
+  useEffect(() => {
+    if (allMarkers.length > 0 && mapViewRef.current) {
+      mapViewRef.current.fitToCoordinates(
+        allMarkers.map(marker => ({
+          latitude: marker.latitude,
+          longitude: marker.longitude,
+        })),
+        {
+          edgePadding: {top: 50, right: 50, bottom: 50, left: 50},
+          animated: true,
+        },
+      );
+    }
+  }, [allMarkers]);
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
@@ -144,7 +220,7 @@ const Search = () => {
             style={styles.iconSmall}
           />
         </View>
-        {/* <Pressable
+        <Pressable
           style={styles.iconBox}
           onPress={() => setShowMapType(!showMapType)}>
           {showMapType ? (
@@ -152,7 +228,7 @@ const Search = () => {
           ) : (
             <Feather name="list" size={25} color={Colors.black} />
           )}
-        </Pressable> */}
+        </Pressable>
         <Pressable
           style={styles.iconBox}
           onPress={() => bottomSheetModalRef2.current?.snapToIndex(0)}>
@@ -186,27 +262,33 @@ const Search = () => {
           <Text style={styles.noProductText}>No products found</Text>
         </View>
       ) : showMapType ? (
-        <FlatList
-          data={products}
-          numColumns={2}
-          refreshing={loading}
-          onRefresh={getProducts}
-          showsVerticalScrollIndicator={false}
-          columnWrapperStyle={{columnGap: 10}}
-          contentContainerStyle={{
-            padding: 20,
-            gap: 10,
-            columnGap: 10,
-          }}
-          renderItem={({item}) => (
-            <WineCard
-              item={item}
-              onPress={() =>
-                navigation.navigate('WineDetail', {item: item?.id})
-              }
-            />
-          )}
-        />
+        <MapView
+          ref={mapViewRef}
+          scrollEnabled
+          showsCompass
+          followsUserLocation
+          mapType="standard"
+          showsScale
+          zoomControlEnabled={true}
+          initialRegion={region}
+          provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+          style={{height: '75%', width: '100%'}}>
+          {allMarkers.map((marker, index) => (
+            <Marker
+              key={index}
+              coordinate={{
+                latitude: marker.latitude,
+                longitude: marker.longitude,
+              }}>
+              {/* Custom Tooltip */}
+              <Callout tooltip>
+                <View style={styles.calloutContainer}>
+                  <Text style={styles.shopName}>{marker.shopName}</Text>
+                </View>
+              </Callout>
+            </Marker>
+          ))}
+        </MapView>
       ) : (
         <FlatList
           data={products}
@@ -230,14 +312,6 @@ const Search = () => {
           )}
         />
       )}
-
-      <VendorLocationFilter
-        bottomSheetModalRef={bottomSheetModalRef}
-        snapPoints={snapPoints}
-        vendorLocation={vendorLocation}
-        selectedVendor={selectedVendor}
-        setSelectedVendor={setSelectedVendor}
-      />
 
       <FilterModal
         bottomSheetModalRef2={bottomSheetModalRef2}
@@ -346,5 +420,21 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.InterRegular,
     fontWeight: '500',
     fontSize: 14,
+  },
+  calloutContainer: {
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 10,
+    elevation: 5, // Shadow for Android
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  shopName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
   },
 });

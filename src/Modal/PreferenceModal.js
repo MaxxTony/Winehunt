@@ -38,9 +38,9 @@ const PreferenceModal = ({
       style={styles.modal}
       onBackdropPress={() => setShowModal(false)}>
       <View style={styles.container}>
-        <Text style={styles.title}>Customise as your preference</Text>
-        <Text style={styles.sectionTitle}>Choose Size</Text>
-        <FlatList
+        {/* <Text style={styles.title}>Customise as your preference</Text> */}
+        {/* <Text style={styles.sectionTitle}>Choose Size</Text> */}
+        {/* <FlatList
           data={sizeList}
           contentContainerStyle={styles.listContainer}
           renderItem={({item}) => (
@@ -54,9 +54,9 @@ const PreferenceModal = ({
               <Text style={styles.itemPrice}>${item?.price}</Text>
             </Pressable>
           )}
-        />
-        <Text style={styles.sectionTitle}>Choose Add on</Text>
-        <FlatList
+        /> */}
+        {/* <Text style={styles.sectionTitle}>Choose Add on</Text> */}
+        {/* <FlatList
           data={AddonList}
           contentContainerStyle={styles.listContainer}
           renderItem={({item}) => (
@@ -74,7 +74,7 @@ const PreferenceModal = ({
               <Text style={styles.itemPrice}>${item?.price}</Text>
             </Pressable>
           )}
-        />
+        /> */}
         <View style={styles.footerRow}>
           <View style={styles.quantityContainer}>
             <Pressable onPress={decreaseQuantity}>

@@ -135,14 +135,12 @@ const Checkout = props => {
       setConfrimModal(true);
       setPayStatus(false);
       createOrder();
-      console.log('payment hogya done balle balle');
     }
   };
 
   const createOrder = async () => {
     const datas = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(datas)?.token;
-    console.log(token);
 
     const param = {
       amount: TotalAmount,
@@ -154,7 +152,7 @@ const Checkout = props => {
         data?.cartData?.map(item => ({
           cart_id: item?.id || '',
           product_id: item?.product?.id || '',
-          price_id: item?.product?.price_mappings[0] || '',
+          price_id: item?.product?.price_mappings?.size_id || 2,
           quantity: item?.quantity || 1,
           status: 1,
         })) || [],
