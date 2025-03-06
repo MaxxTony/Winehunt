@@ -148,34 +148,6 @@ const Search = () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (allMarkers.length > 0) {
-  //     let minLatitude = allMarkers[0].latitude;
-  //     let maxLatitude = allMarkers[0].latitude;
-  //     let minLongitude = allMarkers[0].longitude;
-  //     let maxLongitude = allMarkers[0].longitude;
-
-  //     allMarkers.forEach(coord => {
-  //       if (coord.latitude < minLatitude) minLatitude = coord.latitude;
-  //       if (coord.latitude > maxLatitude) maxLatitude = coord.latitude;
-  //       if (coord.longitude < minLongitude) minLongitude = coord.longitude;
-  //       if (coord.longitude > maxLongitude) maxLongitude = coord.longitude;
-  //     });
-  //     const latitudeDelta = (maxLatitude - minLatitude) * 1.5;
-  //     const longitudeDelta = (maxLongitude - minLongitude) * 1.5;
-  //     const midLatitude = (minLatitude + maxLatitude) / 2;
-  //     const midLongitude = (minLongitude + maxLongitude) / 2;
-  //     const updateRegion = {
-  //       latitude: midLatitude,
-  //       longitude: midLongitude,
-  //       latitudeDelta: latitudeDelta,
-  //       longitudeDelta: longitudeDelta,
-  //     };
-
-  //     mapViewRef.current?.animateToRegion(updateRegion, 1000);
-  //   }
-  // }, [allMarkers]);
-
   useEffect(() => {
     if (allMarkers.length > 0 && mapViewRef.current) {
       mapViewRef.current.fitToCoordinates(
