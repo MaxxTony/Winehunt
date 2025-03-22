@@ -115,7 +115,7 @@ const Payment = props => {
               color: Colors.black,
               fontSize: 16,
             }}>
-            $ {total}
+            $ {total.toFixed(0)}
           </Text>
         </View>
       </ScrollView>
@@ -126,7 +126,7 @@ const Payment = props => {
             const data = {
               paymentType: selectedPayment,
               address: selectedAddress,
-              amount: total,
+              amount: total.toFixed(0),
               cartData: cartData,
             };
             navigation.navigate('Checkout', {data: data});

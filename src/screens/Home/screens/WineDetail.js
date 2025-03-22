@@ -239,7 +239,7 @@ const WineDetail = props => {
     } catch (error) {
       if (error.response) {
         console.log('Server Error:', error.response.data);
-        showWarning(error.response.data?.message);
+        showWarning(error.response.data?.error);
       } else if (error.request) {
         console.log('No Response:', error.request);
       } else {

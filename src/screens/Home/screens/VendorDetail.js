@@ -255,7 +255,7 @@ const VendorDetail = props => {
                   size={18}
                   color={Colors.black}
                 />
-                <Text style={styles.infoText}>{formattedDistance} km</Text>
+                <Text style={styles.infoText}>{formattedDistance}km</Text>
               </View>
               <View style={styles.infoItem}>
                 <AntDesign name="star" size={18} color={Colors.yellow} />

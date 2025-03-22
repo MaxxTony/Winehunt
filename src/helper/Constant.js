@@ -7,6 +7,7 @@ const devUrl6 = 'http://13.48.249.80:8000/api/enquiry/';
 const devUrl7 = 'http://13.48.249.80:8000/api/wishlist/';
 const devUrl8 = 'http://13.48.249.80:8000/api/cart/';
 const devUrl9 = 'http://13.48.249.80:8000/api/order/';
+const devUrl10 = 'http://13.48.249.80:8000/api/other/';
 
 const Constants = {
   baseUrl: devUrl,
@@ -18,6 +19,7 @@ const Constants = {
   baseUrl7: devUrl7,
   baseUrl8: devUrl8,
   baseUrl9: devUrl9,
+  baseUrl10: devUrl10,
   login: 'login-with-otp',
   verifyOtp: 'verify-otp',
   register: 'register-user',
@@ -39,6 +41,10 @@ const Constants = {
   updateCart: 'update-cart',
   createIntent: 'create-payment-intent',
   createOrder: 'create-confirm-order',
+  addAddress: 'add-address',
+  getAddress: 'get-address',
+  updateAddress: 'update-address',
+  CategoryProduct: 'category-product',
 };
 
 export default Constants;

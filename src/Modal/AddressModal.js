@@ -17,14 +17,24 @@ import WineHuntButton from '../common/WineHuntButton';
 import {Dropdown} from 'react-native-element-dropdown';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
-const AddressModal = ({showAddAddressModal, setShowAddAddressModal}) => {
+const AddressModal = ({
+  showAddAddressModal,
+  setShowAddAddressModal,
+  onPress,
+  country,
+  setCountry,
+  city,
+  setCity,
+  state,
+  setState,
+  setFlat,
+  flat,
+  setArea,
+  area,
+  setPincode,
+  pincode,
+}) => {
   const inset = useSafeAreaInsets();
-  const [country, setCountry] = useState(null);
-  const [state, setState] = useState(null);
-  const [city, setCity] = useState('');
-  const [flat, setFlat] = useState('');
-  const [area, setArea] = useState('');
-  const [pincode, setPincode] = useState('');
 
   const countries = [
     {id: 1, name: 'United States'},
@@ -116,7 +126,7 @@ const AddressModal = ({showAddAddressModal, setShowAddAddressModal}) => {
               placeholder="ZIP Code"
               placeholderTextColor={Colors.gray10}
             />
-            <View style={styles.currentLocationContainer}>
+            {/* <View style={styles.currentLocationContainer}>
               <FontAwesome6
                 name="location-crosshairs"
                 size={20}
@@ -125,11 +135,8 @@ const AddressModal = ({showAddAddressModal, setShowAddAddressModal}) => {
               <Text style={styles.currentLocationText}>
                 Use My Current Location
               </Text>
-            </View>
-            <WineHuntButton
-              text="Save"
-              onPress={() => setShowAddAddressModal(false)}
-            />
+            </View> */}
+            <WineHuntButton text="Save" onPress={onPress} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -197,7 +204,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    paddingVertical: Platform.OS === 'ios' ? 10 : 0,
+    paddingVertical: Platform.OS === 'ios' ? 10 : 5,
     paddingHorizontal: 10,
     borderColor: Colors.gray2,
     borderRadius: 8,

@@ -15,8 +15,6 @@ import {showSucess} from '../../helper/Toastify';
 const Checkout = props => {
   const data = props?.route?.params?.data;
 
-  console.log(data);
-
   const DELIVERY_FEE = 100;
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -30,7 +28,7 @@ const Checkout = props => {
     return amount?.toLocaleString();
   };
 
-  const TotalAmount = formatAmount(data?.amount + DELIVERY_FEE);
+  const TotalAmount = formatAmount(parseFloat(data?.amount) + DELIVERY_FEE);
 
   const [payStatus, setPayStatus] = useState(false);
 
@@ -42,7 +40,7 @@ const Checkout = props => {
     const data = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(data)?.token;
     const param = {
-      amount: parseFloat(TotalAmount),
+      amount: parseFloat(TotalAmount).toFixed(0),
       currency: 'USD',
     };
     const url = Constants.baseUrl9 + Constants.createIntent;
@@ -94,7 +92,7 @@ const Checkout = props => {
     };
 
     const {error} = await initPaymentSheet({
-      merchantDisplayName: 'PropFYI, Inc.',
+      merchantDisplayName: 'WineHunt, Inc.',
       customerId: clientSecret?.stripeCustomerId,
       //customerEphemeralKeySecret: clientSecret?.paymentIntentId,
       paymentIntentClientSecret: clientSecret?.clientSecret,
@@ -141,9 +139,11 @@ const Checkout = props => {
   const createOrder = async () => {
     const datas = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(datas)?.token;
+    const userId = JSON.parse(datas)?.user;
 
     const param = {
-      amount: TotalAmount,
+      // user_id: userId?.id,
+      amount: parseFloat(TotalAmount),
       currency: 'usd',
       payment_intent_id: paymentInfo?.paymentIntentId,
       payment_method: data?.paymentType?.name,
@@ -152,9 +152,11 @@ const Checkout = props => {
         data?.cartData?.map(item => ({
           cart_id: item?.id || '',
           product_id: item?.product?.id || '',
-          price_id: item?.product?.price_mappings?.size_id || 2,
+          product_name: item?.product?.name || '',
+          price: item?.price_mappings?.price || 100,
+          size: item?.price_mappings?.size?.name || 'small',
           quantity: item?.quantity || 1,
-          status: 1,
+          status: item?.status,
         })) || [],
     };
 
@@ -169,7 +171,7 @@ const Checkout = props => {
       });
       if (response?.status === 200) {
         showSucess(response?.data?.message);
-        navigation.navigate('Home');
+        navigation.navigate('ThankYou', {info: response?.data?.data?.order});
       }
     } catch (error) {
       console.error('Error doing create order:', error?.response?.data);
@@ -183,7 +185,6 @@ const Checkout = props => {
         onPress={() => navigation.goBack()}
       />
       <Loader modalVisible={loading} setModalVisible={setLoading} />
-
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.headerText}>
           Please confirm and submit your order

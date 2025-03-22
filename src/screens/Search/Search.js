@@ -115,7 +115,6 @@ const Search = () => {
             let latitude = parseFloat(item?.user?.latitude);
             let longitude = parseFloat(item?.user?.longitude);
             const shopName = item?.user?.shop_name || 'Unknown Shop';
-
             if (
               !latitude ||
               !longitude ||
@@ -125,7 +124,6 @@ const Search = () => {
               latitude = 28.625986666666666;
               longitude = 77.38616833333333;
             }
-
             uniqueMarkers[userId] = {latitude, longitude, shopName};
           }
         });

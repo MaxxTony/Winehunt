@@ -59,7 +59,6 @@ const Home = () => {
   const getHomePageData = async () => {
     const data = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(data)?.token;
-
     const url = Constants.baseUrl2 + Constants.home;
     setLoading(true);
     try {
@@ -197,7 +196,6 @@ const Home = () => {
                   onPress={() =>
                     navigation.navigate('WineList', {
                       item: item,
-                      data: homeData?.product,
                     })
                   }>
                   <Image
