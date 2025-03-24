@@ -75,12 +75,7 @@ const Profile = () => {
       image: require('./images/Terms.png'),
       screen: 'Subscription',
     },
-    {
-      id: 8,
-      name: 'Quiz',
-      image: require('./images/file.png'),
-      screen: 'Quiz',
-    },
+
     {
       id: 9,
       name: 'Privacy Policy',

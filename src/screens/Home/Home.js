@@ -171,6 +171,12 @@ const Home = () => {
             />
           )}
         </View>
+        <View style={styles.card}>
+      <Text style={styles.title}>Play Quiz</Text>
+      <Pressable style={styles.button} onPress={() => navigation.navigate("Quiz")}>
+        <Text style={styles.buttonText}>Start</Text>
+      </Pressable>
+    </View>
         <View style={styles.contentContainer}>
           <MultiSwitch
             allStates={['Wine types', 'Popular countries', 'Popular grapes']}
@@ -401,5 +407,37 @@ const styles = StyleSheet.create({
   verticalList: {
     gap: 10,
     marginVertical: 15,
+  },
+
+  card: {
+    backgroundColor: "#000",
+    padding: 20,
+    borderRadius: 10,
+    flexDirection:"row",
+    alignItems: "center",
+    shadowColor: "#fff",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 5,
+    margin: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 15,
+    flex:1
+  },
+  button: {
+    backgroundColor: "#fff",
+    paddingVertical: 5,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  buttonText: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#000",
   },
 });
