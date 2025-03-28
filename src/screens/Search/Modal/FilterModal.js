@@ -74,8 +74,12 @@ const FilterModal = ({bottomSheetModalRef2, snapPoints2}) => {
       <BottomSheetScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.bottomSheetContent}>
-        <Text style={styles.sectionTitle}>Filter</Text>
-        <Text style={styles.subTitle}>Wine Type</Text>
+        <Text style={styles.sectionTitle} allowFontScaling={false}>
+          Filter
+        </Text>
+        <Text style={styles.subTitle} allowFontScaling={false}>
+          Wine Type
+        </Text>
         <View style={styles.chipContainer}>
           {wineType.map((item, index) => (
             <Pressable
@@ -90,14 +94,17 @@ const FilterModal = ({bottomSheetModalRef2, snapPoints2}) => {
                   styles.chipText,
                   selectedWineTypes.includes(item.id) &&
                     styles.selectedChipText,
-                ]}>
+                ]}
+                allowFontScaling={false}>
                 {item.name}
               </Text>
             </Pressable>
           ))}
         </View>
         <View style={styles.divider} />
-        <Text style={styles.subTitle}>Price Range</Text>
+        <Text style={styles.subTitle} allowFontScaling={false}>
+          Price Range
+        </Text>
         <View>
           <FlatList
             data={priceRange}
@@ -116,14 +123,18 @@ const FilterModal = ({bottomSheetModalRef2, snapPoints2}) => {
                     size={30}
                     color={isSelected ? Colors.red : Colors.gray5}
                   />
-                  <Text style={styles.priceRangeText}>{item?.name}</Text>
+                  <Text style={styles.priceRangeText} allowFontScaling={false}>
+                    {item?.name}
+                  </Text>
                 </Pressable>
               );
             }}
           />
         </View>
         <View style={styles.divider} />
-        <Text style={styles.subTitle}>Grapes</Text>
+        <Text style={styles.subTitle} allowFontScaling={false}>
+          Grapes
+        </Text>
         <View style={styles.chipContainer}>
           {grapesType.map((item, index) => (
             <Pressable
@@ -138,14 +149,17 @@ const FilterModal = ({bottomSheetModalRef2, snapPoints2}) => {
                   styles.chipText,
                   selectedGrapesTypes.includes(item.id) &&
                     styles.selectedChipText,
-                ]}>
+                ]}
+                allowFontScaling={false}>
                 {item.name}
               </Text>
             </Pressable>
           ))}
         </View>
         <View style={styles.divider} />
-        <Text style={styles.subTitle}>Popular Country</Text>
+        <Text style={styles.subTitle} allowFontScaling={false}>
+          Popular Country
+        </Text>
         <View style={styles.chipContainer}>
           {popularCountry.map((item, index) => (
             <Pressable
@@ -160,7 +174,8 @@ const FilterModal = ({bottomSheetModalRef2, snapPoints2}) => {
                   styles.chipText,
                   selectedPopularCountry.includes(item.id) &&
                     styles.selectedChipText,
-                ]}>
+                ]}
+                allowFontScaling={false}>
                 {item.name}
               </Text>
             </Pressable>

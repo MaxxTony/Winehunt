@@ -215,7 +215,9 @@ const EditProfile = () => {
               <Pressable
                 style={styles.phoneCountryCodeContainer}
                 onPress={() => setShowPhoneCountryPicker(true)}>
-                <Text style={styles.phoneCountryCodeText}>
+                <Text
+                  style={styles.phoneCountryCodeText}
+                  allowFontScaling={false}>
                   {phoneCountryCode}
                 </Text>
                 <Entypo name="chevron-down" size={15} color={Colors.red} />

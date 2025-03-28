@@ -20,8 +20,10 @@ const VendorLocationFilter = ({
       handleStyle={styles.bottomSheetHandle}
       handleIndicatorStyle={styles.handleIndicator}>
       <View style={styles.container}>
-        <Text style={styles.filterText}>Filter</Text>
-        <Text style={styles.chooseVendorText}>
+        <Text style={styles.filterText} allowFontScaling={false}>
+          Filter
+        </Text>
+        <Text style={styles.chooseVendorText} allowFontScaling={false}>
           Choose your Vendor locations
         </Text>
         <FlatList
@@ -40,7 +42,9 @@ const VendorLocationFilter = ({
                   color={isSelected ? Colors.red2 : Colors.gray11}
                   size={25}
                 />
-                <Text style={styles.vendorText}>{item?.name}</Text>
+                <Text style={styles.vendorText} allowFontScaling={false}>
+                  {item?.name}
+                </Text>
               </Pressable>
             );
           }}

@@ -121,7 +121,7 @@ const Profile = () => {
             }
             style={styles.profileImage}
           />
-          <Text style={styles.profileName}>
+          <Text style={styles.profileName} allowFontScaling={false}>
             {' '}
             {userData?.first_name} {userData?.last_name}
           </Text>
@@ -134,10 +134,12 @@ const Profile = () => {
             style={styles.barcodeImage}
           />
           <View style={styles.milestoneTextContainer}>
-            <Text style={styles.milestoneTitle}>
+            <Text style={styles.milestoneTitle} allowFontScaling={false}>
               Receive Your Milestone score
             </Text>
-            <Text style={styles.milestoneUserId}>User Id: WA@1234</Text>
+            <Text style={styles.milestoneUserId} allowFontScaling={false}>
+              User Id: WA@1234
+            </Text>
           </View>
           <Entypo name="chevron-thin-right" size={20} color={Colors.black} />
         </Pressable>
@@ -169,7 +171,8 @@ const Profile = () => {
                         color:
                           index == data.length - 1 ? Colors.red : Colors.black,
                       },
-                    ]}>
+                    ]}
+                    allowFontScaling={false}>
                     {item?.name}
                   </Text>
                   {index !== data.length - 1 && (

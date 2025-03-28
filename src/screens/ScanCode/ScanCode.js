@@ -28,7 +28,8 @@ const ScanCode = () => {
               color: Colors.red,
               fontWeight: '500',
               fontSize: 18,
-            }}>
+            }}
+            allowFontScaling={false}>
             Use this one-time promo code
           </Text>
           <Text
@@ -37,7 +38,8 @@ const ScanCode = () => {
               color: Colors.black,
               fontWeight: '700',
               fontSize: 25,
-            }}>
+            }}
+            allowFontScaling={false}>
             45@#12389
           </Text>
           <WineHuntButton

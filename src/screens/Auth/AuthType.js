@@ -59,7 +59,8 @@ const AuthType = () => {
           color: '#AC1C2B',
           fontFamily: 'Philosopher-Bold',
           textAlign: 'center',
-        }}>
+        }}
+        allowFontScaling={false}>
         WineHunt
       </Text>
       <View style={{padding: 20, gap: 10}}>

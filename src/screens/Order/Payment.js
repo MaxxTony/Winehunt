@@ -47,7 +47,9 @@ const Payment = props => {
         onPress={() => navigation.goBack()}
       />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.paymentTitle}>Payment Method:</Text>
+        <Text style={styles.paymentTitle} allowFontScaling={false}>
+          Payment Method:
+        </Text>
         <FlatList
           data={types}
           keyExtractor={item => item.id.toString()}
@@ -60,7 +62,9 @@ const Payment = props => {
               ]}
               onPress={() => setSelectedPayment(item)}>
               <Image source={item.image} style={styles.paymentImage} />
-              <Text style={styles.paymentText}>{item.name}</Text>
+              <Text style={styles.paymentText} allowFontScaling={false}>
+                {item.name}
+              </Text>
               <View
                 style={[
                   styles.radioButton,
@@ -70,7 +74,9 @@ const Payment = props => {
             </TouchableOpacity>
           )}
         />
-        <Text style={styles.paymentTitle}>Shipping Address:</Text>
+        <Text style={styles.paymentTitle} allowFontScaling={false}>
+          Shipping Address:
+        </Text>
         <FlatList
           data={addresstype}
           keyExtractor={item => item.id.toString()}
@@ -89,8 +95,12 @@ const Payment = props => {
                 ]}
               />
               <View>
-                <Text style={styles.paymentText}>{item.name}</Text>
-                <Text style={styles.addressText}>{item.address}</Text>
+                <Text style={styles.paymentText} allowFontScaling={false}>
+                  {item.name}
+                </Text>
+                <Text style={styles.addressText} allowFontScaling={false}>
+                  {item.address}
+                </Text>
               </View>
             </TouchableOpacity>
           )}
@@ -106,7 +116,8 @@ const Payment = props => {
               fontFamily: Fonts.InterBold,
               color: Colors.black,
               fontSize: 16,
-            }}>
+            }}
+            allowFontScaling={false}>
             SubTotal
           </Text>
           <Text
@@ -114,7 +125,8 @@ const Payment = props => {
               fontFamily: Fonts.InterBold,
               color: Colors.black,
               fontSize: 16,
-            }}>
+            }}
+            allowFontScaling={false}>
             $ {total.toFixed(0)}
           </Text>
         </View>

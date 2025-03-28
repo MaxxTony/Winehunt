@@ -7,12 +7,14 @@ const DeleteModal = ({onDelete, onCancel}) => {
   return (
     <View style={styles.container}>
       <View style={styles.dragIndicator} />
-      <Text style={styles.title}>Delete Address</Text>
+      <Text style={styles.title} allowFontScaling={false}>
+        Delete Address
+      </Text>
       <Image
         source={require('../screens/Profile/images/map3.png')}
         style={styles.image}
       />
-      <Text style={styles.message}>
+      <Text style={styles.message} allowFontScaling={false}>
         Are you sure you want to delete this address?
       </Text>
       <View style={styles.actionItem}>

@@ -15,7 +15,9 @@ const Notifications = () => {
         onPress={() => navigation.goBack()}
       />
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <Text style={{fontSize: 20}}>No New Notifications</Text>
+        <Text style={{fontSize: 20}} allowFontScaling={false}>
+          No New Notifications
+        </Text>
       </View>
     </View>
   );

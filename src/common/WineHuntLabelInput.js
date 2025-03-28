@@ -27,7 +27,8 @@ const WineHuntLabelInput = props => {
           color: Colors.black,
           fontFamily: Fonts.InterMedium,
           fontWeight: '500',
-        }}>
+        }}
+        allowFontScaling={false}>
         {props?.label}
       </Text>
       <View

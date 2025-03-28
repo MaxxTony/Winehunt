@@ -21,8 +21,10 @@ const ThankYou = props => {
         />
 
         {/* Thank You Text */}
-        <Text style={styles.thankYouText}>Thank you for your order</Text>
-        <Text style={styles.subText}>
+        <Text style={styles.thankYouText} allowFontScaling={false}>
+          Thank you for your order
+        </Text>
+        <Text style={styles.subText} allowFontScaling={false}>
           Your order has been successfully placed
         </Text>
 
@@ -34,28 +36,34 @@ const ThankYou = props => {
                 source={require('./images/order.png')}
                 style={styles.orderIcon}
               />
-              <Text style={styles.orderTitle}>Order Details</Text>
+              <Text style={styles.orderTitle} allowFontScaling={false}>
+                Order Details
+              </Text>
             </View>
-            <Text style={styles.orderId}>
+            <Text style={styles.orderId} allowFontScaling={false}>
               Order ID: {info?.payment_intent_id}
             </Text>
           </View>
 
-          <Text style={styles.infoText}>Rifqi Naufat</Text>
-          <Text style={styles.infoText}>
+          <Text style={styles.infoText} allowFontScaling={false}>
+            Rifqi Naufat
+          </Text>
+          <Text style={styles.infoText} allowFontScaling={false}>
             Address - 1901 Thornridge Cir. Shiloh, Hawaii 81063
           </Text>
-          <Text style={styles.infoText}>Mobile - +1 412 4562 234</Text>
+          <Text style={styles.infoText} allowFontScaling={false}>
+            Mobile - +1 412 4562 234
+          </Text>
 
           <View style={styles.separator} />
 
-          <Text style={styles.infoText}>
+          <Text style={styles.infoText} allowFontScaling={false}>
             Scheduled delivery: Saturday, 16th March
           </Text>
 
           <View style={styles.separator} />
 
-          <Text style={styles.infoText}>
+          <Text style={styles.infoText} allowFontScaling={false}>
             Payment Method: {info?.payment_method}
           </Text>
         </View>
@@ -66,7 +74,9 @@ const ThankYou = props => {
           <Pressable
             style={[styles.button, styles.continueButton]}
             onPress={() => navigation.navigate('Home')}>
-            <Text style={styles.buttonText}>Continue Shopping</Text>
+            <Text style={styles.buttonText} allowFontScaling={false}>
+              Continue Shopping
+            </Text>
           </Pressable>
         </View>
       </View>

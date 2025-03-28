@@ -195,7 +195,8 @@ const AddressList = () => {
                     color: Colors.black,
                     fontFamily: Fonts.InterMedium,
                     fontWeight: '600',
-                  }}>
+                  }}
+                  allowFontScaling={false}>
                   {item?.country_name} {item?.city}
                 </Text>
                 <Text
@@ -204,7 +205,8 @@ const AddressList = () => {
                     color: Colors.black,
                     fontFamily: Fonts.InterMedium,
                     fontWeight: '500',
-                  }}>
+                  }}
+                  allowFontScaling={false}>
                   {item?.state_name} {item?.street} {item?.zip_code}
                 </Text>
               </View>
@@ -257,7 +259,9 @@ const AddressList = () => {
             bounces={false}>
             <View style={[styles.modalContent, {paddingBottom: inset.bottom}]}>
               <View style={styles.dragIndicator} />
-              <Text style={styles.title}>Add Address</Text>
+              <Text style={styles.title} allowFontScaling={false}>
+                Add Address
+              </Text>
               {countries && countries.length > 0 && (
                 <Dropdown
                   style={styles.dropdown}

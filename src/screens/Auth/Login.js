@@ -98,18 +98,24 @@ const Login = () => {
             <Fontisto name="angle-left" size={20} color={Colors.black} />
           </Pressable>
           <View style={styles.content}>
-            <Text style={styles.title}>Enter Mobile Number</Text>
-            <Text style={styles.subtitle}>
+            <Text style={styles.title} allowFontScaling={false}>
+              Enter Mobile Number
+            </Text>
+            <Text style={styles.subtitle} allowFontScaling={false}>
               We have sent a text message with a one-time code to verify your
               phone number. Enter the code below
             </Text>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Mobile Number</Text>
+              <Text style={styles.inputLabel} allowFontScaling={false}>
+                Mobile Number
+              </Text>
               <View style={styles.inputWrapper}>
                 <Pressable
                   style={styles.countryPicker}
                   onPress={() => setShowPhoneCountryPicker(true)}>
-                  <Text style={styles.countryCode}>{phoneCountryCode}</Text>
+                  <Text style={styles.countryCode} allowFontScaling={false}>
+                    {phoneCountryCode}
+                  </Text>
                   <Entypo name="chevron-down" size={15} color={Colors.black} />
                 </Pressable>
                 <TextInput

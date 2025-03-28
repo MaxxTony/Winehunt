@@ -186,17 +186,19 @@ const Checkout = props => {
       />
       <Loader modalVisible={loading} setModalVisible={setLoading} />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.headerText}>
+        <Text style={styles.headerText} allowFontScaling={false}>
           Please confirm and submit your order
         </Text>
-        <Text style={styles.infoText}>
+        <Text style={styles.infoText} allowFontScaling={false}>
           By clicking submit order, you agree to Terms of Condition and Privacy
           Policy.
         </Text>
 
         {/* Payment Section */}
         <View style={styles.cardContainer}>
-          <Text style={styles.cardTitle}>Payment</Text>
+          <Text style={styles.cardTitle} allowFontScaling={false}>
+            Payment
+          </Text>
           <View style={styles.rowBetween}>
             <View style={styles.rowAlign}>
               {data?.paymentType?.image && (
@@ -205,7 +207,9 @@ const Checkout = props => {
                   style={styles.cardIcon}
                 />
               )}
-              <Text style={styles.text}>{data?.paymentType?.name}</Text>
+              <Text style={styles.text} allowFontScaling={false}>
+                {data?.paymentType?.name}
+              </Text>
             </View>
             <Text style={styles.text}>
               {new Date()
@@ -220,24 +224,42 @@ const Checkout = props => {
 
         {/* Shipping Address Section */}
         <View style={styles.cardContainer}>
-          <Text style={styles.cardTitle}>Shipping Address</Text>
-          <Text style={styles.text}>{data?.address?.address}</Text>
+          <Text style={styles.cardTitle} allowFontScaling={false}>
+            Shipping Address
+          </Text>
+          <Text style={styles.text} allowFontScaling={false}>
+            {data?.address?.address}
+          </Text>
         </View>
 
         {/* Order Summary Section */}
         <View style={styles.cardContainer}>
-          <Text style={styles.cardTitle}>Order Summary</Text>
+          <Text style={styles.cardTitle} allowFontScaling={false}>
+            Order Summary
+          </Text>
           <View style={styles.rowBetween}>
-            <Text style={styles.text}>SubTotal</Text>
-            <Text style={styles.amountText}>${formatAmount(data?.amount)}</Text>
+            <Text style={styles.text} allowFontScaling={false}>
+              SubTotal
+            </Text>
+            <Text style={styles.amountText} allowFontScaling={false}>
+              ${formatAmount(data?.amount)}
+            </Text>
           </View>
           <View style={styles.rowBetween}>
-            <Text style={styles.text}>Delivery</Text>
-            <Text style={styles.amountText}>${formatAmount(DELIVERY_FEE)}</Text>
+            <Text style={styles.text} allowFontScaling={false}>
+              Delivery
+            </Text>
+            <Text style={styles.amountText} allowFontScaling={false}>
+              ${formatAmount(DELIVERY_FEE)}
+            </Text>
           </View>
           <View style={styles.rowBetween}>
-            <Text style={styles.grandTotalText}>Grand Total</Text>
-            <Text style={styles.grandTotalAmount}>${TotalAmount}</Text>
+            <Text style={styles.grandTotalText} allowFontScaling={false}>
+              Grand Total
+            </Text>
+            <Text style={styles.grandTotalAmount} allowFontScaling={false}>
+              ${TotalAmount}
+            </Text>
           </View>
         </View>
       </ScrollView>

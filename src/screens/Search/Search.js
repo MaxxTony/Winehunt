@@ -229,7 +229,9 @@ const Search = () => {
         </View>
       ) : products.length === 0 ? (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <Text style={styles.noProductText}>No products found</Text>
+          <Text style={styles.noProductText} allowFontScaling={false}>
+            No products found
+          </Text>
         </View>
       ) : showMapType ? (
         <MapView
@@ -253,7 +255,9 @@ const Search = () => {
               {/* Custom Tooltip */}
               <Callout tooltip>
                 <View style={styles.calloutContainer}>
-                  <Text style={styles.shopName}>{marker.shopName}</Text>
+                  <Text style={styles.shopName} allowFontScaling={false}>
+                    {marker.shopName}
+                  </Text>
                 </View>
               </Callout>
             </Marker>

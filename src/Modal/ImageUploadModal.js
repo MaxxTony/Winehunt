@@ -27,14 +27,22 @@ const ImageUploadModal = ({
       isVisible={isImageModal}
       onBackdropPress={() => setIsImageModal(false)}>
       <View style={styles.modalContainer}>
-        <Text style={styles.modalTitle}>{heading}</Text>
-        <Text style={styles.modalDescription}>{desc}</Text>
+        <Text style={styles.modalTitle} allowFontScaling={false}>
+          {heading}
+        </Text>
+        <Text style={styles.modalDescription} allowFontScaling={false}>
+          {desc}
+        </Text>
         <View style={styles.buttonContainer}>
           <Pressable style={styles.button} onPress={onGalleryPress}>
-            <Text style={styles.buttonText}>Choose Photo</Text>
+            <Text style={styles.buttonText} allowFontScaling={false}>
+              Choose Photo
+            </Text>
           </Pressable>
           <Pressable style={styles.button} onPress={onCameraPress}>
-            <Text style={styles.buttonText}>Take Photo</Text>
+            <Text style={styles.buttonText} allowFontScaling={false}>
+              Take Photo
+            </Text>
           </Pressable>
         </View>
       </View>

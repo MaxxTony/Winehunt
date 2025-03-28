@@ -55,13 +55,17 @@ const Quiz = () => {
       <Text style={styles.quizTitle}>{item.title}</Text>
       {item.isComplete === 1 ? (
         <View style={styles.completeButton}>
-          <Text style={styles.completeText}>Completed</Text>
+          <Text style={styles.completeText} allowFontScaling={false}>
+            Completed
+          </Text>
         </View>
       ) : (
         <Pressable
           style={styles.startButton}
           onPress={() => navigation.navigate('Quizquestion', {data: item})}>
-          <Text style={styles.startText}>Start</Text>
+          <Text style={styles.startText} allowFontScaling={false}>
+            Start
+          </Text>
         </Pressable>
       )}
     </View>

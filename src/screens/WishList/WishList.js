@@ -161,7 +161,11 @@ const WishList = () => {
           />
         )}
         ListEmptyComponent={
-          !loading ? <Text style={styles.noDataText}>No data found</Text> : null
+          !loading ? (
+            <Text style={styles.noDataText} allowFontScaling={false}>
+              No data found
+            </Text>
+          ) : null
         }
       />
     </View>

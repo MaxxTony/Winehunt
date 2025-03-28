@@ -248,6 +248,35 @@ const WineDetail = props => {
     }
   };
 
+  const onsubmit = async () => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+
+    const url = Constants.baseUrl4 + Constants.tryProduct;
+
+    const body = {
+      product_id: detail?.id,
+    };
+
+    try {
+      const res = await axios.post(url, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.error);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    }
+  };
+
   return (
     <View
       style={[
@@ -305,7 +334,9 @@ const WineDetail = props => {
                 flexDirection: 'row',
                 alignItems: 'center',
               }}>
-              <Text style={styles.vendorName}>{detail?.user?.shop_name}</Text>
+              <Text style={styles.vendorName} allowFontScaling={false}>
+                {detail?.user?.shop_name}
+              </Text>
               <Pressable
                 style={{
                   padding: 3,
@@ -329,27 +360,35 @@ const WineDetail = props => {
                     fontFamily: Fonts.InterMedium,
                     fontWeight: '600',
                     color: Colors.white,
-                  }}>
+                  }}
+                  allowFontScaling={false}>
                   View Detail
                 </Text>
               </Pressable>
             </View>
             <View>
-              <Text style={styles.wineName} numberOfLines={1}>
+              <Text
+                style={styles.wineName}
+                numberOfLines={1}
+                allowFontScaling={false}>
                 {detail?.name}
               </Text>
-              <Text style={styles.wineName}>({detail?.title})</Text>
+              <Text style={styles.wineName} allowFontScaling={false}>
+                ({detail?.title})
+              </Text>
             </View>
             <View style={styles.priceRow}>
-              <Text style={styles.priceText}>
+              <Text style={styles.priceText} allowFontScaling={false}>
                 Price{' '}
-                <Text style={styles.priceValue}>
+                <Text style={styles.priceValue} allowFontScaling={false}>
                   £{detail?.price_mappings?.[0]?.price ?? '0.00'}
                 </Text>
               </Text>
               <View style={styles.ratingContainer}>
                 <AntDesign name="star" size={18} color={Colors.yellow} />
-                <Text style={styles.ratingText}>0</Text>
+                <Text style={styles.ratingText} allowFontScaling={false}>
+                  0
+                </Text>
               </View>
             </View>
             <View style={styles.buttonContainer}>
@@ -357,15 +396,22 @@ const WineDetail = props => {
                 <Pressable
                   style={styles.button}
                   onPress={() => setShowModal(true)}>
-                  <Text style={styles.buttonText}>Add To Cart</Text>
+                  <Text style={styles.buttonText} allowFontScaling={false}>
+                    Add To Cart
+                  </Text>
                 </Pressable>
               )}
 
               {detail?.cart_type?.includes(2) && (
                 <Pressable
                   style={styles.button}
-                  onPress={() => navigation.navigate('ScanWineCode')}>
-                  <Text style={styles.buttonText}>Try Me</Text>
+                  onPress={() => {
+                    // navigation.navigate('ScanWineCode')
+                    onsubmit();
+                  }}>
+                  <Text style={styles.buttonText} allowFontScaling={false}>
+                    Try Me
+                  </Text>
                 </Pressable>
               )}
             </View>
@@ -396,7 +442,8 @@ const WineDetail = props => {
                       fontSize: 16,
                       fontWeight: isActive ? 'bold' : 'normal',
                       color: isActive ? Colors.black : 'black',
-                    }}>
+                    }}
+                    allowFontScaling={false}>
                     {item.name}
                   </Text>
                 </Pressable>
@@ -410,7 +457,8 @@ const WineDetail = props => {
                   fontSize: 12,
                   fontFamily: Fonts.InterMedium,
                   color: Colors.black,
-                }}>
+                }}
+                allowFontScaling={false}>
                 {detail?.product_desc}
               </Text>
               <Text
@@ -418,7 +466,8 @@ const WineDetail = props => {
                   fontSize: 18,
                   fontFamily: Fonts.PhilosopherBold,
                   color: Colors.black,
-                }}>
+                }}
+                allowFontScaling={false}>
                 Suggested for you
               </Text>
               <FlatList
@@ -464,6 +513,7 @@ const WineDetail = props => {
                             color: Colors.black,
                             fontWeight: '700',
                           }}
+                          allowFontScaling={false}
                           numberOfLines={1}>
                           {item?.name} ({item?.title})
                         </Text>
@@ -472,7 +522,8 @@ const WineDetail = props => {
                             fontSize: 12,
                             fontFamily: Fonts.InterMedium,
                             color: Colors.gray,
-                          }}>
+                          }}
+                          allowFontScaling={false}>
                           Best Rated this Month
                         </Text>
                         <View
@@ -489,7 +540,8 @@ const WineDetail = props => {
                               fontFamily: Fonts.InterMedium,
                               color: Colors.white,
                               fontWeight: '700',
-                            }}>
+                            }}
+                            allowFontScaling={false}>
                             £{item?.price_mappings?.[0]?.price ?? '0.00'}
                           </Text>
                         </View>
@@ -531,7 +583,8 @@ const WineDetail = props => {
                   fontSize: 18,
                   fontFamily: Fonts.PhilosopherBold,
                   color: Colors.black,
-                }}>
+                }}
+                allowFontScaling={false}>
                 No Review Found yet
               </Text>
             </View>

@@ -29,7 +29,8 @@ const MileStone = () => {
               fontWeight: '500',
               fontSize: 18,
               textAlign: 'center',
-            }}>
+            }}
+            allowFontScaling={false}>
             Almost there! Come back when you reach the full score to get awesome
             deals!
           </Text>

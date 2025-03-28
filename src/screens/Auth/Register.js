@@ -325,7 +325,8 @@ const Register = ({route}) => {
                     color: Colors.black,
                     fontFamily: Fonts.InterRegular,
                     fontWeight: '500',
-                  }}>
+                  }}
+                  allowFontScaling={false}>
                   I agree to the Terms & Conditions
                 </Text>
               </View>

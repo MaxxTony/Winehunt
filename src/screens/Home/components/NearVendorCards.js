@@ -44,8 +44,12 @@ const NearVendorCards = ({item, navigation, userCoordinates}) => {
         style={styles.vendorImage}
       />
       <View style={styles.textContainer}>
-        <Text style={styles.vendorName}>{item?.shop_name}</Text>
-        <Text style={styles.vendorDescription}>Best Rated this Month</Text>
+        <Text style={styles.vendorName} allowFontScaling={false}>
+          {item?.shop_name}
+        </Text>
+        <Text style={styles.vendorDescription} allowFontScaling={false}>
+          Best Rated this Month
+        </Text>
         <View style={styles.ratingRow}>
           {/* <AntDesign name="star" size={15} color={Colors.yellow} /> */}
           {/* <Text style={styles.ratingText}>4.3 | 120 Review</Text> */}
@@ -54,7 +58,9 @@ const NearVendorCards = ({item, navigation, userCoordinates}) => {
       <View>
         <View style={styles.distanceRow}>
           <Feather name="navigation" size={15} color={Colors.black} />
-          <Text style={styles.distanceText}>{formattedDistance} Km</Text>
+          <Text style={styles.distanceText} allowFontScaling={false}>
+            {formattedDistance} Km
+          </Text>
         </View>
       </View>
     </Pressable>

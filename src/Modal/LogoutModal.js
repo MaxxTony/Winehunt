@@ -7,12 +7,16 @@ const LogoutModal = ({onLogout, onCancel}) => {
   return (
     <View style={styles.container}>
       <View style={styles.dragIndicator} />
-      <Text style={styles.title}>Logout ?</Text>
+      <Text style={styles.title} allowFontScaling={false}>
+        Logout ?
+      </Text>
       <Image
         source={require('../screens/Profile/images/map3.png')}
         style={styles.image}
       />
-      <Text style={styles.message}>Are you sure you want to Logout?</Text>
+      <Text style={styles.message} allowFontScaling={false}>
+        Are you sure you want to Logout?
+      </Text>
       <View style={styles.actionItem}>
         <WineHuntButton
           text="Cancel"

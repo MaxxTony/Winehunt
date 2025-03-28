@@ -139,8 +139,10 @@ const Otp = ({route}) => {
             <Fontisto name="angle-left" size={20} color={Colors.black} />
           </Pressable>
           <View style={styles.content}>
-            <Text style={styles.title}>Verify Your Phone {Info?.otp}</Text>
-            <Text style={styles.subtitle}>
+            <Text style={styles.title} allowFontScaling={false}>
+              Verify Your Phone {Info?.otp}
+            </Text>
+            <Text style={styles.subtitle} allowFontScaling={false}>
               We have sent a text message with a one time code to verify your
               phone number. Enter the code below
             </Text>
@@ -158,7 +160,7 @@ const Otp = ({route}) => {
                   onLayout={getCellOnLayoutHandler(index)}
                   key={index}
                   style={[styles.cellRoot, isFocused && styles.focusCell]}>
-                  <Text style={styles.cellText}>
+                  <Text style={styles.cellText} allowFontScaling={false}>
                     {symbol || (isFocused ? <Cursor /> : null)}
                   </Text>
                 </View>
@@ -167,9 +169,12 @@ const Otp = ({route}) => {
             {/* <Text style={styles.otptimer}>0:10</Text> */}
           </View>
           <View style={styles.footer}>
-            <Text style={styles.footerText}>
+            <Text style={styles.footerText} allowFontScaling={false}>
               Didn't receive the OTP?{' '}
-              <Text style={{color: Colors.red}} onPress={() => onResend()}>
+              <Text
+                style={{color: Colors.red}}
+                onPress={() => onResend()}
+                allowFontScaling={false}>
                 Resend OTP
               </Text>
             </Text>

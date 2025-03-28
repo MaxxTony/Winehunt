@@ -19,19 +19,28 @@ const WineCard = ({item, onPress}) => {
           style={styles.bottleImage}
         />
         <View style={styles.textContainer}>
-          <Text style={styles.title} numberOfLines={1}>
+          <Text style={styles.title} numberOfLines={1} allowFontScaling={false}>
             {item?.name}
           </Text>
-          <Text style={styles.subtitle}>
+          <Text style={styles.subtitle} allowFontScaling={false}>
             ({item?.user?.shop_name ? item?.user?.shop_name : 'Restaurant'})
           </Text>
-          <Text style={styles.description} numberOfLines={1}>
+          <Text
+            style={styles.description}
+            numberOfLines={1}
+            allowFontScaling={false}>
             {item?.name}{' '}
           </Text>
-          <Text style={styles.highlightedText}>({item?.title})</Text>
-          <Text style={styles.price}>$ {item?.price_mappings[0]?.price}</Text>
+          <Text style={styles.highlightedText} allowFontScaling={false}>
+            ({item?.title})
+          </Text>
+          <Text style={styles.price} allowFontScaling={false}>
+            $ {item?.price_mappings[0]?.price}
+          </Text>
           <Pressable style={styles.button} onPress={onPress}>
-            <Text style={styles.buttonText}>View More</Text>
+            <Text style={styles.buttonText} allowFontScaling={false}>
+              View More
+            </Text>
           </Pressable>
         </View>
       </View>

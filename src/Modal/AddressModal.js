@@ -69,7 +69,9 @@ const AddressModal = ({
           bounces={false}>
           <View style={[styles.modalContent, {paddingBottom: inset.bottom}]}>
             <View style={styles.dragIndicator} />
-            <Text style={styles.title}>Add Address</Text>
+            <Text style={styles.title} allowFontScaling={false}>
+              Add Address
+            </Text>
             <Dropdown
               style={styles.dropdown}
               placeholderStyle={styles.placeholderStyle}

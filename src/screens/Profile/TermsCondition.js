@@ -15,8 +15,8 @@ const TermsCondition = () => {
         onPress={() => navigation.goBack()}
       />
       <View style={{padding: 20, gap: 10}}>
-        <Text>Terms & Conditions</Text>
-        <Text>
+        <Text allowFontScaling={false}>Terms & Conditions</Text>
+        <Text allowFontScaling={false}>
           Contrary to popular belief, Lorem Ipsum is not simply random text. It
           has roots in a piece of classical Latin literature from 45 BC, making
           it over 2000 years old. Richard McClintock, a Latin professor at
@@ -25,7 +25,7 @@ const TermsCondition = () => {
           through the cites of the word in classical literature, discovered the
           undoubtable source.
         </Text>
-        <Text>
+        <Text allowFontScaling={false}>
           Contrary to popular belief, Lorem Ipsum is not simply random text. It
           has roots in a piece of classical Latin literature from 45 BC, making
           it over 2000 years old. Richard McClintock, a Latin professor at

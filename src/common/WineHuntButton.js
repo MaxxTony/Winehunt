@@ -8,7 +8,9 @@ const WineHuntButton = props => {
       style={[styles.submitButton, props?.extraButtonStyle]}
       onPress={props?.onPress}
       {...props}>
-      <Text style={[styles.submitButtonText, props?.extraTextStyle]}>
+      <Text
+        style={[styles.submitButtonText, props?.extraTextStyle]}
+        allowFontScaling={false}>
         {props?.text}
       </Text>
     </Pressable>

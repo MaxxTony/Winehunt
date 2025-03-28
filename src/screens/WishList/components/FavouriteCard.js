@@ -15,11 +15,17 @@ const FavouriteCard = ({item, type, onPress}) => {
             style={styles.vendorImage}
           />
           <View style={styles.textContainer}>
-            <Text style={styles.vendorName}>{item?.vendor?.shop_name}</Text>
-            <Text style={styles.vendorDescription}>Best Rated this Month</Text>
+            <Text style={styles.vendorName} allowFontScaling={false}>
+              {item?.vendor?.shop_name}
+            </Text>
+            <Text style={styles.vendorDescription} allowFontScaling={false}>
+              Best Rated this Month
+            </Text>
             <View style={styles.ratingRow}>
               <AntDesign name="star" size={15} color={Colors.yellow} />
-              <Text style={styles.ratingText}>4.3 | 120 Review</Text>
+              <Text style={styles.ratingText} allowFontScaling={false}>
+                4.3 | 120 Review
+              </Text>
             </View>
           </View>
           <View
@@ -37,7 +43,9 @@ const FavouriteCard = ({item, type, onPress}) => {
             </Pressable>
             <View style={styles.distanceRow}>
               <Feather name="navigation" size={15} color={Colors.black} />
-              <Text style={styles.distanceText}>2.5 Km</Text>
+              <Text style={styles.distanceText} allowFontScaling={false}>
+                2.5 Km
+              </Text>
             </View>
           </View>
         </View>
@@ -54,10 +62,12 @@ const FavouriteCard = ({item, type, onPress}) => {
           />
 
           <View style={styles.cardDetailsContainer}>
-            <Text style={styles.cardTitle}>
+            <Text style={styles.cardTitle} allowFontScaling={false}>
               {item?.product?.name} ({item?.product?.title})
             </Text>
-            <Text style={styles.cardPrice}>$12.00</Text>
+            <Text style={styles.cardPrice} allowFontScaling={false}>
+              $12.00
+            </Text>
             {/* <WineHuntButton
               text="Add to cart"
               extraButtonStyle={styles.addToCartButton}
@@ -76,7 +86,9 @@ const FavouriteCard = ({item, type, onPress}) => {
             </Pressable>
             <View style={styles.ratingContainer}>
               <AntDesign name="star" size={18} color={Colors.yellow} />
-              <Text style={styles.ratingText}>4.3</Text>
+              <Text style={styles.ratingText} allowFontScaling={false}>
+                4.3
+              </Text>
             </View>
           </View>
         </View>

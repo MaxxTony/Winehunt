@@ -32,6 +32,7 @@ const NewArrivalCard = ({onPress, item}) => {
           fontFamily: Fonts.InterRegular,
           fontWeight: '600',
         }}
+        allowFontScaling={false}
         numberOfLines={1}>
         {item?.title}
       </Text>
@@ -42,6 +43,7 @@ const NewArrivalCard = ({onPress, item}) => {
           fontFamily: Fonts.InterRegular,
           fontWeight: '600',
         }}
+        allowFontScaling={false}
         onPress={onPress}>
         View More
       </Text>

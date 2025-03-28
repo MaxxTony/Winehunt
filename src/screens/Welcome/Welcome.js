@@ -25,7 +25,8 @@ const Welcome = () => {
             fontSize: 34,
             fontFamily: Fonts.PhilosopherBold,
             color: Colors.black,
-          }}>
+          }}
+          allowFontScaling={false}>
           Congratulations
         </Text>
         <Text
@@ -33,7 +34,8 @@ const Welcome = () => {
             fontSize: 16,
             fontFamily: Fonts.InterBold,
             color: Colors.black,
-          }}>
+          }}
+          allowFontScaling={false}>
           Your account has been successfully created !!!
         </Text>
       </View>

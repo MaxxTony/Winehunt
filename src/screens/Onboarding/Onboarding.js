@@ -163,18 +163,26 @@ const Onboarding = () => {
             <TouchableOpacity
               style={styles.btn}
               onPress={() => navigation.navigate('AuthType')}>
-              <Text style={styles.btnText}>GET STARTED</Text>
+              <Text style={styles.btnText} allowFontScaling={false}>
+                GET STARTED
+              </Text>
             </TouchableOpacity>
           ) : (
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={[styles.btn, styles.transparentBtn]}
                 onPress={skipToLastSlide}>
-                <Text style={styles.transparentBtnText}>SKIP</Text>
+                <Text
+                  style={styles.transparentBtnText}
+                  allowFontScaling={false}>
+                  SKIP
+                </Text>
               </TouchableOpacity>
               <View style={styles.buttonSpacing} />
               <TouchableOpacity style={styles.btn} onPress={goToNextSlide}>
-                <Text style={styles.btnText}>NEXT</Text>
+                <Text style={styles.btnText} allowFontScaling={false}>
+                  NEXT
+                </Text>
               </TouchableOpacity>
             </View>
           )}

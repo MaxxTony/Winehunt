@@ -142,15 +142,15 @@ const Cart = () => {
                   resizeMode="contain"
                 />
                 <View style={styles.cartDetailsContainer}>
-                  <Text style={styles.itemName}>
+                  <Text style={styles.itemName} allowFontScaling={false}>
                     {item?.product?.name} ({item?.product?.title})
                   </Text>
-                  <Text style={styles.itemDescription}>
+                  <Text style={styles.itemDescription} allowFontScaling={false}>
                     Best Rated this Month
                   </Text>
                   <View style={styles.priceQuantityContainer}>
                     <View style={styles.priceTag}>
-                      <Text style={styles.priceText}>
+                      <Text style={styles.priceText} allowFontScaling={false}>
                         ${item?.product?.price_mappings?.price}
                       </Text>
                     </View>
@@ -165,7 +165,11 @@ const Cart = () => {
                           size={25}
                         />
                       </TouchableOpacity>
-                      <Text style={styles.quantityText}>{item?.quantity}</Text>
+                      <Text
+                        style={styles.quantityText}
+                        allowFontScaling={false}>
+                        {item?.quantity}
+                      </Text>
                       <TouchableOpacity
                         onPress={() => {
                           if (item?.quantity == 1) {
@@ -221,7 +225,8 @@ const Cart = () => {
                 color: Colors.black,
                 fontWeight: '600',
                 fontSize: 16,
-              }}>
+              }}
+              allowFontScaling={false}>
               Your WineHunt Cart is empty
             </Text>
           </View>
@@ -230,16 +235,28 @@ const Cart = () => {
       {cartData && cartData.length > 0 && (
         <View style={styles.summaryContainer}>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Sub Total</Text>
-            <Text style={styles.summaryValue}>${subtotal.toFixed(2)}</Text>
+            <Text style={styles.summaryLabel} allowFontScaling={false}>
+              Sub Total
+            </Text>
+            <Text style={styles.summaryValue} allowFontScaling={false}>
+              ${subtotal.toFixed(2)}
+            </Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Delivery</Text>
-            <Text style={styles.summaryValue}>${DELIVERY_FEE}</Text>
+            <Text style={styles.summaryLabel} allowFontScaling={false}>
+              Delivery
+            </Text>
+            <Text style={styles.summaryValue} allowFontScaling={false}>
+              ${DELIVERY_FEE}
+            </Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.totalLabel}>Grand Total</Text>
-            <Text style={styles.totalValue}>${grandTotal.toFixed(2)}</Text>
+            <Text style={styles.totalLabel} allowFontScaling={false}>
+              Grand Total
+            </Text>
+            <Text style={styles.totalValue} allowFontScaling={false}>
+              ${grandTotal.toFixed(2)}
+            </Text>
           </View>
           <WineHuntButton
             text="Next"

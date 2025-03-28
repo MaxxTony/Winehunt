@@ -90,10 +90,12 @@ const Quizquestion = props => {
         onPress={() => navigation.goBack()}
       />
       <View style={styles.quizInfoContainer}>
-        <Text style={styles.totalQuizText}>
+        <Text style={styles.totalQuizText} allowFontScaling={false}>
           Total Quiz: {quizInfo.quizzes.length}
         </Text>
-        <Text style={styles.timerText}>(Time: 10 sec)</Text>
+        <Text style={styles.timerText} allowFontScaling={false}>
+          (Time: 10 sec)
+        </Text>
       </View>
       <View style={styles.progressBarContainer}>
         {quizInfo?.quizzes?.map((_, index) => (
@@ -107,7 +109,7 @@ const Quizquestion = props => {
         ))}
       </View>
       <View style={styles.questionContainer}>
-        <Text style={styles.questionText}>
+        <Text style={styles.questionText} allowFontScaling={false}>
           {currentIndex + 1}. {quizInfo.quizzes[currentIndex]?.question}
         </Text>
         <FlatList
@@ -125,7 +127,8 @@ const Quizquestion = props => {
                 onPress={() => handleAnswerSelection(item, index)}
                 disabled={selectedAnswer !== null}>
                 <Text
-                  style={[styles.answerText, isSelected && {color: 'white'}]}>
+                  style={[styles.answerText, isSelected && {color: 'white'}]}
+                  allowFontScaling={false}>
                   {item.text}
                 </Text>
               </TouchableOpacity>
@@ -146,7 +149,9 @@ const Quizquestion = props => {
               }}>
               <AntDesign name="close" size={20} color={Colors.black} />
             </Pressable>
-            <Text style={styles.modalTitle}>Thank You for Playing!</Text>
+            <Text style={styles.modalTitle} allowFontScaling={false}>
+              Thank You for Playing!
+            </Text>
             <Image
               source={require('./images/score.png')}
               style={{height: 280, width: 280}}
@@ -156,7 +161,8 @@ const Quizquestion = props => {
               style={[
                 styles.modalScore,
                 {color: correctAnswers < 3 ? 'red' : 'green'},
-              ]}>
+              ]}
+              allowFontScaling={false}>
               You got {correctAnswers}/{quizInfo.quizzes.length}
             </Text>
             <WineHuntButton text={`Total Earn Milestones ${score}`} />

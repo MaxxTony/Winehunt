@@ -29,14 +29,18 @@ const ActionModal = ({
             source={require('../screens/Profile/images/editIcon2.png')}
             style={styles.icon}
           />
-          <Text style={styles.actionText}>Edit</Text>
+          <Text style={styles.actionText} allowFontScaling={false}>
+            Edit
+          </Text>
         </Pressable>
         <Pressable style={styles.actionItem} onPress={onDelete}>
           <Image
             source={require('../screens/Profile/images/trash.png')}
             style={styles.icon}
           />
-          <Text style={styles.actionText}>Delete</Text>
+          <Text style={styles.actionText} allowFontScaling={false}>
+            Delete
+          </Text>
         </Pressable>
       </View>
     </Modal>
