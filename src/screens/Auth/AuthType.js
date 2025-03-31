@@ -61,9 +61,13 @@ const AuthType = () => {
       source={require('../../../assets/images/LoginPage/ImgBg.png')}
       style={{flex: 1, resizeMode: 'cover', justifyContent: 'center'}}>
       <Text style={styles.logoText} allowFontScaling={false}>WineHunt</Text>
-
+      <View style={{marginLeft:32,marginBottom:-15}}>
+      <Text style={{color:'black',justifyContent:'flex-start',fontSize:14}} allowFontScaling={false}>Continue With Phone</Text>
+      </View>
       <View style={styles.overlay}>
+       
         <View style={styles.container}>
+        
           <SocialLoginButton
             onPress={() => navigation.navigate('Login')}
             icon={require('../../../assets/images/LoginPage/calls.png')}
@@ -148,7 +152,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
   },
   text: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
 });
