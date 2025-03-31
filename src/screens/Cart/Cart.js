@@ -21,6 +21,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from '../../helper/Constant';
 import {showWarning} from '../../helper/Toastify';
 import axios from 'axios';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const Cart = () => {
   const navigation = useNavigation();
@@ -114,10 +115,23 @@ const Cart = () => {
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
-      <BackNavigationWithTitle
+      {/* <BackNavigationWithTitle
         title="Add to cart"
         onPress={() => navigation.goBack()}
-      />
+      /> */}
+
+<View style={styles.con}>
+      {/* Back Button */}
+      <TouchableOpacity style={styles.backButton}>
+        <Icon name="chevron-back" size={20} color="black" onPress={() => navigation.goBack()} />
+        <Text style={styles.text}>Add to Cart</Text>
+      </TouchableOpacity>
+
+      {/* Favorite Button */}
+      <TouchableOpacity style={styles.favoriteButton}>
+        <Icon name="heart-outline" size={18} color="white" />
+      </TouchableOpacity>
+    </View>
       <ScrollView
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}>
@@ -142,15 +156,15 @@ const Cart = () => {
                   resizeMode="contain"
                 />
                 <View style={styles.cartDetailsContainer}>
-                  <Text style={styles.itemName}>
+                  <Text style={styles.itemName} allowFontScaling={false}>
                     {item?.product?.name} ({item?.product?.title})
                   </Text>
-                  <Text style={styles.itemDescription}>
+                  <Text style={styles.itemDescription} allowFontScaling={false}>
                     Best Rated this Month
                   </Text>
                   <View style={styles.priceQuantityContainer}>
                     <View style={styles.priceTag}>
-                      <Text style={styles.priceText}>
+                      <Text style={styles.priceText} allowFontScaling={false}>
                         ${item?.product?.price_mappings?.price}
                       </Text>
                     </View>
@@ -165,7 +179,7 @@ const Cart = () => {
                           size={25}
                         />
                       </TouchableOpacity>
-                      <Text style={styles.quantityText}>{item?.quantity}</Text>
+                      <Text style={styles.quantityText} allowFontScaling={false}>{item?.quantity}</Text>
                       <TouchableOpacity
                         onPress={() => {
                           if (item?.quantity == 1) {
@@ -200,6 +214,7 @@ const Cart = () => {
               placeholderTextColor={Colors.gray4}
               style={styles.couponInput}
               placeholder="Enter Promo Code/ Milestone reward"
+              allowFontScaling={false}
             />
             <WineHuntButton
               text="Apply"
@@ -211,6 +226,7 @@ const Cart = () => {
                 },
               ]}
               disabled={couponCode.length === 0}
+              allowFontScaling={false}
             />
           </View>
         ) : (
@@ -221,7 +237,7 @@ const Cart = () => {
                 color: Colors.black,
                 fontWeight: '600',
                 fontSize: 16,
-              }}>
+              }} allowFontScaling={false}>
               Your WineHunt Cart is empty
             </Text>
           </View>
@@ -230,16 +246,16 @@ const Cart = () => {
       {cartData && cartData.length > 0 && (
         <View style={styles.summaryContainer}>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Sub Total</Text>
-            <Text style={styles.summaryValue}>${subtotal.toFixed(2)}</Text>
+            <Text style={styles.summaryLabel} allowFontScaling={false}>Sub Total</Text>
+            <Text style={styles.summaryValue} allowFontScaling={false}>${subtotal.toFixed(2)}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Delivery</Text>
-            <Text style={styles.summaryValue}>${DELIVERY_FEE}</Text>
+            <Text style={styles.summaryLabel} allowFontScaling={false}>Delivery</Text>
+            <Text style={styles.summaryValue} allowFontScaling={false}>${DELIVERY_FEE}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.totalLabel}>Grand Total</Text>
-            <Text style={styles.totalValue}>${grandTotal.toFixed(2)}</Text>
+            <Text style={styles.totalLabel} allowFontScaling={false}>Grand Total</Text>
+            <Text style={styles.totalValue} allowFontScaling={false}>${grandTotal.toFixed(2)}</Text>
           </View>
           <WineHuntButton
             text="Next"
@@ -248,7 +264,7 @@ const Cart = () => {
                 total: grandTotal,
                 cartData: cartData,
               })
-            }
+            }allowFontScaling={false}
           />
         </View>
       )}
@@ -385,5 +401,30 @@ const styles = StyleSheet.create({
   totalValue: {
     fontWeight: '700',
     fontSize: 16,
+  },
+  con: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  text: {
+    fontSize: 16,
+    color: 'black',
+    marginLeft: 5,
+  },
+  favoriteButton: {
+    backgroundColor: '#d76a83', 
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -69,12 +69,12 @@ const Profile = () => {
       image: require('./images/help.png'),
       screen: 'HelpSupport',
     },
-    {
-      id: 7,
-      name: 'Subscription Plan',
-      image: require('./images/Terms.png'),
-      screen: 'Subscription',
-    },
+    // {
+    //   id: 7,
+    //   name: 'Subscription Plan',
+    //   image: require('./images/Terms.png'),
+    //   screen: 'Subscription',
+    // },
 
     {
       id: 9,
@@ -121,12 +121,12 @@ const Profile = () => {
             }
             style={styles.profileImage}
           />
-          <Text style={styles.profileName}>
+          <Text style={styles.profileName} allowFontScaling={false}>
             {' '}
             {userData?.first_name} {userData?.last_name}
           </Text>
         </View>
-        <Pressable
+        {/* <Pressable
           style={styles.milestoneContainer}
           onPress={() => navigation.navigate('MileStone')}>
           <Image
@@ -140,7 +140,7 @@ const Profile = () => {
             <Text style={styles.milestoneUserId}>User Id: WA@1234</Text>
           </View>
           <Entypo name="chevron-thin-right" size={20} color={Colors.black} />
-        </Pressable>
+        </Pressable> */}
         <View style={styles.optionsContainer}>
           <FlatList
             data={data}
@@ -169,7 +169,7 @@ const Profile = () => {
                         color:
                           index == data.length - 1 ? Colors.red : Colors.black,
                       },
-                    ]}>
+                    ]} allowFontScaling={false}>
                     {item?.name}
                   </Text>
                   {index !== data.length - 1 && (

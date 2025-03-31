@@ -4,7 +4,7 @@ import React from 'react';
 const EditAddress = () => {
   return (
     <View>
-      <Text>EditAddress</Text>
+      <Text allowFontScaling={false}>EditAddress</Text>
     </View>
   );
 };

@@ -52,16 +52,16 @@ const Quiz = () => {
   const renderQuizItem = ({item}) => (
     <View
       style={[styles.quizItem, item.isComplete === 1 && styles.completedQuiz]}>
-      <Text style={styles.quizTitle}>{item.title}</Text>
+      <Text style={styles.quizTitle} allowFontScaling={false}>{item.title}</Text>
       {item.isComplete === 1 ? (
         <View style={styles.completeButton}>
-          <Text style={styles.completeText}>Completed</Text>
+          <Text style={styles.completeText} allowFontScaling={false}>Completed</Text>
         </View>
       ) : (
         <Pressable
           style={styles.startButton}
           onPress={() => navigation.navigate('Quizquestion', {data: item})}>
-          <Text style={styles.startText}>Start</Text>
+          <Text style={styles.startText} allowFontScaling={false}>Start</Text>
         </Pressable>
       )}
     </View>
@@ -76,7 +76,7 @@ const Quiz = () => {
       <View style={styles.imageContainer}>
         <Image source={require('./images/quiz.png')} style={styles.quizImage} />
       </View>
-      <Text style={styles.heading}>Available Quizzes</Text>
+      <Text style={styles.heading} allowFontScaling={false}>Available Quizzes</Text>
       <FlatList
         data={quizList}
         keyExtractor={item => item.id.toString()}
@@ -87,8 +87,9 @@ const Quiz = () => {
             refreshing={refreshing}
             onRefresh={onRefresh}
             colors={[Colors.red]}
+
           />
-        }
+        }allowFontScaling={false}
       />
     </View>
   );
@@ -161,4 +162,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
+  quizTitle:{
+    color:'black'
+  }
 });

@@ -101,7 +101,7 @@ const Home = () => {
           />
         </Pressable>
         <View style={styles.userInfo}>
-          <Text style={styles.userName}>
+          <Text style={styles.userName} allowFontScaling={false}>
             {userData?.first_name} {userData?.last_name}
           </Text>
           <View style={styles.userLocationContainer}>
@@ -110,7 +110,7 @@ const Home = () => {
               style={styles.locationIcon}
               resizeMode="contain"
             />
-            <Text style={styles.userLocationText} numberOfLines={1}>
+            <Text style={styles.userLocationText} numberOfLines={1} allowFontScaling={false}>
               {userData?.address
                 ? userData.address.length > 20
                   ? userData.address.slice(0, 25).concat('...')
@@ -172,9 +172,9 @@ const Home = () => {
           )}
         </View>
         <View style={styles.card}>
-      <Text style={styles.title}>Play Quiz</Text>
+      <Text style={styles.title} allowFontScaling={false}>Play Quiz</Text>
       <Pressable style={styles.button} onPress={() => navigation.navigate("Quiz")}>
-        <Text style={styles.buttonText}>Start</Text>
+        <Text style={styles.buttonText} allowFontScaling={false}>Start</Text>
       </Pressable>
     </View>
         <View style={styles.contentContainer}>
@@ -259,12 +259,13 @@ const Home = () => {
               />
             )}
           />
-          <HeadingWithLink
+          {/* <HeadingWithLink
             title="New Arrival"
             onPress={() =>
               navigation.navigate('NewArrival', {data: homeData?.newArrivals})
             }
-          />
+          /> */}
+          <Text style={{color:'black',fontSize:18,fontWeight: '500', fontFamily: Fonts.PhilosopherBold,}}>New Arrival</Text>
           <FlatList
             data={homeData?.newArrivals?.slice(0, 5)}
             horizontal

@@ -33,7 +33,7 @@ const Welcome = () => {
             fontSize: 16,
             fontFamily: Fonts.InterBold,
             color: Colors.black,
-          }}>
+          }} allowFontScaling={false}>
           Your account has been successfully created !!!
         </Text>
       </View>
@@ -41,6 +41,7 @@ const Welcome = () => {
         <WineHuntButton
           text="Continue"
           onPress={() => navigation.navigate('TabNavigator')}
+          allowFontScaling={false}
         />
       </View>
     </View>

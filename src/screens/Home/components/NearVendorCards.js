@@ -44,18 +44,19 @@ const NearVendorCards = ({item, navigation, userCoordinates}) => {
         style={styles.vendorImage}
       />
       <View style={styles.textContainer}>
-        <Text style={styles.vendorName}>{item?.shop_name}</Text>
-        <Text style={styles.vendorDescription}>Best Rated this Month</Text>
+        <Text style={styles.vendorName} allowFontScaling={false}>{item?.shop_name}</Text>
+        <Text style={styles.vendorDescription} allowFontScaling={false}>Best Rated this Month</Text>
         <View style={styles.ratingRow}>
-          {/* <AntDesign name="star" size={15} color={Colors.yellow} /> */}
-          {/* <Text style={styles.ratingText}>4.3 | 120 Review</Text> */}
+           <AntDesign name="star" size={15} color={Colors.yellow}  allowFontScaling={false}/> 
+           <Text style={styles.ratingText} allowFontScaling={false}>4.3 | 120 Review</Text>
+           <View style={styles.distanceRow}>
+          <Feather name="navigation" size={15} color={Colors.black} allowFontScaling={false}/>
+          <Text style={styles.distanceText} allowFontScaling={false}>{formattedDistance} Km</Text>
+        </View>
         </View>
       </View>
       <View>
-        <View style={styles.distanceRow}>
-          <Feather name="navigation" size={15} color={Colors.black} />
-          <Text style={styles.distanceText}>{formattedDistance} Km</Text>
-        </View>
+      
       </View>
     </Pressable>
   );
@@ -110,12 +111,13 @@ const styles = StyleSheet.create({
     color: Colors.gray7,
     fontFamily: Fonts.InterRegular,
     fontWeight: '400',
-    fontSize: 12,
+    fontSize: 10,
   },
   distanceRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+     alignItems: 'center',
     gap: 5,
+    marginLeft:22
   },
   distanceText: {
     color: Colors.black,

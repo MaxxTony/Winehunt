@@ -184,6 +184,7 @@ const EditProfile = () => {
                 style={styles.textInput}
                 placeholder="User First Name"
                 placeholderTextColor={Colors.gray4}
+                allowFontScaling={false}
               />
             </View>
             <View style={styles.inputContainer}>
@@ -194,6 +195,7 @@ const EditProfile = () => {
                 style={styles.textInput}
                 placeholder="User Last Name"
                 placeholderTextColor={Colors.gray4}
+                allowFontScaling={false}
               />
             </View>
             <View style={styles.inputContainer}>
@@ -209,13 +211,14 @@ const EditProfile = () => {
                 placeholder="User Email"
                 placeholderTextColor={Colors.gray4}
                 keyboardType="email-address"
+                allowFontScaling={false}
               />
             </View>
             <View style={styles.phoneInputContainer}>
               <Pressable
                 style={styles.phoneCountryCodeContainer}
                 onPress={() => setShowPhoneCountryPicker(true)}>
-                <Text style={styles.phoneCountryCodeText}>
+                <Text style={styles.phoneCountryCodeText} allowFontScaling={false}>
                   {phoneCountryCode}
                 </Text>
                 <Entypo name="chevron-down" size={15} color={Colors.red} />
@@ -228,11 +231,12 @@ const EditProfile = () => {
                 keyboardType="number-pad"
                 maxLength={10}
                 style={styles.phoneInput}
+                allowFontScaling={false}
               />
             </View>
 
             <View style={styles.updateButtonContainer}>
-              <WineHuntButton text="Update" onPress={() => onSubmit()} />
+              <WineHuntButton text="Update" onPress={() => onSubmit()} allowFontScaling={false} />
             </View>
           </View>
           <CountryPicker
@@ -243,6 +247,7 @@ const EditProfile = () => {
             withFlagButton={false}
             withFilter={true}
             withAlphaFilter
+            allowFontScaling={false}
           />
         </View>
 

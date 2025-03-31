@@ -14,7 +14,7 @@ const Subscription = () => {
       />
 
       <View style={styles.container1}>
-        <Text style={styles.heading}>Benefits of going pro :</Text>
+        <Text style={styles.heading} allowFontScaling={false}>Benefits of going pro :</Text>
         <View style={styles.benefitsContainer}>
           {Array(4)
             .fill(
@@ -27,12 +27,12 @@ const Subscription = () => {
                   style={styles.checkIcon}
                 />
                 {/* <Text style={styles.checkIcon}>✔</Text> */}
-                <Text style={styles.benefitText}>{item}</Text>
+                <Text style={styles.benefitText} allowFontScaling={false}>{item}</Text>
               </View>
             ))}
         </View>
 
-        <Text style={styles.subHeading}>Subscribe now</Text>
+        <Text style={styles.subHeading} allowFontScaling={false}>Subscribe now</Text>
 
         <TouchableOpacity
           style={[
@@ -40,10 +40,10 @@ const Subscription = () => {
             selectedPlan === 'free' && styles.selectedPlan,
           ]}
           onPress={() => setSelectedPlan('free')}>
-          <Text style={styles.planTitle}>
+          <Text style={styles.planTitle} allowFontScaling={false}>
             Free <Text style={styles.price}>0$/month</Text>
           </Text>
-          <Text style={styles.planDesc}>Get 10% platform free for 10 days</Text>
+          <Text style={styles.planDesc} allowFontScaling={false}>Get 10% platform free for 10 days</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -51,14 +51,14 @@ const Subscription = () => {
             styles.planBox,
             selectedPlan === 'monthly' && styles.selectedPlan,
           ]}
-          onPress={() => setSelectedPlan('monthly')}>
+          onPress={() => setSelectedPlan('monthly')} allowFontScaling={false}>
           <View style={styles.planRow}>
-            <Text style={styles.planTitle}>
+            <Text style={styles.planTitle} allowFontScaling={false}>
               Monthly <Text style={styles.price}>8$/month</Text>
             </Text>
-            <Text style={styles.discount}>25% off</Text>
+            <Text style={styles.discount} allowFontScaling={false}>25% off</Text>
           </View>
-          <Text style={styles.planDesc}>
+          <Text style={styles.planDesc} allowFontScaling={false}>
             You pay one time and can cancel it at any time
           </Text>
         </TouchableOpacity>
@@ -68,21 +68,21 @@ const Subscription = () => {
             styles.planBox,
             selectedPlan === 'yearly' && styles.selectedPlan,
           ]}
-          onPress={() => setSelectedPlan('yearly')}>
-          <Text style={styles.planTitle}>
+          onPress={() => setSelectedPlan('yearly')} allowFontScaling={false}>
+          <Text style={styles.planTitle} allowFontScaling={false}>
             Yearly <Text style={styles.price}>80$/month</Text>
           </Text>
-          <Text style={styles.planDesc}>
+          <Text style={styles.planDesc} allowFontScaling={false}>
             You pay one time and can cancel it at any time
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.subscribeButton}>
-          <Text style={styles.subscribeButtonText}>Subscribe Now</Text>
-          <Text style={styles.subscribePrice}>$08/Month</Text>
+          <Text style={styles.subscribeButtonText} allowFontScaling={false}>Subscribe Now</Text>
+          <Text style={styles.subscribePrice} allowFontScaling={false}>$08/Month</Text>
         </TouchableOpacity>
 
-        <Text style={styles.cancelText}>
+        <Text style={styles.cancelText} allowFontScaling={false}>
           You can cancel subscription any time
         </Text>
       </View>
@@ -99,14 +99,14 @@ const styles = StyleSheet.create({
   },
   container1: {padding: 20, backgroundColor: '#fff', flex: 1},
   heading: {fontSize: 16, fontWeight: 'bold', marginBottom: 10, color: 'black'},
-  benefitsContainer: {marginBottom: 20, marginTop: 10},
+  benefitsContainer: {marginBottom: 20, marginTop: 10,marginRight:5},
   benefitItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 10,
   },
   checkIcon: {color: 'red', marginRight: 8, width: 24, height: 24},
-  benefitText: {fontSize: 14, color: '#555'},
+  benefitText: {fontSize: 14, color: '#555',marginRight:10},
   subHeading: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     height: 85,
   },
   selectedPlan: {borderColor: 'red', backgroundColor: '#fee'},
-  planTitle: {fontSize: 16, fontWeight: 'bold'},
+  planTitle: {fontSize: 16, fontWeight: 'bold',color:'black'},
   price: {color: 'red'},
   planDesc: {fontSize: 12, color: '#777'},
   planRow: {

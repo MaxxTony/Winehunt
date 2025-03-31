@@ -34,7 +34,7 @@ const TabNavigator = () => {
           },
           tabBarHideOnKeyboard: true,
           tabBarLabelPosition: 'below-icon',
-        })}>
+        })} allowFontScaling={false}>
         <Tab.Screen
           name="Home"
           component={Home}
@@ -57,7 +57,7 @@ const TabNavigator = () => {
                 </Text>
               </View>
             ),
-          }}
+          }}allowFontScaling={false}
         />
         <Tab.Screen
           name="Search"
@@ -81,7 +81,7 @@ const TabNavigator = () => {
                 </Text>
               </View>
             ),
-          }}
+          }} allowFontScaling={false}
         />
         <Tab.Screen
           name="Cart"
@@ -106,7 +106,7 @@ const TabNavigator = () => {
                 </Text>
               </View>
             ),
-          }}
+          }} allowFontScaling={false}
         />
         <Tab.Screen
           name="Favorite"
@@ -131,7 +131,7 @@ const TabNavigator = () => {
                 </Text>
               </View>
             ),
-          }}
+          }} allowFontScaling={false}
         />
         <Tab.Screen
           name="Profile"
@@ -156,7 +156,7 @@ const TabNavigator = () => {
                 </Text>
               </View>
             ),
-          }}
+          }} allowFontScaling={false}
         />
       </Tab.Navigator>
     </View>

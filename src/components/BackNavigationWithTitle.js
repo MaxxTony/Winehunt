@@ -22,7 +22,7 @@ const BackNavigationWithTitle = props => {
             color: Colors.black,
             fontFamily: Fonts.InterMedium,
             fontWeight: '500',
-          }}>
+          }} allowFontScaling={false}>
           {props?.title}
         </Text>
       </Pressable>
@@ -36,7 +36,7 @@ const BackNavigationWithTitle = props => {
               color: Colors.red2,
               fontFamily: Fonts.InterMedium,
               fontWeight: '500',
-            }}>
+            }}allowFontScaling={false}>
             {props?.rightText}
           </Text>
         </Pressable>

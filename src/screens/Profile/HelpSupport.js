@@ -107,18 +107,21 @@ const HelpSupport = () => {
               onChangeText={setName}
               placeholder="Enter Your Name"
               label="Name"
+              allowFontScaling={false}
             />
             <WineHuntLabelInput
               value={email}
               onChangeText={setEmail}
               placeholder="Enter Your Email"
               label="Email"
+              allowFontScaling={false}
             />
             <WineHuntLabelInput
               value={title}
               onChangeText={setTitle}
               placeholder="Enter Your Title"
               label="Title"
+              allowFontScaling={false}
             />
             <WineHuntLabelInput
               value={message}
@@ -127,12 +130,14 @@ const HelpSupport = () => {
               label="Your Query"
               extraInputStyle={{height: 100, verticalAlign: 'top'}}
               multiline
+              allowFontScaling={false}
             />
             <View style={styles.buttonContainer}>
               <WineHuntButton
                 text="Submit"
                 onPress={onSubmit}
                 loading={loading}
+                allowFontScaling={false}
               />
             </View>
           </View>

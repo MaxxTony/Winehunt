@@ -28,7 +28,7 @@ const ScanWineCode = () => {
               color: Colors.red,
               fontWeight: '500',
               fontSize: 18,
-            }}>
+            }} allowFontScaling={false}>
             Scan OR Code
           </Text>
           <Text
@@ -36,7 +36,7 @@ const ScanWineCode = () => {
               fontFamily: Fonts.InterMedium,
               color: Colors.black,
               fontSize: 15,
-            }}>
+            }} allowFontScaling={false}>
             Book your table or room on the vendor’s website (link will be
             provided by the vendor). Show this QR code at reception to increase
             your Milestone score and apply the discount!
@@ -45,6 +45,7 @@ const ScanWineCode = () => {
             text="Go Back"
             extraButtonStyle={{paddingHorizontal: 50}}
             onPress={() => navigation.goBack()}
+            allowFontScaling={false}
           />
         </View>
       </View>

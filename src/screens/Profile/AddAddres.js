@@ -4,7 +4,7 @@ import React from 'react';
 const AddAddres = () => {
   return (
     <View>
-      <Text>AddAddres</Text>
+      <Text allowFontScaling={false}>AddAddres</Text>
     </View>
   );
 };

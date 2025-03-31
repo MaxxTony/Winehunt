@@ -195,7 +195,7 @@ const AddressList = () => {
                     color: Colors.black,
                     fontFamily: Fonts.InterMedium,
                     fontWeight: '600',
-                  }}>
+                  }} allowFontScaling={false}>
                   {item?.country_name} {item?.city}
                 </Text>
                 <Text
@@ -204,7 +204,7 @@ const AddressList = () => {
                     color: Colors.black,
                     fontFamily: Fonts.InterMedium,
                     fontWeight: '500',
-                  }}>
+                  }} allowFontScaling={false}>
                   {item?.state_name} {item?.street} {item?.zip_code}
                 </Text>
               </View>
@@ -257,7 +257,7 @@ const AddressList = () => {
             bounces={false}>
             <View style={[styles.modalContent, {paddingBottom: inset.bottom}]}>
               <View style={styles.dragIndicator} />
-              <Text style={styles.title}>Add Address</Text>
+              <Text style={styles.title} allowFontScaling={false}>Add Address</Text>
               {countries && countries.length > 0 && (
                 <Dropdown
                   style={styles.dropdown}
@@ -296,28 +296,28 @@ const AddressList = () => {
                 onChangeText={setCity}
                 style={styles.input}
                 placeholder="City"
-                placeholderTextColor={Colors.gray10}
+                placeholderTextColor={Colors.gray10} allowFontScaling={false}
               />
               <TextInput
                 value={flat}
                 onChangeText={setFlat}
                 style={styles.input}
                 placeholder="Flat/Block"
-                placeholderTextColor={Colors.gray10}
+                placeholderTextColor={Colors.gray10} allowFontScaling={false}
               />
               <TextInput
                 value={area}
                 onChangeText={setArea}
                 style={styles.input}
                 placeholder="Apartment/Street/Area"
-                placeholderTextColor={Colors.gray10}
+                placeholderTextColor={Colors.gray10} allowFontScaling={false}
               />
               <TextInput
                 value={pincode}
                 onChangeText={setPincode}
                 style={styles.input}
                 placeholder="ZIP Code"
-                placeholderTextColor={Colors.gray10}
+                placeholderTextColor={Colors.gray10} allowFontScaling={false}
               />
               {/* <View style={styles.currentLocationContainer}>
               <FontAwesome6
@@ -329,7 +329,7 @@ const AddressList = () => {
                 Use My Current Location
               </Text>
             </View> */}
-              <WineHuntButton text="Save" onPress={() => addAddress()} />
+              <WineHuntButton text="Save" onPress={() => addAddress()} allowFontScaling={false} />
             </View>
           </ScrollView>
         </KeyboardAvoidingView>

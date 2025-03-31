@@ -16,7 +16,7 @@ const HeadingWithLink = props => {
           fontFamily: Fonts.PhilosopherBold,
           fontWeight: '500',
           fontSize: 18,
-        }}>
+        }} allowFontScaling={false}>
         {props?.title}
       </Text>
       <Text
@@ -26,7 +26,7 @@ const HeadingWithLink = props => {
           fontWeight: '500',
           fontSize: 15,
         }}
-        onPress={props?.onPress}>
+        onPress={props?.onPress} allowFontScaling={false}>
         See all
       </Text>
     </View>

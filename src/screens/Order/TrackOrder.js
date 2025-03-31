@@ -4,7 +4,7 @@ import React from 'react';
 const TrackOrder = () => {
   return (
     <View>
-      <Text>TrackOrder</Text>
+      <Text allowFontScaling={false}>TrackOrder</Text>
     </View>
   );
 };

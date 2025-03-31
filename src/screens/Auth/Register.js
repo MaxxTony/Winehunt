@@ -226,7 +226,7 @@ const Register = ({route}) => {
       if (res?.status == 200) {
         await AsyncStorage.setItem('userDetail', JSON.stringify(res?.data));
         showSucess(res?.data?.message);
-        navigation.navigate('TabNavigator');
+        navigation.navigate('Congratulations');
       }
     } catch (error) {
       if (error.response) {

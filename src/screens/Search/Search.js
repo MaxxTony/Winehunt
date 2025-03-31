@@ -174,8 +174,9 @@ const Search = () => {
             value={searchText}
             onChangeText={e => setSearchText(e)}
             style={styles.searchInput}
-            placeholder="Search by cultivars/wines/vendors"
+            placeholder="Search by cultivars"
             placeholderTextColor={Colors.gray9}
+            allowFontScaling={false}
           />
           {searchText.length > 0 && (
             <AntDesign
@@ -229,7 +230,7 @@ const Search = () => {
         </View>
       ) : products.length === 0 ? (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <Text style={styles.noProductText}>No products found</Text>
+          <Text style={styles.noProductText} allowFontScaling={false}>No products found</Text>
         </View>
       ) : showMapType ? (
         <MapView

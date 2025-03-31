@@ -15,21 +15,21 @@ const FeatureWindeCard = ({item, onPress}) => {
           style={styles.bottleImage}
         />
         <View style={styles.textContainer}>
-          <Text style={styles.title} numberOfLines={1}>
+          <Text style={styles.title} numberOfLines={1} allowFontScaling={false}>
             {item?.title}
           </Text>
-          <Text style={styles.subtitle} numberOfLines={1}>
+          <Text style={styles.subtitle} numberOfLines={1} allowFontScaling={false}>
             {item?.user?.shop_name}
           </Text>
-          <Text style={styles.description} numberOfLines={1}>
+          <Text style={styles.description} numberOfLines={1} allowFontScaling={false}>
             {item?.name}{' '}
-            <Text style={styles.highlightedText}>{item?.type?.name}</Text>
+            <Text style={styles.highlightedText} allowFontScaling={false}>{item?.type?.name}</Text>
           </Text>
-          <Text style={styles.price} numberOfLines={1}>
+          <Text style={styles.price} numberOfLines={1} allowFontScaling={false}>
             $ {item?.price_mappings[0]?.price}
           </Text>
           <Pressable style={styles.button} onPress={onPress}>
-            <Text style={styles.buttonText}>View More</Text>
+            <Text style={styles.buttonText} allowFontScaling={false}>View More</Text>
           </Pressable>
         </View>
       </View>

@@ -137,7 +137,7 @@ const VendorDetail = props => {
         onPress={() => handleContactPress(item.name)}>
         <Image source={item.image} style={styles.contactImage} />
       </Pressable>
-      <Text style={styles.contactOptionText}>{item.name}</Text>
+      <Text style={styles.contactOptionText} allowFontScaling={false}>{item.name}</Text>
     </View>
   );
 
@@ -237,7 +237,10 @@ const VendorDetail = props => {
           <Pressable
             style={styles.backButton}
             onPress={() => navigation.goBack()}>
-            <Fontisto name="angle-left" size={20} color={Colors.white} />
+            <Fontisto name="angle-left" size={20} color={Colors.white} allowFontScaling={false}
+
+
+/>
           </Pressable>
           <View style={styles.headerInfoContainer}>
             <Image
@@ -254,12 +257,19 @@ const VendorDetail = props => {
                   name="navigate-outline"
                   size={18}
                   color={Colors.black}
+                  allowFontScaling={false}
                 />
-                <Text style={styles.infoText}>{formattedDistance}km</Text>
+                <Text style={styles.infoText} allowFontScaling={false}
+
+
+>{formattedDistance}km</Text>
               </View>
               <View style={styles.infoItem}>
-                <AntDesign name="star" size={18} color={Colors.yellow} />
-                <Text style={styles.infoText}>{detail?.total_reviews}</Text>
+                <AntDesign name="star" size={18} color={Colors.yellow} allowFontScaling={false} />
+                <Text style={styles.infoText} allowFontScaling={false}
+
+
+>{detail?.total_reviews}</Text>
               </View>
               <Pressable
                 style={styles.favoriteButton}
@@ -280,18 +290,18 @@ const VendorDetail = props => {
           </View>
         </ImageBackground>
         <View style={styles.contentContainer}>
-          <Text style={styles.vendorName}>{detail?.shop_name}</Text>
+          <Text style={styles.vendorName} allowFontScaling={false}>{detail?.shop_name}</Text>
           <View style={styles.locationContainer}>
-            <Ionicons name="location-outline" size={15} color={Colors.gray} />
-            <Text style={styles.locationText}>{detail?.address}</Text>
+            <Ionicons name="location-outline" size={15} color={Colors.gray} allowFontScaling={false} />
+            <Text style={styles.locationText} allowFontScaling={false}>{detail?.address}</Text>
           </View>
-          <Text style={styles.description}>{detail?.description}</Text>
+          <Text style={styles.description} allowFontScaling={false}>{detail?.description}</Text>
           <View>
             {detail &&
               detail?.business_hours?.map(item => (
                 <Text key={item.id} style={styles.openStatus}>
                   Open {'  '}
-                  <Text style={styles.openTime}>
+                  <Text style={styles.openTime} allowFontScaling={false}>
                     {item.weekday} {formatTime(item.open_time)} to{' '}
                     {formatTime(item.close_time)}
                   </Text>
@@ -306,7 +316,7 @@ const VendorDetail = props => {
             renderItem={renderContactOption}
           />
           <View style={styles.separator} />
-          <Text style={styles.sectionTitle}>Product for you</Text>
+          <Text style={styles.sectionTitle} allowFontScaling={false}>Product for you</Text>
           <FlatList
             data={detail?.products}
             renderItem={({item, index}) => {
@@ -323,7 +333,7 @@ const VendorDetail = props => {
                   />
                   <View style={styles.productDetails}>
                     <View style={styles.productHeader}>
-                      <Text style={styles.productTitle} numberOfLines={1}>
+                      <Text style={styles.productTitle} numberOfLines={1} allowFontScaling={false}>
                         {item?.name} ({item?.title})
                       </Text>
                       <Pressable
@@ -343,14 +353,14 @@ const VendorDetail = props => {
                         />
                       </Pressable>
                     </View>
-                    <Text style={styles.productTag}>Best Rated this Month</Text>
+                    <Text style={styles.productTag} allowFontScaling={false}>Best Rated this Month</Text>
                     <View style={styles.productFooter}>
                       <Pressable
                         style={styles.viewMoreButton}
                         onPress={() =>
                           navigation.navigate('WineDetail', {item: item?.id})
                         }>
-                        <Text style={styles.viewMoreText}>View More</Text>
+                        <Text style={styles.viewMoreText} allowFontScaling={false}>View More</Text>
                       </Pressable>
                       <View style={styles.ratingContainer}>
                         <AntDesign
@@ -358,7 +368,7 @@ const VendorDetail = props => {
                           size={18}
                           color={Colors.yellow}
                         />
-                        <Text style={styles.infoText}>
+                        <Text style={styles.infoText} allowFontScaling={false}>
                           {item?.average_rating}
                         </Text>
                       </View>
@@ -369,7 +379,7 @@ const VendorDetail = props => {
             }}
           />
 
-          <Text style={styles.sectionTitle}>Offers</Text>
+          <Text style={styles.sectionTitle} allowFontScaling={false}>Offers</Text>
 
           {detail && detail?.length > 0 && detail?.offers.length > 0 ? (
             <FlatList
@@ -386,20 +396,20 @@ const VendorDetail = props => {
                       borderColor: Colors.gray10,
                       borderRadius: 10,
                     }}>
-                    <Text>{item?.name}</Text>
+                    <Text allowFontScaling={false}>{item?.name}</Text>
                   </View>
                 );
               }}
             />
           ) : (
-            <Text
+            <Text 
               style={{
                 fontSize: 16,
                 color: Colors.black,
                 fontFamily: Fonts.InterBold,
                 fontWeight: '400',
                 textAlign: 'center',
-              }}>
+              }} allowFontScaling={false}>
               No offers at this time{' '}
             </Text>
           )}
@@ -409,7 +419,7 @@ const VendorDetail = props => {
               alignItems: 'center',
               justifyContent: 'space-between',
             }}>
-            <Text style={styles.sectionTitle}>Review (0)</Text>
+            <Text style={styles.sectionTitle} allowFontScaling={false}>Review (0)</Text>
             {/* <Text
               style={{
                 fontSize: 14,
@@ -420,7 +430,7 @@ const VendorDetail = props => {
             </Text> */}
           </View>
           {detail && detail?.length > 0 && detail?.reviews.length > 0 ? (
-            <Text>There is a review</Text>
+            <Text allowFontScaling={false}>There is a review</Text>
           ) : (
             <Text
               style={{
@@ -504,18 +514,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   openTime: {color: Colors.gray4, fontSize: 12, fontWeight: '400'},
-  contactList: {gap: 20},
-  contactOptionContainer: {alignItems: 'center', gap: 5},
+  contactList: {gap:40},
+  contactOptionContainer: {alignItems: 'center',justifyContent:'space-around' },
   contactOptionIcon: {
     padding: 10,
     borderWidth: 1,
     alignItems: 'center',
     borderRadius: 100,
     borderColor: Colors.gray4,
+    justifyContent:"space-between"
   },
   contactImage: {height: 20, width: 20},
   contactOptionText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: Fonts.InterRegular,
     color: Colors.black,
   },
