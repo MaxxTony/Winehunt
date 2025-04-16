@@ -175,9 +175,22 @@ const Home = () => {
           )}
         </View>
         <View style={styles.card}>
-          <Text style={styles.title} allowFontScaling={false}>
-            Play Quiz
-          </Text>
+          <View style={styles.quizInfo}>
+            <Text style={styles.title} allowFontScaling={false}>
+              Play Quiz
+            </Text>
+            <Text style={styles.milestoneText} allowFontScaling={false}>
+              Milestone: {userData?.milestone || 0} / 40 Points
+            </Text>
+            <View style={styles.progressBarContainer}>
+              <View
+                style={[
+                  styles.progressBar,
+                  {width: `${((userData?.milestone || 0) / 40) * 100}%`},
+                ]}
+              />
+            </View>
+          </View>
           <Pressable
             style={styles.button}
             onPress={() => navigation.navigate('Quiz')}>
@@ -421,7 +434,7 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: '#000',
+    backgroundColor: Colors.red2,
     padding: 20,
     borderRadius: 10,
     flexDirection: 'row',
@@ -450,5 +463,25 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
     color: '#000',
+  },
+  quizInfo: {
+    flex: 1,
+    marginRight: 10,
+  },
+  milestoneText: {
+    fontSize: 14,
+    color: '#fff',
+    fontFamily: Fonts.InterRegular,
+    marginBottom: 10,
+  },
+  progressBarContainer: {
+    height: 8,
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#FFD700', // Gold color for progress
   },
 });

@@ -16,13 +16,14 @@ import Fontisto from 'react-native-vector-icons/Fontisto';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {Colors, Fonts} from '../../../constant/Styles';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Constants from '../../../helper/Constant';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showSucess, showWarning} from '../../../helper/Toastify';
 import axios from 'axios';
 import haversine from 'haversine';
+import AnimatedCartModal from '../components/AnimatedCartModal';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -43,6 +44,7 @@ const formatTime = time => {
 const VendorDetail = props => {
   const navigation = useNavigation();
   const data = props?.route?.params?.item;
+  const isFocused = useIsFocused();
 
   const userCoords = props?.route?.params?.userCoordinates;
 
@@ -53,10 +55,35 @@ const VendorDetail = props => {
   const [likedItems, setLikedItems] = useState({});
 
   const [vendorCoordinates, setVendorCoordinates] = useState({});
+  const [cartData, setCartData] = useState([]);
+
+  const [isCartVisible, setIsCartVisible] = useState(false);
 
   useEffect(() => {
     getVendorDetail();
   }, []);
+
+  useEffect(() => {
+    if (isFocused) getCartData();
+  }, [isFocused]);
+
+  const getCartData = async () => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl8 + Constants.getCart;
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      setCartData(res?.data?.cart);
+    } catch (error) {
+      showWarning(error.response?.data?.message || 'Error fetching cart');
+    }
+  };
 
   const getVendorDetail = async () => {
     const info = await AsyncStorage.getItem('userDetail');
@@ -465,6 +492,42 @@ const VendorDetail = props => {
           )}
         </View>
       </ScrollView>
+
+      {cartData?.length > 0 && (
+        <Pressable
+          style={{
+            position: 'absolute',
+            bottom: 20,
+            alignSelf: 'center',
+            width: '60%',
+            paddingVertical: 12,
+            backgroundColor: Colors.blue,
+            borderRadius: 25,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.2,
+            shadowRadius: 3,
+            elevation: 5,
+          }}
+          onPress={() => setIsCartVisible(true)}>
+          <Text
+            style={{
+              color: Colors.white,
+              textAlign: 'center',
+              fontSize: 16,
+              fontWeight: 'bold',
+            }}>
+            View Cart ({cartData.length} items)
+          </Text>
+        </Pressable>
+      )}
+
+      <AnimatedCartModal
+        visible={isCartVisible}
+        cartData={cartData}
+        onClose={() => setIsCartVisible(false)}
+        navigation={navigation}
+      />
     </View>
   );
 };

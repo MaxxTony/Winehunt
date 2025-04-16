@@ -234,7 +234,8 @@ const WineDetail = props => {
       if (res?.data?.status === 200) {
         setShowModal(false);
         showSucess(res?.data?.message);
-        navigation.navigate('Cart');
+        // navigation.navigate('Cart');
+        navigation.goBack();
       }
     } catch (error) {
       if (error.response) {
