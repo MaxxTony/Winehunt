@@ -23,6 +23,7 @@ const Constants = {
   login: 'login-with-otp',
   verifyOtp: 'verify-otp',
   register: 'register-user',
+  socialLogin:"social-authentication",
   home: 'get-home',
   profile: 'get-profile',
   editProfile: 'edit-profile',

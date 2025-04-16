@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">WineHunt</string>
+    <string name="facebook_app_id">1405021084021588</string>
+<string name="fb_login_protocol_scheme">fb1405021084021588</string>
+<string name="facebook_client_token">4f7fbd05c1a9629b8aa812541f363f60</string>
              <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyAvhOv_MIWS7k1W7Fm9UZR-9TGXQCVS91Q</string>
 
 </resources>

@@ -1,7 +1,7 @@
 export const Key = {
   apiKey: 'AIzaSyAvhOv_MIWS7k1W7Fm9UZR-9TGXQCVS91Q',
   webClientId:
-    '974351416688-65s2rqq806dcnp86jd1p08k1k3u9h1pl.apps.googleusercontent.com',
+    '974351416688-tbaq6pq3egd0rfbuf3nletfnou6l2sal.apps.googleusercontent.com',
   stripeKey:
     'pk_test_51Qw8YSEw5S69YHnUh9iCw3NHODK8YENTXNtb6wfH04eAGMEhXEiF99knlDmMSXZs3MN017xrDgYg3x0zxXyy6mw100ILShFbnR',
 

@@ -117,6 +117,8 @@ dependencies {
      implementation('com.google.firebase:firebase-analytics')
      implementation("com.google.firebase:firebase-auth-ktx:22.1.2")
      implementation 'com.stripe:stripe-android:20.48.4'
+    implementation 'com.facebook.android:facebook-android-sdk:12.1.2'
+
 
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
