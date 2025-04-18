@@ -7,6 +7,7 @@ import Search from '../screens/Search/Search';
 import Cart from '../screens/Cart/Cart';
 import WishList from '../screens/WishList/WishList';
 import Profile from '../screens/Profile/Profile';
+import Order from '../screens/Order/Order';
 
 const Tab = createBottomTabNavigator();
 
@@ -109,13 +110,13 @@ const TabNavigator = () => {
           }}
         />
         <Tab.Screen
-          name="Favorite"
-          component={WishList}
+          name="Order"
+          component={Order}
           options={{
             tabBarIcon: ({focused}) => (
               <View style={styles.tabBarIconContainer}>
                 <Image
-                  source={require('../../assets/images/TabNavigatorImages/wishlist.png')}
+                  source={require('../../assets/images/TabNavigatorImages/shop.png')}
                   style={[
                     styles.tabBarIconImage,
                     {tintColor: focused ? Colors.red : Colors.black},
@@ -127,7 +128,7 @@ const TabNavigator = () => {
                     styles.tabBarIconText,
                     {color: focused ? Colors.red : Colors.black},
                   ]}>
-                  Favorite
+                  Shop
                 </Text>
               </View>
             ),
