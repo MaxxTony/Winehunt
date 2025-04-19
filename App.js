@@ -13,7 +13,6 @@ import Key from './src/utils/Key';
 
 const App = () => {
   LogBox.ignoreAllLogs();
-  //console.log('keeeeyyyyyyy', Key.stripeKey);
   return (
     <StripeProvider
       publishableKey={Key.stripeKey}

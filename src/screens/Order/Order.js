@@ -16,9 +16,9 @@ const Order = () => {
       <BackNavigationWithTitle
         title="Order"
         onPress={() => navigation.goBack()}
-        rightIcon={true}
-        rightText="Clear All"
-        onPressRightIcon={() => onClearAll()}
+        // rightIcon={true}
+        // rightText="Clear All"
+        // onPressRightIcon={() => onClearAll()}
         extraStyle={styles.backNavigationExtraStyle}
       />
       <View style={styles.switchContainer}>
@@ -40,7 +40,7 @@ const Order = () => {
           data={Array.from({length: 20})}
           renderItem={({item, index}) => {
             return (
-              <View style={styles.cardContainer}>
+                <Pressable style={styles.cardContainer} onPress={() => navigation.navigate("OrderDetail")}>
                 <View style={styles.topSection}>
                   <Image
                     source={require('./images/wine.png')}
@@ -71,7 +71,7 @@ const Order = () => {
                     <Text style={styles.bottomBtnText}>Get Invoice</Text>
                   </Pressable>
                 </View>
-              </View>
+              </Pressable>
             );
           }}
         />
@@ -81,7 +81,7 @@ const Order = () => {
           data={Array.from({length: 20})}
           renderItem={({item, index}) => {
             return (
-              <View style={styles.cardContainer}>
+              <Pressable style={styles.cardContainer} onPress={() => navigation.navigate("OrderDetail")}>
                 <View style={styles.topSection}>
                   <Image
                     source={require('./images/wine.png')}
@@ -102,7 +102,7 @@ const Order = () => {
                     <Text style={styles.priceText}>£12.00</Text>
                   </View>
                 </View>
-              </View>
+              </Pressable>
             );
           }}
         />
