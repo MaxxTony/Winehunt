@@ -61,7 +61,7 @@ const Order = () => {
                     <Text style={styles.priceText}>£12.00</Text>
                   </View>
                 </View>
-                <View style={styles.divider} />
+                {/* <View style={styles.divider} />
                 <View style={styles.bottomButtons}>
                   <Pressable style={styles.bottomBtn}>
                     <Text style={styles.bottomBtnText}>Track Order</Text>
@@ -70,7 +70,7 @@ const Order = () => {
                   <Pressable style={styles.bottomBtn}>
                     <Text style={styles.bottomBtnText}>Get Invoice</Text>
                   </Pressable>
-                </View>
+                </View> */}
               </Pressable>
             );
           }}

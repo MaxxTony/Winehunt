@@ -38,7 +38,7 @@ const Home = () => {
   const [homeData, setHomeData] = useState([]);
   const dispatch = useDispatch();
   const {userData} = useSelector(state => state.profile);
-
+ 
   useEffect(() => {
     getHomePageData();
   }, []);
@@ -125,7 +125,7 @@ const Home = () => {
         <View style={styles.actionIcons}>
           <Pressable onPress={() => navigation.navigate('ScanCode')}>
             <Image
-              source={require('./images/scanner.png')}
+              source={require('./images/scanner2.png')}
               style={styles.icon}
             />
           </Pressable>

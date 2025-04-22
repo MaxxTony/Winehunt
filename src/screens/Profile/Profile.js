@@ -122,11 +122,11 @@ const Profile = () => {
             style={styles.profileImage}
           />
           <Text style={styles.profileName} allowFontScaling={false}>
-            {' '}
+    
             {userData?.first_name} {userData?.last_name}
           </Text>
         </View>
-        <Pressable
+        {/* <Pressable
           style={styles.milestoneContainer}
           onPress={() => navigation.navigate('MileStone')}>
           <Image
@@ -142,7 +142,7 @@ const Profile = () => {
             </Text>
           </View>
           <Entypo name="chevron-thin-right" size={20} color={Colors.black} />
-        </Pressable>
+        </Pressable> */}
         <View style={styles.optionsContainer}>
           <FlatList
             data={data}

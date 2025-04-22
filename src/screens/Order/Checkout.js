@@ -160,6 +160,8 @@ const Checkout = props => {
         })) || [],
     };
 
+    console.log(param);
+
     const url = Constants.baseUrl9 + Constants.createOrder;
     try {
       const response = await axios.post(url, param, {
