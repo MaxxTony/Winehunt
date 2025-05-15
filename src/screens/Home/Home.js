@@ -38,7 +38,7 @@ const Home = () => {
   const [homeData, setHomeData] = useState([]);
   const dispatch = useDispatch();
   const {userData} = useSelector(state => state.profile);
- 
+
   useEffect(() => {
     getHomePageData();
   }, []);
@@ -124,10 +124,17 @@ const Home = () => {
         </View>
         <View style={styles.actionIcons}>
           <Pressable onPress={() => navigation.navigate('ScanCode')}>
-            <Image
-              source={require('./images/scanner2.png')}
-              style={styles.icon}
-            />
+            {userData?.milestone == 40 ? (
+              <Image
+                source={require('./images/scanner.png')}
+                style={styles.icon}
+              />
+            ) : (
+              <Image
+                source={require('./images/scanner2.png')}
+                style={styles.icon}
+              />
+            )}
           </Pressable>
           <Pressable onPress={() => navigation.navigate('Notifications')}>
             <Image
@@ -198,6 +205,27 @@ const Home = () => {
               Start
             </Text>
           </Pressable>
+        </View>
+        <View
+          style={[styles.card, {marginTop: 0, backgroundColor: Colors.blue}]}>
+          <View style={styles.quizInfo}>
+            <Text
+              style={[styles.title, {textAlign: 'center'}]}
+              allowFontScaling={false}>
+              Milestone point score
+            </Text>
+            <Text style={styles.milestoneText} allowFontScaling={false}>
+              Milestone: {userData?.milestone || 0} / 10 Points
+            </Text>
+            <View style={styles.progressBarContainer}>
+              <View
+                style={[
+                  styles.progressBar,
+                  {width: `${((userData?.milestone || 0) / 40) * 100}%`},
+                ]}
+              />
+            </View>
+          </View>
         </View>
         <View style={styles.contentContainer}>
           <MultiSwitch
