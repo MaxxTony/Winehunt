@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    paddingHorizontal: 20,
+    // paddingHorizontal: 20,
   },
   imageContainer: {
     alignItems: 'center',
@@ -124,6 +124,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     paddingBottom: 20,
+    paddingHorizontal: 20,
   },
   quizItem: {
     backgroundColor: '#f8f8f8',
