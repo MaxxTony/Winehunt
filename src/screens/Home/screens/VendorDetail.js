@@ -91,7 +91,7 @@ const VendorDetail = props => {
     const url = Constants.baseUrl5 + Constants.vendorDetail;
     setLoading(true);
     const body = {
-      vendor_id: data?.product?.user_id ? data?.product?.user_id :  data?.id,
+      vendor_id: data?.product?.user_id ? data?.product?.user_id : data?.id,
     };
     try {
       const res = await axios.post(url, body, {
@@ -424,39 +424,42 @@ const VendorDetail = props => {
             Offers
           </Text>
 
-          {detail && detail?.length > 0 && detail?.offers.length > 0 ? (
-            <FlatList
-              data={detail?.offers}
-              horizontal
-              contentContainerStyle={{gap: 10}}
-              showsHorizontalScrollIndicator={false}
-              renderItem={({item, index}) => {
-                return (
-                  <View
-                    style={{
-                      padding: 10,
-                      borderWidth: 1,
-                      borderColor: Colors.gray10,
-                      borderRadius: 10,
-                    }}>
-                    <Text allowFontScaling={false}>{item?.name}</Text>
-                  </View>
-                );
-              }}
-            />
-          ) : (
-            <Text
-              style={{
-                fontSize: 16,
-                color: Colors.black,
-                fontFamily: Fonts.InterBold,
-                fontWeight: '400',
-                textAlign: 'center',
-              }}
-              allowFontScaling={false}>
-              No offers at this time{' '}
-            </Text>
-          )}
+          <FlatList
+            data={detail?.offers || []}
+            horizontal
+            keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={{
+              gap: 10,
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+            }}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({item}) => (
+              <View
+                style={{
+                  padding: 10,
+                  borderWidth: 1,
+                  borderColor: Colors.gray10,
+                  borderRadius: 10,
+                }}>
+                <Text allowFontScaling={false}>{item?.name}</Text>
+              </View>
+            )}
+            ListEmptyComponent={() => (
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: Colors.grayDark,
+                  fontFamily: Fonts.InterMedium,
+                  textAlign: 'center',
+                  paddingVertical: 16,
+                }}
+                allowFontScaling={false}>
+                No offers at this time
+              </Text>
+            )}
+          />
+
           <View
             style={{
               flexDirection: 'row',

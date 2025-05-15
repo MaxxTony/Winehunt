@@ -1,24 +1,67 @@
 import {FlatList, Image, Pressable, StyleSheet, Text, View} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors, Fonts} from '../../constant/Styles';
 import {MultiSwitch} from 'react-native-multiswitch-selector';
+import Constants from '../../helper/Constant';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import {showWarning} from '../../helper/Toastify';
 
 const Order = () => {
   const navigation = useNavigation();
   const inset = useSafeAreaInsets();
   const [type, setType] = useState('Current Order');
+  const [loading, setLoading] = useState(false);
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    getOrders();
+  }, [type]);
+
+  const getOrders = async () => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl9 + Constants.getOrders;
+    setLoading(true);
+
+    const body = type === 'Current Order' ? {status: 1} : undefined;
+
+    try {
+      const res = await axios.post(url, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (res?.status === 200) {
+        const ordersData = res?.data?.response?.data || [];
+
+        // If you want to display one card per order
+        setOrders(ordersData);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <BackNavigationWithTitle
         title="Order"
         onPress={() => navigation.goBack()}
-        // rightIcon={true}
-        // rightText="Clear All"
-        // onPressRightIcon={() => onClearAll()}
         extraStyle={styles.backNavigationExtraStyle}
       />
       <View style={styles.switchContainer}>
@@ -34,79 +77,116 @@ const Order = () => {
           styleInactiveStateText={styles.inactiveStateText}
         />
       </View>
-      {type === 'Current Order' ? (
-        <FlatList
-          contentContainerStyle={{padding: 20, gap: 10}}
-          data={Array.from({length: 20})}
-          renderItem={({item, index}) => {
-            return (
-                <Pressable style={styles.cardContainer} onPress={() => navigation.navigate("OrderDetail")}>
-                <View style={styles.topSection}>
-                  <Image
-                    source={require('./images/wine.png')}
-                    style={styles.productImage}
-                    resizeMode="contain"
-                  />
-                  <View style={styles.middleSection}>
-                    <Text style={styles.productName}>
-                      Eva (White Grape-juice)
-                    </Text>
-                    <Text style={styles.productSize}>Size: M</Text>
-                  </View>
-                  <View style={styles.rightSection}>
-                    <Pressable style={styles.cancelButton}>
-                      <Text style={styles.cancelButtonText}>Cancel Order</Text>
-                    </Pressable>
-                    <Text style={styles.refundText}>Refund</Text>
-                    <Text style={styles.priceText}>£12.00</Text>
-                  </View>
-                </View>
-                {/* <View style={styles.divider} />
-                <View style={styles.bottomButtons}>
-                  <Pressable style={styles.bottomBtn}>
-                    <Text style={styles.bottomBtnText}>Track Order</Text>
-                  </Pressable>
-                  <View style={styles.verticalDivider} />
-                  <Pressable style={styles.bottomBtn}>
-                    <Text style={styles.bottomBtnText}>Get Invoice</Text>
-                  </Pressable>
-                </View> */}
-              </Pressable>
-            );
-          }}
-        />
-      ) : (
-        <FlatList
-          contentContainerStyle={{padding: 20, gap: 10}}
-          data={Array.from({length: 20})}
-          renderItem={({item, index}) => {
-            return (
-              <Pressable style={styles.cardContainer} onPress={() => navigation.navigate("OrderDetail")}>
-                <View style={styles.topSection}>
-                  <Image
-                    source={require('./images/wine.png')}
-                    style={styles.productImage}
-                    resizeMode="contain"
-                  />
-                  <View style={styles.middleSection}>
-                    <Text style={styles.productName}>
-                      Eva (White Grape-juice)
-                    </Text>
-                    <Text style={styles.productSize}>Size: M</Text>
-                  </View>
-                  <View style={styles.rightSection}>
-                    <Pressable style={styles.cancelButton}>
-                      <Text style={styles.cancelButtonText}>Place Order</Text>
-                    </Pressable>
 
-                    <Text style={styles.priceText}>£12.00</Text>
-                  </View>
-                </View>
-              </Pressable>
-            );
-          }}
-        />
-      )}
+      <FlatList
+        contentContainerStyle={{padding: 20, gap: 10}}
+        data={orders}
+        onRefresh={getOrders}
+        showsVerticalScrollIndicator={false}
+        refreshing={loading}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({item}) => {
+          return (
+            <Pressable
+              style={styles.cardContainer}
+              onPress={() => navigation.navigate('OrderDetail', {item: item})}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}>
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    color: Colors.black,
+                    marginBottom: 10,
+                  }}>
+                  Order ID: {item.id}
+                </Text>
+                <Text
+                  style={{
+                    padding: 8,
+                    backgroundColor: Colors.green2,
+                    borderRadius: 40,
+                    paddingHorizontal: 16,
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: '600',
+                  }}>
+                  {item?.status}
+                </Text>
+              </View>
+              {item &&
+                item?.order_items &&
+                item?.order_items.map((orderItem, index) => {
+                  const imageUri = orderItem?.product?.images?.[0]?.image;
+                  return (
+                    <View key={index} style={styles.topSection}>
+                      <Image
+                        source={{uri: imageUri}}
+                        style={styles.productImage}
+                        resizeMode="contain"
+                      />
+                      <View style={styles.middleSection}>
+                        <Text style={styles.productName} numberOfLines={1}>
+                          {orderItem.product_name}
+                        </Text>
+                        <Text style={styles.productSize}>
+                          Size: {orderItem.size}
+                        </Text>
+                        <Text style={styles.productSize}>
+                          Qty: {orderItem.quantity}
+                        </Text>
+                      </View>
+                      <View style={styles.rightSection}>
+                        <Text style={styles.priceText}>£{orderItem.price}</Text>
+                      </View>
+                    </View>
+                  );
+                })}
+              <View
+                style={{
+                  height: 1,
+                  width: '100%',
+                  backgroundColor: Colors.gray11,
+                }}
+              />
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'flex-end',
+                  marginTop: 10,
+                  gap: 50,
+                }}>
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: 16,
+                    color: Colors.black,
+                  }}>
+                  Total
+                </Text>
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: 16,
+                    color: Colors.blue,
+                  }}>
+                  £
+                  {item?.order_items
+                    ?.reduce((sum, i) => {
+                      const price = parseFloat(i.price) || 0;
+                      const qty = parseInt(i.quantity) || 0;
+                      return sum + price * qty;
+                    }, 0)
+                    .toFixed(2)}
+                </Text>
+              </View>
+            </Pressable>
+          );
+        }}
+      />
     </View>
   );
 };
@@ -153,85 +233,66 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontSize: 14,
   },
+
   cardContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
     borderRadius: 15,
-    margin: 10,
     padding: 15,
-    elevation: 5,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: {width: 0, height: 2},
+    shadowRadius: 4,
   },
   topSection: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 15,
+    marginBottom: 10,
   },
   productImage: {
-    width: 50,
+    width: 60,
     height: 90,
+    borderRadius: 8,
+    backgroundColor: '#f2f2f2',
   },
   middleSection: {
     flex: 1,
     justifyContent: 'center',
-    gap: 5,
+    gap: 4,
   },
   productName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#000',
+    color: Colors.black,
   },
   productSize: {
-    fontSize: 14,
-    color: '#000',
+    fontSize: 13,
+    color: '#555',
   },
   rightSection: {
     alignItems: 'flex-end',
-    justifyContent: 'space-between',
     gap: 5,
   },
   cancelButton: {
-    backgroundColor: '#326EFF',
+    backgroundColor: Colors.blue,
     paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 10,
+    paddingHorizontal: 10,
+    borderRadius: 8,
   },
   cancelButtonText: {
-    color: '#fff',
+    color: Colors.white,
     fontSize: 12,
     fontWeight: '500',
   },
   refundText: {
-    color: '#326EFF',
+    color: Colors.blue,
+    fontSize: 12,
     textDecorationLine: 'underline',
-    fontSize: 14,
   },
   priceText: {
     color: '#A62222',
     fontWeight: '700',
     fontSize: 16,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#ccc',
-    marginVertical: 10,
-  },
-  bottomButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  bottomBtn: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  bottomBtnText: {
-    color: '#D34343',
-    fontSize: 15,
-    fontWeight: '600',
-    textDecorationLine: 'underline',
-  },
-  verticalDivider: {
-    width: 1,
-    height: '100%',
-    backgroundColor: '#ccc',
   },
 });

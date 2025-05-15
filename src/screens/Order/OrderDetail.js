@@ -1,5 +1,5 @@
 import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {Colors, Fonts} from '../../constant/Styles';
 import {useNavigation} from '@react-navigation/native';
@@ -7,12 +7,21 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Feather from 'react-native-vector-icons/Feather';
 import WineHuntLabelInput from '../../common/WineHuntLabelInput';
 
-const OrderDetail = () => {
+const OrderDetail = props => {
+  const data = props?.route?.params?.item;
+
   const navigation = useNavigation();
   const inset = useSafeAreaInsets();
   const [orderId, setOrderId] = useState('');
   const [trakingNumber, setTrakingNumber] = useState('');
   const [trakingLink, setTrakingLink] = useState('');
+  const shippingCharge = 20;
+
+  const formatDate = isoString => {
+    const date = new Date(isoString);
+    const options = {day: '2-digit', month: 'long', year: 'numeric'};
+    return `Date: ${date.toLocaleDateString('en-GB', options)}`;
+  };
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
@@ -20,11 +29,13 @@ const OrderDetail = () => {
         title="Order Detail"
         onPress={() => navigation.goBack()}
       />
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <View style={styles.orderInfo}>
             <Text style={styles.orderId}>Orders ID: 9900423</Text>
-            <Text style={styles.orderDate}>Date: 02 April, 2025</Text>
+            <Text style={styles.orderDate}>{formatDate(data?.created_at)}</Text>
           </View>
           <Text style={styles.downloadText}>Download Invoice</Text>
         </View>
@@ -35,37 +46,41 @@ const OrderDetail = () => {
 
           <View style={styles.row}>
             <Text style={styles.label}>Sub Total</Text>
-            <Text style={styles.label}>£12.00</Text>
+            <Text style={styles.label}>${data?.amount}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Shipping Charges</Text>
-            <Text style={styles.label}>£20</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Other Tax</Text>
-            <Text style={styles.label}>£0</Text>
+            <Text style={styles.label}>${shippingCharge}</Text>
           </View>
 
           <View style={styles.divider} />
 
           <View style={styles.row}>
             <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.label}>£12.00</Text>
+            <Text style={styles.label}>
+              ${parseFloat(data?.amount) + shippingCharge}
+            </Text>
           </View>
         </View>
 
         <View style={styles.summaryCard}>
           <Text style={styles.summaryTitle}>Shipping Information</Text>
           <View style={styles.divider} />
-          <Text style={styles.label}>Alex Pathic</Text>
-          <Text style={styles.label}>305 Block B, Down Street, Arizona</Text>
+          <Text style={styles.label}>
+            {data?.user?.first_name} {data?.user?.last_name}
+          </Text>
+          <Text style={styles.label}>
+            {data?.shipping_address?.country_name}{' '}
+            {data?.shipping_address?.city} {data?.shipping_address?.state_name}{' '}
+            {data?.shipping_address?.city} {data?.shipping_address?.block}
+          </Text>
           <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
             <Feather name="phone" size={18} color={Colors.black} />
-            <Text style={styles.label}>+1 202-555-0123</Text>
+            <Text style={styles.label}>{data?.user?.phone}</Text>
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
             <Feather name="mail" size={18} color={Colors.black} />
-            <Text style={styles.label}>alex@example.com</Text>
+            <Text style={styles.label}>{data?.user?.email}</Text>
           </View>
         </View>
         <View style={styles.summaryCard}>
@@ -85,7 +100,7 @@ const OrderDetail = () => {
                   fontWeight: '600',
                   fontSize: 16,
                 }}>
-                Credit Card
+                {data?.payment_method}
               </Text>
               <Text
                 style={{

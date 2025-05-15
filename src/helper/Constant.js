@@ -47,6 +47,7 @@ const Constants = {
   updateAddress: 'update-address',
   CategoryProduct: 'category-product',
   tryProduct: 'generate-try-me-qr',
+  getOrders:"get-user-orders"
 };
 
 export default Constants;
