@@ -23,8 +23,8 @@ const Payment = props => {
 
   const types = [
     {id: 1, name: 'Credit Card', image: require('./images/c1.png')},
-    {id: 2, name: 'Google Pay', image: require('./images/c2.png')},
-    {id: 3, name: 'UPI Method', image: require('./images/c3.png')},
+    // {id: 2, name: 'Google Pay', image: require('./images/c2.png')},
+    // {id: 3, name: 'UPI Method', image: require('./images/c3.png')},
   ];
 
   const [selectedPayment, setSelectedPayment] = useState(types[0]);

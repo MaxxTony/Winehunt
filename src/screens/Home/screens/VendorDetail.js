@@ -91,7 +91,7 @@ const VendorDetail = props => {
     const url = Constants.baseUrl5 + Constants.vendorDetail;
     setLoading(true);
     const body = {
-      vendor_id: data?.id,
+      vendor_id: data?.product?.user_id ? data?.product?.user_id :  data?.id,
     };
     try {
       const res = await axios.post(url, body, {

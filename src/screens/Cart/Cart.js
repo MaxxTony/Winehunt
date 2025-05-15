@@ -2,6 +2,7 @@ import {
   FlatList,
   Image,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,9 +11,13 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useIsFocused,
+  useNavigation,
+} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors, Fonts} from '../../constant/Styles';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -21,6 +26,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from '../../helper/Constant';
 import {showWarning} from '../../helper/Toastify';
 import axios from 'axios';
+import {useDispatch, useSelector} from 'react-redux';
+import {fetchProfile} from '../../redux/slices/profileSlice';
 
 const Cart = () => {
   const navigation = useNavigation();
@@ -30,6 +37,14 @@ const Cart = () => {
   const [cartData, setCartData] = useState([]);
   const [couponCode, setCouponCode] = useState('');
   const DELIVERY_FEE = 100;
+  const dispatch = useDispatch();
+  const {userData} = useSelector(state => state.profile);
+
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchProfile());
+    }, [dispatch]),
+  );
 
   useEffect(() => {
     if (isFocused) getCartData();
@@ -132,22 +147,31 @@ const Cart = () => {
           renderItem={({item, index}) => {
             return (
               <View style={styles.cartItemContainer} key={index}>
-                <Image
-                  source={
-                    item?.product?.product_images[0]?.image
-                      ? {uri: item?.product?.product_images[0]?.image}
-                      : require('./images/cartBottle.png')
-                  }
-                  style={styles.bottleImage}
-                  resizeMode="contain"
-                />
+                <Pressable
+                  onPress={() => {
+                    navigation.navigate('VendorDetail', {
+                      item: item,
+                      userCoordinates: {
+                        latitude: userData?.latitude,
+                        longitude: userData?.longitude,
+                      },
+                    });
+                  }}>
+                  <Image
+                    source={
+                      item?.product?.product_images[0]?.image
+                        ? {uri: item?.product?.product_images[0]?.image}
+                        : require('./images/cartBottle.png')
+                    }
+                    style={styles.bottleImage}
+                    resizeMode="contain"
+                  />
+                </Pressable>
                 <View style={styles.cartDetailsContainer}>
                   <Text style={styles.itemName} allowFontScaling={false}>
                     {item?.product?.name} ({item?.product?.title})
                   </Text>
-                  <Text style={styles.itemDescription} allowFontScaling={false}>
-                    Best Rated this Month
-                  </Text>
+
                   <View style={styles.priceQuantityContainer}>
                     <View style={styles.priceTag}>
                       <Text style={styles.priceText} allowFontScaling={false}>
@@ -312,7 +336,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.InterMedium,
     color: Colors.black,
     fontWeight: '700',
-    fontSize: 16,
+    fontSize: 14,
   },
   itemDescription: {
     fontFamily: Fonts.InterMedium,
@@ -327,7 +351,7 @@ const styles = StyleSheet.create({
   },
   priceTag: {
     padding: 5,
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
     backgroundColor: Colors.red,
     alignItems: 'center',
     borderRadius: 5,

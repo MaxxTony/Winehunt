@@ -142,7 +142,7 @@ const Checkout = props => {
     const userId = JSON.parse(datas)?.user;
 
     const param = {
-      // user_id: userId?.id,
+      user_id: userId?.id,
       amount: parseFloat(TotalAmount),
       currency: 'usd',
       payment_intent_id: paymentInfo?.paymentIntentId,
@@ -151,6 +151,7 @@ const Checkout = props => {
       items:
         data?.cartData?.map(item => ({
           cart_id: item?.id || '',
+          vendor_id:item?.product?.user_id,
           product_id: item?.product?.id || '',
           product_name: item?.product?.name || '',
           price: item?.price_mappings?.price || 100,
@@ -160,7 +161,8 @@ const Checkout = props => {
         })) || [],
     };
 
-    console.log(param);
+    console.log(param)
+ 
 
     const url = Constants.baseUrl9 + Constants.createOrder;
     try {

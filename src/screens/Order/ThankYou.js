@@ -9,7 +9,6 @@ const ThankYou = props => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const info = props?.route?.params?.info;
-  console.log(info);
 
   return (
     <View style={[styles.container, {paddingTop: insets.top}]}>
@@ -40,19 +39,21 @@ const ThankYou = props => {
                 Order Details
               </Text>
             </View>
-            <Text style={styles.orderId} allowFontScaling={false}>
-              Order ID: {info?.payment_intent_id}
-            </Text>
           </View>
+          <Text style={styles.orderId} allowFontScaling={false}>
+            Order ID: {info?.order_number}
+          </Text>
 
           <Text style={styles.infoText} allowFontScaling={false}>
-            Rifqi Naufat
+            {info?.user?.first_name} {info?.user?.last_name}
           </Text>
           <Text style={styles.infoText} allowFontScaling={false}>
-            Address - 1901 Thornridge Cir. Shiloh, Hawaii 81063
+            Address - {info?.shipping_address?.country_name}{' '}
+            {info?.shipping_address?.city} {info?.shipping_address?.state_name}{' '}
+            {info?.shipping_address?.city} {info?.shipping_address?.block}
           </Text>
           <Text style={styles.infoText} allowFontScaling={false}>
-            Mobile - +1 412 4562 234
+            Mobile - {info?.user?.phone}
           </Text>
 
           <View style={styles.separator} />
@@ -149,7 +150,9 @@ const styles = StyleSheet.create({
   },
   orderId: {
     fontSize: 14,
-    color: Colors.darkGray,
+    color: Colors.black,
+    fontWeight: '600',
+    marginBottom: 20,
   },
   infoText: {
     fontSize: 14,
