@@ -6,6 +6,9 @@ import {useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Feather from 'react-native-vector-icons/Feather';
 import WineHuntLabelInput from '../../common/WineHuntLabelInput';
+import RNFS from 'react-native-fs';
+import { showError, showSucess } from '../../helper/Toastify';
+
 
 const OrderDetail = props => {
   const data = props?.route?.params?.item;
@@ -23,6 +26,28 @@ const OrderDetail = props => {
     return `Date: ${date.toLocaleDateString('en-GB', options)}`;
   };
 
+   const onDownloadInvoice = async () => {
+    try {
+      const fileName = `invoice_${Date.now()}.pdf`;
+      const downloadDest = `${RNFS.DownloadDirectoryPath}/${fileName}`;
+
+      const options = {
+        fromUrl: 'https://www.wmaccess.com/downloads/sample-invoice.pdf', // Your PDF link
+        toFile: downloadDest,
+      };
+
+      const result = await RNFS.downloadFile(options).promise;
+      if (result.statusCode === 200) {
+        showSucess('Invoice downloaded successfully!');
+      } else {
+        showError('Download failed.');
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+    }
+  };
+
+
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <BackNavigationWithTitle
@@ -34,10 +59,10 @@ const OrderDetail = props => {
         showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <View style={styles.orderInfo}>
-            <Text style={styles.orderId}>Orders ID: 9900423</Text>
+            <Text style={styles.orderId}>Orders ID: {data?.id}</Text>
             <Text style={styles.orderDate}>{formatDate(data?.created_at)}</Text>
           </View>
-          <Text style={styles.downloadText}>Download Invoice</Text>
+          <Text style={styles.downloadText} onPress={() => onDownloadInvoice()}>Download Invoice</Text>
         </View>
 
         <View style={styles.summaryCard}>

@@ -1,4 +1,14 @@
-import {FlatList, Image, Pressable, StyleSheet, Text, View} from 'react-native';
+import {
+  Alert,
+  FlatList,
+  Image,
+  PermissionsAndroid,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {useNavigation} from '@react-navigation/native';
@@ -8,7 +18,11 @@ import {MultiSwitch} from 'react-native-multiswitch-selector';
 import Constants from '../../helper/Constant';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import {showWarning} from '../../helper/Toastify';
+import {showError, showSucess, showWarning} from '../../helper/Toastify';
+import DeleteModal from '../../Modal/DeleteModal';
+import ActionModal from '../../Modal/ActionnModal';
+import CancelOrderModal from '../../Modal/CancelOrderModal';
+import RNFS from 'react-native-fs';
 
 const Order = () => {
   const navigation = useNavigation();
@@ -16,6 +30,8 @@ const Order = () => {
   const [type, setType] = useState('Current Order');
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
+  const [showDelteModal, setShowDeleteModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
     getOrders();
@@ -39,8 +55,6 @@ const Order = () => {
 
       if (res?.status === 200) {
         const ordersData = res?.data?.response?.data || [];
-
-        // If you want to display one card per order
         setOrders(ordersData);
       }
     } catch (error) {
@@ -54,6 +68,62 @@ const Order = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onDelete = async () => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl9 + Constants.orderStatus;
+    const body = {
+      order_id: selectedOrder?.id,
+      status: 3,
+    };
+
+    try {
+      const res = await axios.post(url, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (res?.status === 200) {
+        console.log(JSON.stringify(res?.data), 'lp');
+        showSucess('order cancelled successfully');
+        setShowDeleteModal(false);
+        getOrders();
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    }
+  };
+
+  const onDownloadInvoice = async () => {
+    try {
+      const fileName = `invoice_${Date.now()}.pdf`;
+      const downloadDest = `${RNFS.DownloadDirectoryPath}/${fileName}`;
+
+      const options = {
+        fromUrl: 'https://www.wmaccess.com/downloads/sample-invoice.pdf', // Your PDF link
+        toFile: downloadDest,
+      };
+
+      const result = await RNFS.downloadFile(options).promise;
+      if (result.statusCode === 200) {
+        showSucess('Invoice downloaded successfully!');
+      } else {
+        showError('Download failed.');
+      }
+    } catch (error) {
+      console.error('Download error:', error);
     }
   };
 
@@ -113,8 +183,12 @@ const Order = () => {
                     fontSize: 14,
                     color: Colors.white,
                     fontWeight: '600',
+                  }}
+                  onPress={() => {
+                    setShowDeleteModal(true);
+                    setSelectedOrder(item);
                   }}>
-                  {item?.status}
+                  Cancel Order
                 </Text>
               </View>
               {item &&
@@ -156,7 +230,7 @@ const Order = () => {
                 style={{
                   flexDirection: 'row',
                   justifyContent: 'flex-end',
-                  marginTop: 10,
+                  marginVertical: 10,
                   gap: 50,
                 }}>
                 <Text
@@ -183,9 +257,55 @@ const Order = () => {
                     .toFixed(2)}
                 </Text>
               </View>
+              <View
+                style={{
+                  height: 1,
+                  width: '100%',
+                  backgroundColor: Colors.gray11,
+                }}
+              />
+              <View
+                style={{
+                  padding: 10,
+                  flexDirection: 'row',
+                  gap: 10,
+                  justifyContent: 'center',
+                }}>
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: 16,
+                    color: Colors.red,
+                    textDecorationLine: 'underline',
+                  }}
+                  onPress={() =>
+                    navigation.navigate('TrackOrder', {item: item})
+                  }>
+                  Track Order
+                </Text>
+                <View
+                  style={{height: 20, width: 2, backgroundColor: Colors.gray4}}
+                />
+                <Text
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: 16,
+                    color: Colors.red,
+                    textDecorationLine: 'underline',
+                  }}
+                  onPress={() => onDownloadInvoice()}>
+                  Get Invoice
+                </Text>
+              </View>
             </Pressable>
           );
         }}
+      />
+
+      <CancelOrderModal
+        isVisible={showDelteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={() => onDelete()}
       />
     </View>
   );
