@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   FlatList,
   Image,
@@ -8,37 +8,38 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {Colors, Fonts} from '../../constant/Styles';
 import WineHuntButton from '../../common/WineHuntButton';
+import {fetchProfile} from '../../redux/slices/profileSlice';
+import {useDispatch, useSelector} from 'react-redux';
 
 const Payment = props => {
   const total = props?.route?.params?.total;
   const cartData = props?.route?.params?.cartData;
-
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  const dispatch = useDispatch();
+  const {userData} = useSelector(state => state.profile);
+  
 
   const types = [
     {id: 1, name: 'Credit Card', image: require('./images/c1.png')},
-    // {id: 2, name: 'Google Pay', image: require('./images/c2.png')},
-    // {id: 3, name: 'UPI Method', image: require('./images/c3.png')},
   ];
 
   const [selectedPayment, setSelectedPayment] = useState(types[0]);
 
-  const addresstype = [
-    {id: 1, name: 'Home', address: '2464 Royal Ln. Mesa, New Jersey 45463'},
-    {
-      id: 2,
-      name: 'Office',
-      address: '1901 Thornridge Cir. Shiloh, Hawaii 81063',
-    },
-  ];
+  const addresstype = [{id: 1, name: 'Home', address: `${userData?.address}`}];
 
   const [selectedAddress, setSelectedAddress] = useState(addresstype[0]);
+
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchProfile());
+    }, [dispatch]),
+  );
 
   return (
     <View style={[styles.container, {paddingTop: insets.top}]}>
@@ -199,7 +200,7 @@ const styles = StyleSheet.create({
   addressText: {
     fontFamily: Fonts.PhilosopherRegular,
     color: Colors.black,
-    fontSize: 14,
+    fontSize: 12,
   },
   radioButton: {
     height: 18,

@@ -128,7 +128,7 @@ const TabNavigator = () => {
                     styles.tabBarIconText,
                     {color: focused ? Colors.red : Colors.black},
                   ]}>
-                  Shop
+                  Orders
                 </Text>
               </View>
             ),

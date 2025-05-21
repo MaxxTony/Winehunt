@@ -250,6 +250,30 @@ const VendorDetail = props => {
   });
   const formattedDistance = formatNumber(distance);
 
+  const handleRemoveItem = async itemId => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl8 + Constants.deleteCart;
+    const data = {
+      id: itemId,
+    };
+    try {
+      const res = await axios.post(url, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.data?.status == 200) {
+        // setCartData(prev => prev.filter(item => item.id !== itemId));
+        getCartData();
+      }
+    } catch (error) {
+      console.log(error);
+      showWarning(error.response?.data?.message || 'Error updating cart');
+    }
+  };
+
   return (
     <View style={{flex: 1, backgroundColor: Colors.white}}>
       <ScrollView
@@ -525,12 +549,15 @@ const VendorDetail = props => {
         </Pressable>
       )}
 
-      <AnimatedCartModal
-        visible={isCartVisible}
-        cartData={cartData}
-        onClose={() => setIsCartVisible(false)}
-        navigation={navigation}
-      />
+      {cartData?.length > 0 && (
+        <AnimatedCartModal
+          visible={isCartVisible}
+          cartData={cartData}
+          onClose={() => setIsCartVisible(false)}
+          navigation={navigation}
+          onRemoveItem={handleRemoveItem}
+        />
+      )}
     </View>
   );
 };

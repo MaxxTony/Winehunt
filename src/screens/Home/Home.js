@@ -19,7 +19,11 @@ import HeadingWithLink from '../../components/HeadingWithLink';
 import NearVendorCards from './components/NearVendorCards';
 import FeatureWindeCard from './components/FeatureWindeCard';
 import NewArrivalCard from './components/NewArrivalCard';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useIsFocused,
+  useNavigation,
+} from '@react-navigation/native';
 import Constants from '../../helper/Constant';
 import {showWarning} from '../../helper/Toastify';
 import axios from 'axios';
@@ -27,10 +31,13 @@ import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchProfile} from '../../redux/slices/profileSlice';
+import AnimatedCartModal from './components/AnimatedCartModal';
 
 const Home = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
+
   const width = Dimensions.get('window').width;
   const [type, setType] = useState('Wine types');
   const [categories, setCategories] = useState([]);
@@ -38,6 +45,30 @@ const Home = () => {
   const [homeData, setHomeData] = useState([]);
   const dispatch = useDispatch();
   const {userData} = useSelector(state => state.profile);
+  const [cartData, setCartData] = useState([]);
+  const [isCartVisible, setIsCartVisible] = useState(false);
+
+  useEffect(() => {
+    if (isFocused) getCartData();
+  }, [isFocused]);
+
+  const getCartData = async () => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl8 + Constants.getCart;
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      setCartData(res?.data?.cart);
+    } catch (error) {
+      showWarning(error.response?.data?.message || 'Error fetching cart');
+    }
+  };
 
   useEffect(() => {
     getHomePageData();
@@ -84,6 +115,30 @@ const Home = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRemoveItem = async itemId => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl8 + Constants.deleteCart;
+    const data = {
+      id: itemId,
+    };
+    try {
+      const res = await axios.post(url, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.data?.status == 200) {
+        // setCartData(prev => prev.filter(item => item.id !== itemId));
+        getCartData();
+      }
+    } catch (error) {
+      console.log(error);
+      showWarning(error.response?.data?.message || 'Error updating cart');
     }
   };
 
@@ -186,9 +241,12 @@ const Home = () => {
             <Text style={styles.title} allowFontScaling={false}>
               Play Quiz
             </Text>
+
+            {/* Show Milestone Progress */}
             <Text style={styles.milestoneText} allowFontScaling={false}>
               Milestone: {userData?.milestone || 0} / 40 Points
             </Text>
+
             <View style={styles.progressBarContainer}>
               <View
                 style={[
@@ -197,22 +255,45 @@ const Home = () => {
                 ]}
               />
             </View>
+            <View style={{flexDirection: 'row', gap: 10, marginTop: 10,justifyContent: 'space-between'}}>
+              {/* Convert Button */}
+              {userData?.milestone > 0 && (
+                <Pressable
+                  style={styles.convertButton}
+                  onPress={() => {
+                    if ((userData?.coins || 0) <= 40) {
+                      showWarning(
+                        'You need more than 40 coins to convert into milestone.',
+                      );
+                      return;
+                    }
+                  }}>
+                  <Text
+                    style={styles.convertButtonText}
+                    allowFontScaling={false}>
+                    Convert Coins to Milestone
+                  </Text>
+                </Pressable>
+              )}
+              {/* Start Quiz Button */}
+              <Pressable
+                style={styles.button}
+                onPress={() => navigation.navigate('Quiz')}>
+                <Text style={styles.buttonText} allowFontScaling={false}>
+                  Start
+                </Text>
+              </Pressable>
+            </View>
           </View>
-          <Pressable
-            style={styles.button}
-            onPress={() => navigation.navigate('Quiz')}>
-            <Text style={styles.buttonText} allowFontScaling={false}>
-              Start
-            </Text>
-          </Pressable>
         </View>
+
         <View
           style={[styles.card, {marginTop: 0, backgroundColor: Colors.blue}]}>
           <View style={styles.quizInfo}>
             <Text
               style={[styles.title, {textAlign: 'center'}]}
               allowFontScaling={false}>
-              Milestone point score
+              Milestone Point Score
             </Text>
             <Text style={styles.milestoneText} allowFontScaling={false}>
               Milestone: {userData?.milestone || 0} / 10 Points
@@ -221,12 +302,38 @@ const Home = () => {
               <View
                 style={[
                   styles.progressBar,
-                  {width: `${((userData?.milestone || 0) / 40) * 100}%`},
+                  {width: `${((userData?.milestone || 0) / 10) * 100}%`}, // milestone max is 10 in this card
                 ]}
               />
             </View>
+
+            {/* 🎁 Reward Options when milestone >= 10 */}
+            {userData?.milestone >= 10 && (
+              <View style={styles.rewardContainer}>
+                <Text style={styles.rewardTitle} allowFontScaling={false}>
+                  🎉 Choose Your Reward:
+                </Text>
+
+                <Pressable
+                  style={styles.rewardOption}
+                  onPress={() => navigation.navigate('ScanCode')}>
+                  <Text style={styles.rewardText} allowFontScaling={false}>
+                    📦 20% Discount on Wine Products
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.rewardOption}
+                  onPress={() => navigation.navigate('ScanCode')}>
+                  <Text style={styles.rewardText} allowFontScaling={false}>
+                    🎫 £10 Voucher (Min Order £50)
+                  </Text>
+                </Pressable>
+              </View>
+            )}
           </View>
         </View>
+
         <View style={styles.contentContainer}>
           <MultiSwitch
             allStates={['Wine types', 'Popular countries', 'Popular grapes']}
@@ -336,6 +443,45 @@ const Home = () => {
           />
         </View>
       </ScrollView>
+
+      {cartData?.length > 0 && (
+        <Pressable
+          style={{
+            position: 'absolute',
+            bottom: 20,
+            alignSelf: 'center',
+            width: '60%',
+            paddingVertical: 12,
+            backgroundColor: Colors.blue,
+            borderRadius: 25,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.2,
+            shadowRadius: 3,
+            elevation: 5,
+          }}
+          onPress={() => setIsCartVisible(true)}>
+          <Text
+            style={{
+              color: Colors.white,
+              textAlign: 'center',
+              fontSize: 16,
+              fontWeight: 'bold',
+            }}>
+            View Cart ({cartData.length} items)
+          </Text>
+        </Pressable>
+      )}
+
+      {cartData?.length > 0 && (
+        <AnimatedCartModal
+          visible={isCartVisible}
+          cartData={cartData}
+          onClose={() => setIsCartVisible(false)}
+          navigation={navigation}
+          onRemoveItem={handleRemoveItem}
+        />
+      )}
     </View>
   );
 };
@@ -511,5 +657,44 @@ const styles = StyleSheet.create({
   progressBar: {
     height: '100%',
     backgroundColor: '#FFD700', // Gold color for progress
+  },
+  convertButton: {
+    backgroundColor: '#fff',
+    padding: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+
+  convertButtonText: {
+    color: '#000',
+    fontWeight: 'bold',
+  },
+
+  rewardContainer: {
+    marginTop: 16,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+  },
+
+  rewardTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+
+  rewardOption: {
+    backgroundColor: '#f0f0f0',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    marginVertical: 6,
+    width: '100%',
+  },
+
+  rewardText: {
+    textAlign: 'center',
+    color: '#333',
   },
 });

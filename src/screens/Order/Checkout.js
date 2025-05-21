@@ -14,6 +14,7 @@ import {showSucess} from '../../helper/Toastify';
 
 const Checkout = props => {
   const data = props?.route?.params?.data;
+  console.log(data)
 
   const DELIVERY_FEE = 100;
   const navigation = useNavigation();
