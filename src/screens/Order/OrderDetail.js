@@ -1,4 +1,12 @@
-import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {
+  Image,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {useState} from 'react';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {Colors, Fonts} from '../../constant/Styles';
@@ -7,17 +15,20 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Feather from 'react-native-vector-icons/Feather';
 import WineHuntLabelInput from '../../common/WineHuntLabelInput';
 import RNFS from 'react-native-fs';
-import { showError, showSucess } from '../../helper/Toastify';
-
+import {showError, showSucess} from '../../helper/Toastify';
 
 const OrderDetail = props => {
   const data = props?.route?.params?.item;
-
+  console.log(data);
   const navigation = useNavigation();
   const inset = useSafeAreaInsets();
-  const [orderId, setOrderId] = useState('');
-  const [trakingNumber, setTrakingNumber] = useState('');
-  const [trakingLink, setTrakingLink] = useState('');
+  const [orderId, setOrderId] = useState(data?.id ? data?.id.toString() : '');
+  const [trakingNumber, setTrakingNumber] = useState(
+    '3RSydIEw5S69YHnU0SBdnAlY',
+  );
+  const [trakingLink, setTrakingLink] = useState(
+    'https://www.delhivery.com/tracking',
+  );
   const shippingCharge = 20;
 
   const formatDate = isoString => {
@@ -26,7 +37,7 @@ const OrderDetail = props => {
     return `Date: ${date.toLocaleDateString('en-GB', options)}`;
   };
 
-   const onDownloadInvoice = async () => {
+  const onDownloadInvoice = async () => {
     try {
       const fileName = `invoice_${Date.now()}.pdf`;
       const downloadDest = `${RNFS.DownloadDirectoryPath}/${fileName}`;
@@ -47,12 +58,12 @@ const OrderDetail = props => {
     }
   };
 
-
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <BackNavigationWithTitle
         title="Order Detail"
         onPress={() => navigation.goBack()}
+        refund={true}
       />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -62,7 +73,9 @@ const OrderDetail = props => {
             <Text style={styles.orderId}>Orders ID: {data?.id}</Text>
             <Text style={styles.orderDate}>{formatDate(data?.created_at)}</Text>
           </View>
-          <Text style={styles.downloadText} onPress={() => onDownloadInvoice()}>Download Invoice</Text>
+          <Text style={styles.downloadText} onPress={() => onDownloadInvoice()}>
+            Download Invoice
+          </Text>
         </View>
 
         <View style={styles.summaryCard}>
@@ -174,11 +187,34 @@ const OrderDetail = props => {
             label="Tracking Number"
           />
           <WineHuntLabelInput
-            value={trakingNumber}
-            onChangeText={e => setTrakingNumber(e)}
+            value={trakingLink}
+            onChangeText={e => setTrakingLink(e)}
             placeholder="Enter Your Tracking Link"
             label="Tracking Link"
           />
+          <TouchableOpacity
+            onPress={() => {
+              const link = trakingLink.trim();
+              if (link) {
+                const validLink = link.startsWith('http')
+                  ? link
+                  : `https://${link}`;
+                Linking.openURL(validLink).catch(err =>
+                  console.warn('Failed to open URL:', err),
+                );
+              }
+            }}>
+            <Text
+              style={{
+                color: '#326EFF',
+                textDecorationLine: 'underline',
+                marginTop: 5,
+                textAlign: 'center',
+                fontWeight: '600',
+              }}>
+              Open Tracking Link
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>

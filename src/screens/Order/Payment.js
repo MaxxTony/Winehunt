@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   FlatList,
   Image,
@@ -15,6 +15,10 @@ import {Colors, Fonts} from '../../constant/Styles';
 import WineHuntButton from '../../common/WineHuntButton';
 import {fetchProfile} from '../../redux/slices/profileSlice';
 import {useDispatch, useSelector} from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from '../../helper/Constant';
+import axios from 'axios';
+import {showWarning} from '../../helper/Toastify';
 
 const Payment = props => {
   const total = props?.route?.params?.total;
@@ -23,7 +27,46 @@ const Payment = props => {
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch();
   const {userData} = useSelector(state => state.profile);
-  
+  const [addressList, setAddressList] = useState([]);
+
+  useEffect(() => {
+    getAddress();
+  }, []);
+
+  const getAddress = async () => {
+    const data = await AsyncStorage.getItem('userDetail');
+    const userInfo = JSON.parse(data);
+    const token = userInfo?.token;
+
+    const url = Constants.baseUrl10 + Constants.getAddress;
+
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.status == 200) {
+        const addresstype = res?.data?.address.map((item, index) => ({
+          id: item.id,
+          name: 'Home',
+          address: `${item.block}, ${item.street}, ${item.city}, ${item.state_name}, ${item.zip_code}, ${item.country_name}`,
+        }));
+        setAddressList(addresstype);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    }
+  };
+
 
   const types = [
     {id: 1, name: 'Credit Card', image: require('./images/c1.png')},
@@ -79,7 +122,7 @@ const Payment = props => {
           Shipping Address:
         </Text>
         <FlatList
-          data={addresstype}
+          data={addressList}
           keyExtractor={item => item.id.toString()}
           contentContainerStyle={styles.listContainer}
           renderItem={({item}) => (

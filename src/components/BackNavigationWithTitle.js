@@ -7,42 +7,30 @@ const BackNavigationWithTitle = props => {
   return (
     <View style={[styles.container, props?.extraStyle]}>
       <Pressable
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 10,
-          paddingHorizontal: 20,
-          paddingVertical: 5,
-        }}
+        style={styles.backButton}
         onPress={props?.onPress}>
         <Fontisto name="angle-left" size={20} color={Colors.black} />
-        <Text
-          style={{
-            fontSize: 20,
-            color: Colors.black,
-            fontFamily: Fonts.InterMedium,
-            fontWeight: '500',
-          }}
-          allowFontScaling={false}>
+        <Text style={styles.titleText} allowFontScaling={false}>
           {props?.title}
         </Text>
       </Pressable>
-      {props?.rightIcon && (
-        <Pressable
-          onPress={props?.onPressRightIcon}
-          style={{paddingHorizontal: 20}}>
-          <Text
-            style={{
-              fontSize: 16,
-              color: Colors.red2,
-              fontFamily: Fonts.InterMedium,
-              fontWeight: '500',
-            }}
-            allowFontScaling={false}>
-            {props?.rightText}
-          </Text>
-        </Pressable>
-      )}
+
+      <View style={styles.rightButtonsContainer}>
+        {props?.rightIcon && (
+          <Pressable onPress={props?.onPressRightIcon} style={styles.rightTextButton}>
+            <Text style={styles.rightText} allowFontScaling={false}>
+              {props?.rightText}
+            </Text>
+          </Pressable>
+        )}
+        {props?.refund && (
+          <Pressable onPress={props?.onPressRefund} style={styles.refundButton}>
+            <Text style={styles.refundText} allowFontScaling={false}>
+              {props?.refundText || 'Refund'}
+            </Text>
+          </Pressable>
+        )}
+      </View>
     </View>
   );
 };
@@ -56,8 +44,48 @@ const styles = StyleSheet.create({
     gap: 10,
     borderBottomWidth: 2,
     paddingBottom: 10,
-    paddingTop: Platform.OS == 'android' ? 10 : 0,
+    paddingTop: Platform.OS === 'android' ? 10 : 0,
     borderColor: Colors.gray2,
     justifyContent: 'space-between',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 5,
+  },
+  titleText: {
+    fontSize: 20,
+    color: Colors.black,
+    fontFamily: Fonts.InterMedium,
+    fontWeight: '500',
+  },
+  rightButtonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 20,
+  },
+  rightTextButton: {
+    paddingHorizontal: 10,
+  },
+  rightText: {
+    fontSize: 16,
+    color: Colors.red2,
+    fontFamily: Fonts.InterMedium,
+    fontWeight: '500',
+  },
+  refundButton: {
+    backgroundColor: '#326EFF',
+    paddingHorizontal: 15,
+    paddingVertical: 6,
+    borderRadius: 5,
+  },
+  refundText: {
+    color: Colors.white,
+    fontSize: 14,
+    fontWeight: '500',
+    fontFamily: Fonts.InterMedium,
   },
 });

@@ -1,4 +1,4 @@
-import {ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -8,9 +8,11 @@ import WineHuntLabelInput from '../../common/WineHuntLabelInput';
 
 const TrackOrder = props => {
   const data = props?.route?.params?.item;
-  const [orderId, setOrderId] = useState(data?.id ? data?.id : '');
-  const [trakingNumber, setTrakingNumber] = useState('');
-  const [trakingLink, setTrakingLink] = useState('');
+  const [orderId, setOrderId] = useState(data?.id ? data?.id.toString() : '');
+  const [trakingNumber, setTrakingNumber] = useState('3RSydIEw5S69YHnU0SBdnAlY');
+  const [trakingLink, setTrakingLink] = useState('https://www.delhivery.com/tracking');
+
+
 
   const navigation = useNavigation();
   const inset = useSafeAreaInsets();
@@ -53,11 +55,36 @@ const TrackOrder = props => {
             label="Tracking Number"
           />
           <WineHuntLabelInput
-            value={trakingNumber}
-            onChangeText={e => setTrakingNumber(e)}
+            value={trakingLink}
+            onChangeText={e => setTrakingLink(e)}
             placeholder="Enter Your Tracking Link"
             label="Tracking Link"
           />
+          <TouchableOpacity
+            onPress={() => {
+              const link = trakingLink.trim();
+              if (link) {
+                const validLink = link.startsWith('http')
+                  ? link
+                  : `https://${link}`;
+                Linking.openURL(validLink).catch(err =>
+                  console.warn('Failed to open URL:', err),
+                );
+              }
+            }}
+            
+            >
+            <Text
+              style={{
+                color: '#326EFF',
+                textDecorationLine: 'underline',
+                marginTop: 5,
+                textAlign: 'center',  
+                fontWeight: '600',
+              }}>
+              Open Tracking Link
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>

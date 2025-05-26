@@ -43,7 +43,7 @@ const Order = () => {
     const url = Constants.baseUrl9 + Constants.getOrders;
     setLoading(true);
 
-    const body = type === 'Current Order' ? {status: 1} : undefined;
+    const body = type === 'Current Order' ? {status: 1} : {status: 4};
 
     try {
       const res = await axios.post(url, body, {
@@ -155,6 +155,20 @@ const Order = () => {
         showsVerticalScrollIndicator={false}
         refreshing={loading}
         keyExtractor={(item, index) => index.toString()}
+        ListEmptyComponent={
+          !loading ? (
+            <View style={{alignItems: 'center', marginTop: 50}}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  color: Colors.gray4,
+                  fontWeight: '500',
+                }}>
+                No orders found
+              </Text>
+            </View>
+          ) : null
+        }
         renderItem={({item}) => {
           return (
             <Pressable

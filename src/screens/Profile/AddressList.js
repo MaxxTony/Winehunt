@@ -238,13 +238,10 @@ const AddressList = () => {
     const data = await AsyncStorage.getItem('userDetail');
     const userInfo = JSON.parse(data);
     const token = userInfo?.token;
-
     const datas = {
       id: selectedAddress?.id,
     };
-
     const url = Constants.baseUrl10 + 'delete-address';
-
     try {
       const res = await axios.post(url, datas, {
         headers: {
