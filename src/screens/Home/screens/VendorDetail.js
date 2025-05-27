@@ -545,7 +545,7 @@ const VendorDetail = props => {
               justifyContent: 'space-between',
             }}>
             <Text style={styles.sectionTitle} allowFontScaling={false}>
-              Review (0)
+              Review 
             </Text>
             <Text
               style={{

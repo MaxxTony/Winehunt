@@ -89,6 +89,9 @@ const WineDetail = props => {
     }
   };
 
+  
+
+
   const tab = [
     {
       id: 1,
