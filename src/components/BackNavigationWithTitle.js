@@ -6,23 +6,39 @@ import Fontisto from 'react-native-vector-icons/Fontisto';
 const BackNavigationWithTitle = props => {
   return (
     <View style={[styles.container, props?.extraStyle]}>
-      <Pressable
-        style={styles.backButton}
-        onPress={props?.onPress}>
+      <Pressable style={styles.backButton} onPress={props?.onPress}>
         <Fontisto name="angle-left" size={20} color={Colors.black} />
-        <Text style={styles.titleText} allowFontScaling={false}>
-          {props?.title}
-        </Text>
+        <View>
+          <Text style={styles.titleText} allowFontScaling={false}>
+            {props?.title}
+          </Text>
+          {props?.subtitle && (
+            <Text style={styles.subtitleText} allowFontScaling={false}>
+              {props?.subtitleText || "Write what kind things you like and don’t like ..."}
+            </Text>
+          )}
+        </View>
       </Pressable>
 
       <View style={styles.rightButtonsContainer}>
         {props?.rightIcon && (
-          <Pressable onPress={props?.onPressRightIcon} style={styles.rightTextButton}>
+          <Pressable
+            onPress={props?.onPressRightIcon}
+            style={styles.rightTextButton}>
             <Text style={styles.rightText} allowFontScaling={false}>
               {props?.rightText}
             </Text>
           </Pressable>
         )}
+
+        {props?.review && (
+          <Pressable onPress={props?.onPressReview} style={styles.reviewButton}>
+            <Text style={styles.reviewText} allowFontScaling={false}>
+              {props?.reviewText || 'Add Review'}
+            </Text>
+          </Pressable>
+        )}
+
         {props?.refund && (
           <Pressable onPress={props?.onPressRefund} style={styles.refundButton}>
             <Text style={styles.refundText} allowFontScaling={false}>
@@ -61,6 +77,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.InterMedium,
     fontWeight: '500',
   },
+  subtitleText: {
+    fontSize: 12,
+    color: Colors.gray15,
+    fontFamily: Fonts.InterMedium,
+    fontWeight: '500',
+  },
   rightButtonsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -83,6 +105,18 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   refundText: {
+    color: Colors.white,
+    fontSize: 14,
+    fontWeight: '500',
+    fontFamily: Fonts.InterMedium,
+  },
+  reviewButton: {
+    backgroundColor: Colors.green, // or any color you want
+    paddingHorizontal: 15,
+    paddingVertical: 6,
+    borderRadius: 5,
+  },
+  reviewText: {
     color: Colors.white,
     fontSize: 14,
     fontWeight: '500',

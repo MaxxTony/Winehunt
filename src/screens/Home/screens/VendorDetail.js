@@ -24,6 +24,10 @@ import {showSucess, showWarning} from '../../../helper/Toastify';
 import axios from 'axios';
 import haversine from 'haversine';
 import AnimatedCartModal from '../components/AnimatedCartModal';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -339,7 +343,7 @@ const VendorDetail = props => {
             {detail?.shop_name}
           </Text>
           <View style={styles.locationContainer}>
-            <Ionicons name="location-outline" size={15} color={Colors.gray} />
+            <Ionicons name="location-outline" size={15} color={Colors.gray15} />
             <Text style={styles.locationText} allowFontScaling={false}>
               {detail?.address}
             </Text>
@@ -470,16 +474,66 @@ const VendorDetail = props => {
               </View>
             )}
             ListEmptyComponent={() => (
+              <View
+                style={{
+                  width: '100%',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: Colors.black,
+                    fontFamily: Fonts.InterBold,
+                    fontWeight: '400',
+                    textAlign: 'center',
+                  }}
+                  allowFontScaling={false}>
+                  No offers at this time
+                </Text>
+              </View>
+            )}
+          />
+
+          <Text style={styles.sectionTitle} allowFontScaling={false}>
+            Image Gallery
+          </Text>
+          <FlatList
+            data={detail?.vendor_images || []}
+            horizontal
+            keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={{
+              gap: 10,
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+            }}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({item}) => (
+              <View
+                style={{
+                  padding: 10,
+                  borderWidth: 1,
+                  borderColor: Colors.gray10,
+                  borderRadius: 10,
+                }}>
+                <Image
+                  source={{uri: item?.image}}
+                  style={{height: 100, width: 100}}
+                  resizeMode="contain"
+                />
+              </View>
+            )}
+            ListEmptyComponent={() => (
               <Text
                 style={{
                   fontSize: 16,
-                  color: Colors.grayDark,
-                  fontFamily: Fonts.InterMedium,
+                  color: Colors.black,
+                  fontFamily: Fonts.InterBold,
+                  fontWeight: '400',
                   textAlign: 'center',
-                  paddingVertical: 16,
                 }}
                 allowFontScaling={false}>
-                No offers at this time
+                No images at this time{' '}
               </Text>
             )}
           />
@@ -493,30 +547,66 @@ const VendorDetail = props => {
             <Text style={styles.sectionTitle} allowFontScaling={false}>
               Review (0)
             </Text>
-            {/* <Text
+            <Text
               style={{
                 fontSize: 14,
                 fontFamily: Fonts.InterRegular,
                 color: Colors.black,
-              }}>
-              View All
-            </Text> */}
-          </View>
-          {detail && detail?.length > 0 && detail?.reviews.length > 0 ? (
-            <Text allowFontScaling={false}>There is a review</Text>
-          ) : (
-            <Text
-              style={{
-                fontSize: 16,
-                color: Colors.black,
-                fontFamily: Fonts.InterBold,
-                fontWeight: '400',
-                textAlign: 'center',
               }}
-              allowFontScaling={false}>
-              No review at this time{' '}
+              onPress={() =>
+                navigation.navigate('ReviewList', {
+                  reviews: detail,
+                  type: 'vendors',
+                })
+              }>
+              View All
             </Text>
-          )}
+          </View>
+
+          <FlatList
+            data={detail?.reviews || []}
+            keyExtractor={(item, index) =>
+              item?.id?.toString() || index.toString()
+            }
+            contentContainerStyle={{gap: 15}}
+            renderItem={({item}) => (
+              <View style={styles.card}>
+                <View style={styles.header}>
+                  <Image
+                    source={{uri: item?.user?.image}}
+                    style={styles.avatar}
+                  />
+                  <View style={styles.userInfo}>
+                    <Text style={styles.userName}>
+                      {item?.user?.first_name} {item?.user?.last_name}
+                    </Text>
+                    <Text style={styles.dateText}>
+                      {' '}
+                      {dayjs(item?.created_at).fromNow()}
+                    </Text>
+                  </View>
+                  <View style={styles.ratingContainer}>
+                    <AntDesign name="star" size={16} color={Colors.yellow} />
+                    <Text style={styles.ratingText}>{item?.rating}</Text>
+                  </View>
+                </View>
+                <Text style={styles.reviewText}>{item?.review}</Text>
+              </View>
+            )}
+            ListEmptyComponent={() => (
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: Colors.black,
+                  fontFamily: Fonts.InterBold,
+                  fontWeight: '400',
+                  textAlign: 'center',
+                }}
+                allowFontScaling={false}>
+                No review at this time{' '}
+              </Text>
+            )}
+          />
         </View>
       </ScrollView>
 
@@ -611,7 +701,7 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 13,
     fontFamily: Fonts.InterRegular,
-    color: Colors.gray,
+    color: Colors.gray15,
     flex: 1,
     flexWrap: 'wrap',
   },
@@ -675,4 +765,58 @@ const styles = StyleSheet.create({
   },
   viewMoreText: {fontSize: 12, color: Colors.white, fontWeight: '700'},
   ratingContainer: {flexDirection: 'row', alignItems: 'center', gap: 5},
+
+  card: {
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.gray14,
+    backgroundColor: '#FAFAFA',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: {width: 0, height: 1},
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  avatar: {
+    height: 44,
+    width: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.gray10,
+  },
+  userInfo: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  userName: {
+    fontSize: 16,
+    fontFamily: Fonts.InterSemiBold,
+    color: Colors.black,
+  },
+  dateText: {
+    fontSize: 13,
+    color: Colors.gray15,
+    marginTop: 2,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  ratingText: {
+    fontSize: 14,
+    color: Colors.black,
+    fontWeight: '600',
+  },
+  reviewText: {
+    fontSize: 15,
+    color: Colors.gray8,
+    lineHeight: 20,
+    fontFamily: Fonts.InterRegular,
+  },
 });

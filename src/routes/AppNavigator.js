@@ -36,6 +36,8 @@ import Quizquestion from '../screens/Profile/Quizquestion';
 import Subscription from '../screens/Profile/Subscription';
 import WishList from '../screens/WishList/WishList';
 import OrderDetail from '../screens/Order/OrderDetail';
+import ReviewList from '../screens/Home/screens/ReviewList';
+import Review from '../screens/Home/screens/Review';
 
 const Stack = createNativeStackNavigator();
 
@@ -102,6 +104,8 @@ const AppNavigator = () => {
       <Stack.Screen name="Subscription" component={Subscription} />
       <Stack.Screen name="Favorite" component={WishList} />
       <Stack.Screen name="OrderDetail" component={OrderDetail} />
+      <Stack.Screen name="ReviewList" component={ReviewList} />
+      <Stack.Screen name="Review" component={Review} />
     </Stack.Navigator>
   );
 };

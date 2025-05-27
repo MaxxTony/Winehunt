@@ -23,7 +23,7 @@ const Constants = {
   login: 'login-with-otp',
   verifyOtp: 'verify-otp',
   register: 'register-user',
-  socialLogin:"social-authentication",
+  socialLogin: 'social-authentication',
   home: 'get-home',
   profile: 'get-profile',
   editProfile: 'edit-profile',
@@ -47,8 +47,10 @@ const Constants = {
   updateAddress: 'update-address',
   CategoryProduct: 'category-product',
   tryProduct: 'generate-try-me-qr',
-  getOrders:"get-user-orders",
-  orderStatus:"update-order-status",
+  getOrders: 'get-user-orders',
+  orderStatus: 'update-order-status',
+  latestOffers: 'latest-vendor-offers',
+  createReview:"create-review",
 };
 
 export default Constants;

@@ -47,6 +47,7 @@ const Home = () => {
   const {userData} = useSelector(state => state.profile);
   const [cartData, setCartData] = useState([]);
   const [isCartVisible, setIsCartVisible] = useState(false);
+  const [offers, setOffers] = useState([]);
 
   useEffect(() => {
     if (isFocused) getCartData();
@@ -72,6 +73,7 @@ const Home = () => {
 
   useEffect(() => {
     getHomePageData();
+    getOffers();
   }, []);
 
   useFocusEffect(
@@ -139,6 +141,23 @@ const Home = () => {
     } catch (error) {
       console.log(error);
       showWarning(error.response?.data?.message || 'Error updating cart');
+    }
+  };
+
+  const getOffers = async () => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl10 + Constants.latestOffers;
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      setOffers(res?.data?.data || []);
+    } catch (error) {
+      showWarning(error.response?.data?.message || 'Error fetching offers');
     }
   };
 
@@ -224,13 +243,14 @@ const Home = () => {
               width={width - 40}
               height={width / 2}
               autoPlay={true}
-              data={homeData?.banners}
+              data={offers}
               scrollAnimationDuration={1000}
               pagingEnabled={true}
               renderItem={({item}) => (
                 <Image
                   source={{uri: item.image}}
                   style={styles.carouselImage}
+                  resizeMode='contain'
                 />
               )}
             />
@@ -255,7 +275,13 @@ const Home = () => {
                 ]}
               />
             </View>
-            <View style={{flexDirection: 'row', gap: 10, marginTop: 10,justifyContent: 'space-between'}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                gap: 10,
+                marginTop: 10,
+                justifyContent: 'space-between',
+              }}>
               {/* Convert Button */}
               {userData?.milestone > 0 && (
                 <Pressable
