@@ -161,6 +161,8 @@ const Home = () => {
     }
   };
 
+  console.log(homeData?.newArrivals);
+
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <View style={styles.header}>
@@ -250,7 +252,7 @@ const Home = () => {
                 <Image
                   source={{uri: item.image}}
                   style={styles.carouselImage}
-                  resizeMode='contain'
+                  resizeMode="contain"
                 />
               )}
             />
@@ -398,75 +400,92 @@ const Home = () => {
               )}
             />
           </View>
-          <HeadingWithLink
-            title="Near Vendors for you"
-            onPress={() =>
-              navigation.navigate('Vendors', {data: homeData?.vendors})
-            }
-          />
-
-          <FlatList
-            data={homeData?.vendors?.slice(0, 5)}
-            scrollEnabled={false}
-            contentContainerStyle={styles.verticalList}
-            renderItem={({item}) => (
-              <NearVendorCards
-                item={item}
-                navigation={navigation}
-                userCoordinates={{
-                  latitude: userData?.latitude,
-                  longitude: userData?.longitude,
-                }}
-              />
-            )}
-          />
-
-          <HeadingWithLink
-            title="Featured Wine"
-            onPress={() =>
-              navigation.navigate('FeatureWine', {data: homeData?.product})
-            }
-          />
-          <FlatList
-            data={homeData?.product}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={[
-              styles.horizontalList,
-              {marginVertical: 20},
-            ]}
-            renderItem={({item}) => (
-              <FeatureWindeCard
-                item={item}
+          {homeData?.vendors?.length > 0 && (
+            <>
+              <HeadingWithLink
+                title="Near Vendors for you"
                 onPress={() =>
-                  navigation.navigate('WineDetail', {item: item?.id})
+                  navigation.navigate('Vendors', {data: homeData?.vendors})
                 }
               />
-            )}
-          />
-          <HeadingWithLink
-            title="New Arrival"
-            onPress={() =>
-              navigation.navigate('NewArrival', {data: homeData?.newArrivals})
-            }
-          />
-          <FlatList
-            data={homeData?.newArrivals?.slice(0, 5)}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={[
-              styles.horizontalList,
-              {marginVertical: 20},
-            ]}
-            renderItem={({item}) => (
-              <NewArrivalCard
-                item={item}
+
+              <FlatList
+                data={homeData?.vendors?.slice(0, 5)}
+                scrollEnabled={false}
+                contentContainerStyle={styles.verticalList}
+                renderItem={({item}) => (
+                  <NearVendorCards
+                    item={item}
+                    navigation={navigation}
+                    userCoordinates={{
+                      latitude: userData?.latitude,
+                      longitude: userData?.longitude,
+                    }}
+                  />
+                )}
+              />
+            </>
+          )}
+
+          {homeData?.product?.length > 0 && (
+            <>
+              <HeadingWithLink
+                title="Featured Wine"
                 onPress={() =>
-                  navigation.navigate('WineDetail', {item: item?.id})
+                  navigation.navigate('FeatureWine', {data: homeData?.product})
                 }
               />
-            )}
-          />
+
+              <FlatList
+                data={homeData?.product}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={[
+                  styles.horizontalList,
+                  {marginVertical: 20},
+                ]}
+                renderItem={({item}) => (
+                  <FeatureWindeCard
+                    item={item}
+                    onPress={() =>
+                      navigation.navigate('WineDetail', {item: item?.id})
+                    }
+                  />
+                )}
+              />
+            </>
+          )}
+
+          {homeData?.newArrivals?.length > 0 && (
+            <>
+              <HeadingWithLink
+                title="New Arrival"
+                onPress={() =>
+                  navigation.navigate('NewArrival', {
+                    data: homeData?.newArrivals,
+                  })
+                }
+              />
+
+              <FlatList
+                data={homeData?.newArrivals?.slice(0, 5)}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={[
+                  styles.horizontalList,
+                  {marginVertical: 20},
+                ]}
+                renderItem={({item}) => (
+                  <NewArrivalCard
+                    item={item}
+                    onPress={() =>
+                      navigation.navigate('WineDetail', {item: item?.id})
+                    }
+                  />
+                )}
+              />
+            </>
+          )}
         </View>
       </ScrollView>
 
