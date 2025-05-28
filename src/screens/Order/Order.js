@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors, Fonts} from '../../constant/Styles';
 import {MultiSwitch} from 'react-native-multiswitch-selector';
@@ -19,14 +19,13 @@ import Constants from '../../helper/Constant';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import {showError, showSucess, showWarning} from '../../helper/Toastify';
-import DeleteModal from '../../Modal/DeleteModal';
-import ActionModal from '../../Modal/ActionnModal';
 import CancelOrderModal from '../../Modal/CancelOrderModal';
 import RNFS from 'react-native-fs';
 
 const Order = () => {
   const navigation = useNavigation();
   const inset = useSafeAreaInsets();
+  const isFocused = useIsFocused();
   const [type, setType] = useState('Current Order');
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
@@ -35,7 +34,7 @@ const Order = () => {
 
   useEffect(() => {
     getOrders();
-  }, [type]);
+  }, [type, isFocused]);
 
   const getOrders = async () => {
     const info = await AsyncStorage.getItem('userDetail');
@@ -75,10 +74,10 @@ const Order = () => {
   const onDelete = async () => {
     const info = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(info)?.token;
-    const url = Constants.baseUrl9 + Constants.orderStatus;
+    const url = Constants.baseUrl9 + 'cancel-order';
     const body = {
       order_id: selectedOrder?.id,
-      status: 2,
+      // status: 2,
     };
 
     try {
@@ -111,12 +110,10 @@ const Order = () => {
     try {
       const fileName = `invoice_${Date.now()}.pdf`;
       const downloadDest = `${RNFS.DownloadDirectoryPath}/${fileName}`;
-
       const options = {
-        fromUrl: 'https://www.wmaccess.com/downloads/sample-invoice.pdf', // Your PDF link
+        fromUrl: 'https://www.wmaccess.com/downloads/sample-invoice.pdf',
         toFile: downloadDest,
       };
-
       const result = await RNFS.downloadFile(options).promise;
       if (result.statusCode === 200) {
         showSucess('Invoice downloaded successfully!');
@@ -189,7 +186,7 @@ const Order = () => {
                   }}>
                   Order ID: {item.id}
                 </Text>
-                {item?.status === 'Rejected' ? (
+                {item?.status === 'Rejected' || item?.status === 'Canceled' ? (
                   <Text
                     style={{
                       padding: 8,
@@ -272,82 +269,92 @@ const Order = () => {
               <View
                 style={{
                   flexDirection: 'row',
-                  justifyContent: 'flex-end',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
                   marginVertical: 10,
-                  gap: 50,
                 }}>
-                <Text
-                  style={{
-                    fontWeight: 'bold',
-                    fontSize: 16,
-                    color: Colors.black,
-                  }}>
-                  Total
-                </Text>
-                <Text
-                  style={{
-                    fontWeight: 'bold',
-                    fontSize: 16,
-                    color: Colors.blue,
-                  }}>
-                  £
-                  {item?.order_items
-                    ?.reduce((sum, i) => {
-                      const price = parseFloat(i.price) || 0;
-                      const qty = parseInt(i.quantity) || 0;
-                      return sum + price * qty;
-                    }, 0)
-                    .toFixed(2)}
-                </Text>
-              </View>
-              {item?.status !== 'Rejected' && type !== 'Order History' && (
-                <>
-                  <View
-                    style={{
-                      height: 1,
-                      width: '100%',
-                      backgroundColor: Colors.gray11,
-                    }}
-                  />
-                  <View
-                    style={{
-                      padding: 10,
-                      flexDirection: 'row',
-                      gap: 10,
-                      justifyContent: 'center',
-                    }}>
+                {item?.status === 'Rejected' ||
+                  (item?.status === 'Canceled' && (
                     <Text
                       style={{
                         fontWeight: 'bold',
                         fontSize: 16,
                         color: Colors.red,
-                        textDecorationLine: 'underline',
-                      }}
-                      onPress={() =>
-                        navigation.navigate('TrackOrder', {item: item})
-                      }>
-                      Track Order
+                      }}>
+                      Refund: {item?.refund_status}
                     </Text>
+                  ))}
+
+                {/* Right: Total and Amount */}
+                <View style={{flexDirection: 'row', gap: 8}}>
+                  <Text
+                    style={{
+                      fontWeight: 'bold',
+                      fontSize: 16,
+                      color: Colors.black,
+                    }}>
+                    Total:
+                  </Text>
+                  <Text
+                    style={{
+                      fontWeight: 'bold',
+                      fontSize: 16,
+                      color: Colors.black,
+                    }}>
+                    ₹{item?.amount}
+                  </Text>
+                </View>
+              </View>
+              {item?.status !== 'Rejected' &&
+                type !== 'Order History' &&
+                item?.status !== 'Canceled' && (
+                  <>
                     <View
                       style={{
-                        height: 20,
-                        width: 2,
-                        backgroundColor: Colors.gray4,
+                        height: 1,
+                        width: '100%',
+                        backgroundColor: Colors.gray11,
                       }}
                     />
-                    <Text
+                    <View
                       style={{
-                        fontWeight: 'bold',
-                        fontSize: 16,
-                        color: Colors.red,
-                        textDecorationLine: 'underline',
-                      }}
-                      onPress={() => onDownloadInvoice()}>
-                      Get Invoice
-                    </Text>
-                  </View>
-                </>
-              )}
+                        padding: 10,
+                        flexDirection: 'row',
+                        gap: 10,
+                        justifyContent: 'center',
+                      }}>
+                      <Text
+                        style={{
+                          fontWeight: 'bold',
+                          fontSize: 16,
+                          color: Colors.red,
+                          textDecorationLine: 'underline',
+                        }}
+                        onPress={() =>
+                          navigation.navigate('TrackOrder', {item: item})
+                        }>
+                        Track Order
+                      </Text>
+                      <View
+                        style={{
+                          height: 20,
+                          width: 2,
+                          backgroundColor: Colors.gray4,
+                        }}
+                      />
+                      <Text
+                        style={{
+                          fontWeight: 'bold',
+                          fontSize: 16,
+                          color: Colors.red,
+                          textDecorationLine: 'underline',
+                        }}
+                        onPress={() => onDownloadInvoice()}>
+                        Get Invoice
+                      </Text>
+                    </View>
+                  </>
+                )}
             </Pressable>
           );
         }}

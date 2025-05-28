@@ -14,7 +14,6 @@ import {showSucess} from '../../helper/Toastify';
 
 const Checkout = props => {
   const data = props?.route?.params?.data;
-  console.log(data)
 
   const DELIVERY_FEE = 100;
   const navigation = useNavigation();
@@ -29,7 +28,8 @@ const Checkout = props => {
     return amount?.toLocaleString();
   };
 
-  const TotalAmount = formatAmount(parseFloat(data?.amount) + DELIVERY_FEE);
+  const TotalAmount = parseFloat(data?.amount) + DELIVERY_FEE;
+
 
   const [payStatus, setPayStatus] = useState(false);
 
@@ -41,7 +41,7 @@ const Checkout = props => {
     const data = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(data)?.token;
     const param = {
-      amount: parseFloat(TotalAmount).toFixed(0),
+      amount: TotalAmount,
       currency: 'USD',
     };
     const url = Constants.baseUrl9 + Constants.createIntent;
@@ -149,10 +149,11 @@ const Checkout = props => {
       payment_intent_id: paymentInfo?.paymentIntentId,
       payment_method: data?.paymentType?.name,
       shipping_address_id: data?.address?.id,
+      vendor_id: data?.vendorId,
       items:
         data?.cartData?.map(item => ({
           cart_id: item?.id || '',
-          vendor_id:item?.product?.user_id,
+          vendor_id: item?.product?.user_id,
           product_id: item?.product?.id || '',
           product_name: item?.product?.name || '',
           price: item?.price_mappings?.price || 100,
@@ -162,8 +163,6 @@ const Checkout = props => {
         })) || [],
     };
 
-    console.log(param)
- 
 
     const url = Constants.baseUrl9 + Constants.createOrder;
     try {

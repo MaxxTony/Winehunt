@@ -19,7 +19,7 @@ import {showError, showSucess} from '../../helper/Toastify';
 
 const OrderDetail = props => {
   const data = props?.route?.params?.item;
-  console.log(data);
+  console.log(data?.refund_status);
   const navigation = useNavigation();
   const inset = useSafeAreaInsets();
   const [orderId, setOrderId] = useState(data?.id ? data?.id.toString() : '');

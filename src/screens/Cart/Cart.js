@@ -145,6 +145,7 @@ const Cart = () => {
           scrollEnabled={false}
           contentContainerStyle={{gap: 5, paddingBottom: 10}}
           renderItem={({item, index}) => {
+          
             return (
               <View style={styles.cartItemContainer} key={index}>
                 <Pressable
@@ -288,6 +289,7 @@ const Cart = () => {
               navigation.navigate('Payment', {
                 total: grandTotal,
                 cartData: cartData,
+                  vendorId: cartData?.[0]?.product?.user_id,
               })
             }
           />

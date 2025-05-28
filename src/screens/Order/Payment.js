@@ -23,6 +23,7 @@ import {showWarning} from '../../helper/Toastify';
 const Payment = props => {
   const total = props?.route?.params?.total;
   const cartData = props?.route?.params?.cartData;
+  const vendorId = props?.route?.params?.vendorId;
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch();
@@ -66,7 +67,6 @@ const Payment = props => {
       }
     }
   };
-
 
   const types = [
     {id: 1, name: 'Credit Card', image: require('./images/c1.png')},
@@ -184,6 +184,7 @@ const Payment = props => {
               address: selectedAddress,
               amount: total.toFixed(0),
               cartData: cartData,
+              vendorId:vendorId
             };
             navigation.navigate('Checkout', {data: data});
           }}
