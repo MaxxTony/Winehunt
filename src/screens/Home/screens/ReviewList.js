@@ -16,6 +16,8 @@ const ReviewList = props => {
   const data = props?.route?.params?.reviews;
   const type = props?.route?.params?.type;
 
+
+
   function timeAgo(dateString) {
     const now = new Date();
     const date = new Date(dateString);
@@ -53,7 +55,7 @@ const ReviewList = props => {
       />
 
       <FlatList
-        data={data?.reviews}
+        data={data?.reviews || data?.product_reviews}
         keyExtractor={(item, index) => item?.id?.toString() || index.toString()}
         contentContainerStyle={styles.listContainer}
         renderItem={({item}) => (
@@ -76,6 +78,19 @@ const ReviewList = props => {
             </View>
             <Text style={styles.reviewText}>{item?.review}</Text>
           </View>
+        )}product_reviews
+        ListEmptyComponent={() => (
+          <Text
+            style={{
+              fontSize: 16,
+              color: Colors.black,
+              fontFamily: Fonts.InterBold,
+              fontWeight: '400',
+              textAlign: 'center',
+            }}
+            allowFontScaling={false}>
+            No review at this time{' '}
+          </Text>
         )}
       />
     </View>

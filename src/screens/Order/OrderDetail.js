@@ -63,7 +63,7 @@ const OrderDetail = props => {
       <BackNavigationWithTitle
         title="Order Detail"
         onPress={() => navigation.goBack()}
-        refund={true}
+        // refund={true}
       />
       <ScrollView
         contentContainerStyle={styles.scrollContent}

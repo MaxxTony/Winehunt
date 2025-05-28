@@ -38,10 +38,11 @@ const Review = props => {
 
     const param = {
       type: type,
-      vendor_id: vendorId,
       review: message,
       rating: rating,
+      ...(type === 'wines' ? {product_id: vendorId} : {vendor_id: vendorId}),
     };
+    console.log(param)
 
     const url = Constants.baseUrl10 + Constants.createReview;
 
@@ -53,10 +54,9 @@ const Review = props => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(response?.data);
       showSucess(response?.data?.message);
       setMessage('');
-      setRating(0); 
+      setRating(0);
       navigation.goBack();
     } catch (error) {
       console.error('Error doing create review:', error?.response?.data);

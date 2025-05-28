@@ -42,16 +42,17 @@ const Order = () => {
     const token = JSON.parse(info)?.token;
     const url = Constants.baseUrl9 + Constants.getOrders;
     setLoading(true);
-
-    const body = type === 'Current Order' ? {status: 1} : {status: 4};
-
     try {
-      const res = await axios.post(url, body, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+      const res = await axios.post(
+        url,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         },
-      });
+      );
 
       if (res?.status === 200) {
         const ordersData = res?.data?.response?.data || [];
@@ -77,7 +78,7 @@ const Order = () => {
     const url = Constants.baseUrl9 + Constants.orderStatus;
     const body = {
       order_id: selectedOrder?.id,
-      status: 3,
+      status: 2,
     };
 
     try {
@@ -188,22 +189,50 @@ const Order = () => {
                   }}>
                   Order ID: {item.id}
                 </Text>
-                <Text
-                  style={{
-                    padding: 8,
-                    backgroundColor: Colors.green2,
-                    borderRadius: 40,
-                    paddingHorizontal: 16,
-                    fontSize: 14,
-                    color: Colors.white,
-                    fontWeight: '600',
-                  }}
-                  onPress={() => {
-                    setShowDeleteModal(true);
-                    setSelectedOrder(item);
-                  }}>
-                  Cancel Order
-                </Text>
+                {item?.status === 'Rejected' ? (
+                  <Text
+                    style={{
+                      padding: 8,
+                      backgroundColor: Colors.red2,
+                      borderRadius: 40,
+                      paddingHorizontal: 20,
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: '600',
+                    }}>
+                    {item?.status}
+                  </Text>
+                ) : type === 'Order History' ? (
+                  <Text
+                    style={{
+                      padding: 8,
+                      backgroundColor: Colors.blue,
+                      borderRadius: 40,
+                      paddingHorizontal: 20,
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: '600',
+                    }}>
+                    {item?.status}
+                  </Text>
+                ) : (
+                  <Text
+                    style={{
+                      padding: 8,
+                      backgroundColor: Colors.green2,
+                      borderRadius: 40,
+                      paddingHorizontal: 20,
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: '600',
+                    }}
+                    onPress={() => {
+                      setShowDeleteModal(true);
+                      setSelectedOrder(item);
+                    }}>
+                    Cancel Order
+                  </Text>
+                )}
               </View>
               {item &&
                 item?.order_items &&
@@ -271,46 +300,54 @@ const Order = () => {
                     .toFixed(2)}
                 </Text>
               </View>
-              <View
-                style={{
-                  height: 1,
-                  width: '100%',
-                  backgroundColor: Colors.gray11,
-                }}
-              />
-              <View
-                style={{
-                  padding: 10,
-                  flexDirection: 'row',
-                  gap: 10,
-                  justifyContent: 'center',
-                }}>
-                <Text
-                  style={{
-                    fontWeight: 'bold',
-                    fontSize: 16,
-                    color: Colors.red,
-                    textDecorationLine: 'underline',
-                  }}
-                  onPress={() =>
-                    navigation.navigate('TrackOrder', {item: item})
-                  }>
-                  Track Order
-                </Text>
-                <View
-                  style={{height: 20, width: 2, backgroundColor: Colors.gray4}}
-                />
-                <Text
-                  style={{
-                    fontWeight: 'bold',
-                    fontSize: 16,
-                    color: Colors.red,
-                    textDecorationLine: 'underline',
-                  }}
-                  onPress={() => onDownloadInvoice()}>
-                  Get Invoice
-                </Text>
-              </View>
+              {item?.status !== 'Rejected' && type !== 'Order History' && (
+                <>
+                  <View
+                    style={{
+                      height: 1,
+                      width: '100%',
+                      backgroundColor: Colors.gray11,
+                    }}
+                  />
+                  <View
+                    style={{
+                      padding: 10,
+                      flexDirection: 'row',
+                      gap: 10,
+                      justifyContent: 'center',
+                    }}>
+                    <Text
+                      style={{
+                        fontWeight: 'bold',
+                        fontSize: 16,
+                        color: Colors.red,
+                        textDecorationLine: 'underline',
+                      }}
+                      onPress={() =>
+                        navigation.navigate('TrackOrder', {item: item})
+                      }>
+                      Track Order
+                    </Text>
+                    <View
+                      style={{
+                        height: 20,
+                        width: 2,
+                        backgroundColor: Colors.gray4,
+                      }}
+                    />
+                    <Text
+                      style={{
+                        fontWeight: 'bold',
+                        fontSize: 16,
+                        color: Colors.red,
+                        textDecorationLine: 'underline',
+                      }}
+                      onPress={() => onDownloadInvoice()}>
+                      Get Invoice
+                    </Text>
+                  </View>
+                </>
+              )}
             </Pressable>
           );
         }}

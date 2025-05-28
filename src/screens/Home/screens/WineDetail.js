@@ -26,6 +26,10 @@ import axios from 'axios';
 import {showSucess, showWarning} from '../../../helper/Toastify';
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchProfile} from '../../../redux/slices/profileSlice';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
 
 const {width} = Dimensions.get('window');
 
@@ -88,9 +92,6 @@ const WineDetail = props => {
       setLoading(false);
     }
   };
-
-  
-
 
   const tab = [
     {
@@ -253,7 +254,7 @@ const WineDetail = props => {
   };
 
   const onsubmit = async () => {
-    navigation.navigate('ScanCode')
+    navigation.navigate('ScanCode');
     // const info = await AsyncStorage.getItem('userDetail');
     // const token = JSON.parse(info)?.token;
 
@@ -466,6 +467,7 @@ const WineDetail = props => {
                 allowFontScaling={false}>
                 {detail?.product_desc}
               </Text>
+
               <Text
                 style={{
                   fontSize: 18,
@@ -475,6 +477,7 @@ const WineDetail = props => {
                 allowFontScaling={false}>
                 Suggested for you
               </Text>
+
               <FlatList
                 data={detail?.suggestions}
                 contentContainerStyle={{gap: 10}}
@@ -590,8 +593,125 @@ const WineDetail = props => {
                   color: Colors.black,
                 }}
                 allowFontScaling={false}>
-                No Review Found yet
+                Image Gallery
               </Text>
+              <FlatList
+                data={detail?.product_images || []}
+                horizontal
+                keyExtractor={(item, index) => index.toString()}
+                contentContainerStyle={{
+                  gap: 10,
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                }}
+                showsHorizontalScrollIndicator={false}
+                renderItem={({item}) => (
+                  <View
+                    style={{
+                      padding: 10,
+                      borderWidth: 1,
+                      borderColor: Colors.gray10,
+                      borderRadius: 10,
+                    }}>
+                    <Image
+                      source={{uri: item?.image}}
+                      style={{height: 100, width: 100}}
+                      resizeMode="contain"
+                    />
+                  </View>
+                )}
+                ListEmptyComponent={() => (
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: Colors.black,
+                      fontFamily: Fonts.InterBold,
+                      fontWeight: '400',
+                      textAlign: 'center',
+                    }}
+                    allowFontScaling={false}>
+                    No images at this time{' '}
+                  </Text>
+                )}
+              />
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontFamily: Fonts.PhilosopherBold,
+                    color: Colors.black,
+                  }}
+                  allowFontScaling={false}>
+                  Review
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontFamily: Fonts.InterRegular,
+                    color: Colors.black,
+                  }}
+                  onPress={() =>
+                    navigation.navigate('ReviewList', {
+                      reviews: detail,
+                      type: 'wines',
+                    })
+                  }>
+                  View All
+                </Text>
+              </View>
+              <FlatList
+                data={detail?.product_reviews || []}
+                keyExtractor={(item, index) =>
+                  item?.id?.toString() || index.toString()
+                }
+                contentContainerStyle={{gap: 15}}
+                renderItem={({item}) => (
+                  <View style={styles.card}>
+                    <View style={styles.header}>
+                      <Image
+                        source={{uri: item?.user?.image}}
+                        style={styles.avatar}
+                      />
+                      <View style={styles.userInfo}>
+                        <Text style={styles.userName}>
+                          {item?.user?.first_name} {item?.user?.last_name}
+                        </Text>
+                        <Text style={styles.dateText}>
+                          {' '}
+                          {dayjs(item?.created_at).fromNow()}
+                        </Text>
+                      </View>
+                      <View style={styles.ratingContainer}>
+                        <AntDesign
+                          name="star"
+                          size={16}
+                          color={Colors.yellow}
+                        />
+                        <Text style={styles.ratingText}>{item?.rating}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.reviewText}>{item?.review}</Text>
+                  </View>
+                )}
+                ListEmptyComponent={() => (
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: Colors.black,
+                      fontFamily: Fonts.InterBold,
+                      fontWeight: '400',
+                      textAlign: 'center',
+                    }}
+                    allowFontScaling={false}>
+                    No review at this time{' '}
+                  </Text>
+                )}
+              />
             </View>
           )}
         </View>
@@ -723,5 +843,59 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.InterMedium,
     fontWeight: '800',
     color: Colors.white,
+  },
+
+  card: {
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.gray14,
+    backgroundColor: '#FAFAFA',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: {width: 0, height: 1},
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  avatar: {
+    height: 44,
+    width: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.gray10,
+  },
+  userInfo: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  userName: {
+    fontSize: 16,
+    fontFamily: Fonts.InterSemiBold,
+    color: Colors.black,
+  },
+  dateText: {
+    fontSize: 13,
+    color: Colors.gray15,
+    marginTop: 2,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  ratingText: {
+    fontSize: 14,
+    color: Colors.black,
+    fontWeight: '600',
+  },
+  reviewText: {
+    fontSize: 15,
+    color: Colors.gray8,
+    lineHeight: 20,
+    fontFamily: Fonts.InterRegular,
   },
 });
