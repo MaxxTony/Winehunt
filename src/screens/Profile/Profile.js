@@ -70,13 +70,6 @@ const Profile = () => {
       screen: 'HelpSupport',
     },
     {
-      id: 7,
-      name: 'Subscription Plan',
-      image: require('./images/Terms.png'),
-      screen: 'Subscription',
-    },
-
-    {
       id: 9,
       name: 'Privacy Policy',
       image: require('./images/privacy.png'),

@@ -96,7 +96,7 @@ const Cart = () => {
     if (!Array.isArray(cartData)) return 0;
     return cartData.reduce(
       (acc, item) =>
-        acc + item.quantity * (item?.product?.price_mappings?.price || 0),
+        acc + item.quantity * (item?.product?.price || 0),
       0,
     );
   };
@@ -176,7 +176,7 @@ const Cart = () => {
                   <View style={styles.priceQuantityContainer}>
                     <View style={styles.priceTag}>
                       <Text style={styles.priceText} allowFontScaling={false}>
-                        ${item?.product?.price_mappings?.price}
+                        ${item?.product?.price}
                       </Text>
                     </View>
                     <View style={styles.quantityContainer}>

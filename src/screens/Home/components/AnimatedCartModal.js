@@ -40,6 +40,7 @@ const AnimatedCartModal = ({
     }
   }, [visible]);
 
+
   const renderItem = ({item}) => (
     <View
       style={{
@@ -57,7 +58,7 @@ const AnimatedCartModal = ({
       <Image
         source={{
           uri:
-            item.product.product_images?.[0]?.image ||
+            item?.product?.product_images?.[0]?.image ||
             'https://via.placeholder.com/50',
         }}
         style={{
@@ -84,7 +85,7 @@ const AnimatedCartModal = ({
             maximumFractionDigits: 0,
           }).format(
             item?.quantity *
-              parseFloat(item?.product?.price_mappings?.price),
+              parseFloat(item?.product?.price),
           )}
         </Text>
         <TouchableOpacity onPress={() => onRemoveItem(item.id)}>

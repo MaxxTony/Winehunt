@@ -31,9 +31,7 @@ import axios from 'axios';
 const AddressList = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
-
   const [addressList, setAddressList] = useState([]);
-
   const [showActionModal, setShowActionModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAddAddressModal, setShowAddAddressModal] = useState(false);
@@ -62,10 +60,17 @@ const AddressList = () => {
     try {
       const response = await fetch('https://restcountries.com/v3.1/all');
       const data = await response.json();
-      const countryList = data.map(country => ({
+      const filtered = data.filter(
+        country =>
+          country.name.common === 'United Kingdom' ||
+          country.cca2 === 'GB' ||
+          country.cca3 === 'GBR',
+      );
+      const countryList = filtered.map(country => ({
         id: country.cca2,
         name: country.name.common,
       }));
+
       setCountries(countryList);
     } catch (error) {
       console.error('Error fetching countries:', error);
@@ -276,6 +281,7 @@ const AddressList = () => {
 
       <FlatList
         data={addressList}
+        keyExtractor={(item, index) => index.toString()}
         renderItem={({item, index}) => {
           return (
             <View
@@ -318,7 +324,21 @@ const AddressList = () => {
             </View>
           );
         }}
+        ListEmptyComponent={
+          <View style={{padding: 20, alignItems: 'center'}}>
+            <Text
+              style={{
+                fontSize: 16,
+                color: Colors.gray,
+                fontFamily: Fonts.InterMedium,
+              }}
+              allowFontScaling={false}>
+              No address list found
+            </Text>
+          </View>
+        }
       />
+
       <View style={{marginTop: 'auto', padding: 20, paddingBottom: 30}}>
         <WineHuntButton
           text="Add New Address"
@@ -334,13 +354,13 @@ const AddressList = () => {
           setShowDeleteModal(true);
         }}
         onEdit={() => {
-          setShowActionModal(false);
-          setShowEditModal(true);
           setCountry(selectedAddress?.country_name);
           setCity(selectedAddress?.city);
           setFlat(selectedAddress?.block);
           setArea(selectedAddress?.street);
           setPincode(selectedAddress?.zip_code);
+          setShowActionModal(false);
+          setShowEditModal(true);
         }}
       />
 
@@ -362,15 +382,15 @@ const AddressList = () => {
         animationOut="fadeOutDown"
         isVisible={showAddAddressModal}
         style={styles.modal}
-        onBackdropPress={() => {
-          setShowAddAddressModal(false);
-        }}>
+        onBackdropPress={() => setShowAddAddressModal(false)}
+        onBackButtonPress={() => setShowAddAddressModal(false)}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.keyboardAvoidingView}>
           <ScrollView
             contentContainerStyle={styles.scrollContent}
-            bounces={false}>
+            bounces={false}
+            keyboardShouldPersistTaps="handled">
             <View style={[styles.modalContent, {paddingBottom: inset.bottom}]}>
               <View style={styles.dragIndicator} />
               <Text style={styles.title} allowFontScaling={false}>
@@ -390,7 +410,7 @@ const AddressList = () => {
                   placeholder="Country"
                   value={country}
                   onChange={item => {
-                    setCountry(item?.id);
+                    setCountry(item?.name);
                     setCountryCode(item?.name);
                   }}
                 />
@@ -462,11 +482,11 @@ const AddressList = () => {
                   maxHeight={250}
                   dropdownPosition={'auto'}
                   labelField="name"
-                  valueField="id"
+                  valueField="name"
                   placeholder="Country"
                   value={country}
                   onChange={item => {
-                    setCountry(item?.id);
+                    setCountry(item?.name);
                     setCountryCode(item?.name);
                   }}
                 />
@@ -521,6 +541,7 @@ const styles = StyleSheet.create({
   },
   keyboardAvoidingView: {
     flex: 1,
+    justifyContent: 'flex-end',
   },
   scrollContent: {
     flexGrow: 1,

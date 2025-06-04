@@ -21,6 +21,7 @@ import axios from 'axios';
 import {showError, showSucess, showWarning} from '../../helper/Toastify';
 import CancelOrderModal from '../../Modal/CancelOrderModal';
 import RNFS from 'react-native-fs';
+import AnimatedCartModal from '../Home/components/AnimatedCartModal';
 
 const Order = () => {
   const navigation = useNavigation();
@@ -31,6 +32,9 @@ const Order = () => {
   const [orders, setOrders] = useState([]);
   const [showDelteModal, setShowDeleteModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  const [cartData, setCartData] = useState([]);
+  const [isCartVisible, setIsCartVisible] = useState(false);
 
   useEffect(() => {
     getOrders();
@@ -125,6 +129,52 @@ const Order = () => {
     }
   };
 
+  useEffect(() => {
+    if (isFocused) getCartData();
+  }, [isFocused]);
+
+  const getCartData = async () => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl8 + Constants.getCart;
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      setCartData(res?.data?.cart);
+    } catch (error) {
+      showWarning(error.response?.data?.message || 'Error fetching cart');
+    }
+  };
+
+  const handleRemoveItem = async itemId => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl8 + Constants.deleteCart;
+    const data = {
+      id: itemId,
+    };
+    try {
+      const res = await axios.post(url, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.data?.status == 200) {
+        // setCartData(prev => prev.filter(item => item.id !== itemId));
+        getCartData();
+      }
+    } catch (error) {
+      console.log(error);
+      showWarning(error.response?.data?.message || 'Error updating cart');
+    }
+  };
+
+
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <BackNavigationWithTitle
@@ -186,7 +236,9 @@ const Order = () => {
                   }}>
                   Order ID: {item.id}
                 </Text>
-                {item?.status === 'Rejected' || item?.status === 'Canceled' ? (
+                {item?.status === 'Rejected' ||
+                item?.status === 'Canceled' ||
+                item?.status === 'Confirmed' ? (
                   <Text
                     style={{
                       padding: 8,
@@ -365,6 +417,45 @@ const Order = () => {
         onClose={() => setShowDeleteModal(false)}
         onConfirm={() => onDelete()}
       />
+
+        {cartData?.length > 0 && (
+        <Pressable
+          style={{
+            position: 'absolute',
+            bottom: 20,
+            alignSelf: 'center',
+            width: '60%',
+            paddingVertical: 12,
+            backgroundColor: Colors.blue,
+            borderRadius: 25,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.2,
+            shadowRadius: 3,
+            elevation: 5,
+          }}
+          onPress={() => setIsCartVisible(true)}>
+          <Text
+            style={{
+              color: Colors.white,
+              textAlign: 'center',
+              fontSize: 16,
+              fontWeight: 'bold',
+            }}>
+            View Cart ({cartData.length} items)
+          </Text>
+        </Pressable>
+      )}
+
+      {cartData?.length > 0 && (
+        <AnimatedCartModal
+          visible={isCartVisible}
+          cartData={cartData}
+          onClose={() => setIsCartVisible(false)}
+          navigation={navigation}
+          onRemoveItem={handleRemoveItem}
+        />
+      )}
     </View>
   );
 };

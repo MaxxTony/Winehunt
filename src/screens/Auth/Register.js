@@ -44,12 +44,9 @@ const Register = ({route}) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [checked, setChecked] = useState(false);
-
   const [isImageModal, setIsImageModal] = useState(false);
-
   const [filePath, setFilePath] = useState(null);
   const [fileUri, setFileUri] = useState('');
-
   const [loading, setLoading] = useState(false);
   const [coordinates, setCoordinates] = useState([]);
   const [currentAddress, setCurrentAddress] = useState('');

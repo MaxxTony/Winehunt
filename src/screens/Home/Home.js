@@ -64,7 +64,6 @@ const Home = () => {
           'Content-Type': 'application/json',
         },
       });
-
       setCartData(res?.data?.cart);
     } catch (error) {
       showWarning(error.response?.data?.message || 'Error fetching cart');
@@ -161,8 +160,6 @@ const Home = () => {
     }
   };
 
-  console.log(homeData?.newArrivals);
-
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <View style={styles.header}>
@@ -249,11 +246,27 @@ const Home = () => {
               scrollAnimationDuration={1000}
               pagingEnabled={true}
               renderItem={({item}) => (
-                <Image
-                  source={{uri: item.image}}
-                  style={styles.carouselImage}
-                  resizeMode="contain"
-                />
+                <Pressable
+                  style={{position: 'relative'}}
+                  onPress={() =>
+                    navigation.navigate('WineDetail', {item: item?.product_id})
+                  }>
+                  <Image
+                    source={{uri: item.image}}
+                    style={styles.carouselImage}
+                  />
+                  <Text
+                    style={{
+                      color: '#fff',
+                      fontSize: 20,
+                      position: 'absolute',
+                      right: 10,
+                      bottom: 20,
+                      fontWeight: 'bold',
+                    }}>
+                    {item?.offer_desc}
+                  </Text>
+                </Pressable>
               )}
             />
           )}
@@ -336,7 +349,7 @@ const Home = () => {
             </View>
 
             {/* 🎁 Reward Options when milestone >= 10 */}
-            {userData?.milestone >= 10 && (
+            {userData?.milestone >= 1000 && (
               <View style={styles.rewardContainer}>
                 <Text style={styles.rewardTitle} allowFontScaling={false}>
                   🎉 Choose Your Reward:

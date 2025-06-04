@@ -42,7 +42,8 @@ const Review = props => {
       rating: rating,
       ...(type === 'wines' ? {product_id: vendorId} : {vendor_id: vendorId}),
     };
-    console.log(param)
+
+   
 
     const url = Constants.baseUrl10 + Constants.createReview;
 

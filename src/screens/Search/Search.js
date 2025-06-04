@@ -12,7 +12,7 @@ import {
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Colors, Fonts} from '../../constant/Styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
@@ -32,11 +32,13 @@ import Constants from '../../helper/Constant';
 import axios from 'axios';
 import {showWarning} from '../../helper/Toastify';
 import Geolocation from '@react-native-community/geolocation';
+import AnimatedCartModal from '../Home/components/AnimatedCartModal';
 
 const Search = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
   const mapViewRef = useRef(null);
+  const isFocused = useIsFocused();
   const [region, setRegion] = useState(null);
   const [searchText, setSearchText] = useState('');
   const [type, setType] = useState('Popular');
@@ -49,10 +51,33 @@ const Search = () => {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [allMarkers, setAllMarkers] = useState([]);
+  const [cartData, setCartData] = useState([]);
+  const [isCartVisible, setIsCartVisible] = useState(false);
 
   useEffect(() => {
     getProducts();
   }, [searchText, type]);
+
+  useEffect(() => {
+    if (isFocused) getCartData();
+  }, [isFocused]);
+
+  const getCartData = async () => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl8 + Constants.getCart;
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      setCartData(res?.data?.cart);
+    } catch (error) {
+      showWarning(error.response?.data?.message || 'Error fetching cart');
+    }
+  };
 
   useEffect(() => {
     getCurrentPosition();
@@ -160,6 +185,30 @@ const Search = () => {
       );
     }
   }, [allMarkers]);
+
+   const handleRemoveItem = async itemId => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl8 + Constants.deleteCart;
+    const data = {
+      id: itemId,
+    };
+    try {
+      const res = await axios.post(url, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.data?.status == 200) {
+        // setCartData(prev => prev.filter(item => item.id !== itemId));
+        getCartData();
+      }
+    } catch (error) {
+      console.log(error);
+      showWarning(error.response?.data?.message || 'Error updating cart');
+    }
+  };
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
@@ -291,6 +340,45 @@ const Search = () => {
         bottomSheetModalRef2={bottomSheetModalRef2}
         snapPoints2={snapPoints2}
       />
+
+       {cartData?.length > 0 && (
+        <Pressable
+          style={{
+            position: 'absolute',
+            bottom: 20,
+            alignSelf: 'center',
+            width: '60%',
+            paddingVertical: 12,
+            backgroundColor: Colors.blue,
+            borderRadius: 25,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.2,
+            shadowRadius: 3,
+            elevation: 5,
+          }}
+          onPress={() => setIsCartVisible(true)}>
+          <Text
+            style={{
+              color: Colors.white,
+              textAlign: 'center',
+              fontSize: 16,
+              fontWeight: 'bold',
+            }}>
+            View Cart ({cartData.length} items)
+          </Text>
+        </Pressable>
+      )}
+
+      {cartData?.length > 0 && (
+        <AnimatedCartModal
+          visible={isCartVisible}
+          cartData={cartData}
+          onClose={() => setIsCartVisible(false)}
+          navigation={navigation}
+          onRemoveItem={handleRemoveItem}
+        />
+      )}
     </View>
   );
 };

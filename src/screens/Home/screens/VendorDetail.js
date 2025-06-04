@@ -65,7 +65,7 @@ const VendorDetail = props => {
 
   useEffect(() => {
     getVendorDetail();
-  }, []);
+  }, [isFocused]);
 
   useEffect(() => {
     if (isFocused) getCartData();
@@ -314,12 +314,12 @@ const VendorDetail = props => {
                   {formattedDistance}km
                 </Text>
               </View>
-              <View style={styles.infoItem}>
+              {/* <View style={styles.infoItem}>
                 <AntDesign name="star" size={18} color={Colors.yellow} />
                 <Text style={styles.infoText} allowFontScaling={false}>
                   {detail?.total_reviews}
                 </Text>
-              </View>
+              </View> */}
               <Pressable
                 style={styles.favoriteButton}
                 onPress={() => {
@@ -545,7 +545,7 @@ const VendorDetail = props => {
               justifyContent: 'space-between',
             }}>
             <Text style={styles.sectionTitle} allowFontScaling={false}>
-              Review 
+              Review
             </Text>
             <Text
               style={{
@@ -557,6 +557,7 @@ const VendorDetail = props => {
                 navigation.navigate('ReviewList', {
                   reviews: detail,
                   type: 'vendors',
+                  data: data,
                 })
               }>
               View All

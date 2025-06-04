@@ -4,12 +4,25 @@ import {Colors, Fonts} from '../../../constant/Styles';
 import WineHuntButton from '../../../common/WineHuntButton';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
+import {useNavigation} from '@react-navigation/native';
 
 const FavouriteCard = ({item, type, onPress}) => {
+  const navigation = useNavigation();
+
   return (
     <>
       {type == 'Vendors' ? (
-        <View style={styles.cardContainer}>
+        <Pressable
+          style={styles.cardContainer}
+          onPress={() => {
+            navigation.navigate('VendorDetail', {
+              item: item?.vendor,
+              userCoordinates: {
+                latitude: item?.vendor?.latitude,
+                longitude: item?.vendor?.longitude,
+              },
+            });
+          }}>
           <Image
             source={require('../images/wine.png')}
             style={styles.vendorImage}
@@ -48,9 +61,11 @@ const FavouriteCard = ({item, type, onPress}) => {
               </Text>
             </View>
           </View>
-        </View>
+        </Pressable>
       ) : (
-        <View style={styles.cardContainer}>
+        <Pressable
+          style={styles.cardContainer}
+          onPress={() => navigation.navigate('WineDetail', {item: item?.product?.id})}>
           <Image
             source={
               item?.product?.product_images[0]?.image
@@ -91,7 +106,7 @@ const FavouriteCard = ({item, type, onPress}) => {
               </Text>
             </View>
           </View>
-        </View>
+        </Pressable>
       )}
     </>
   );

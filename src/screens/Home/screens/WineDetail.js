@@ -15,7 +15,11 @@ import {Colors, Fonts} from '../../../constant/Styles';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useIsFocused,
+  useNavigation,
+} from '@react-navigation/native';
 import Modal from 'react-native-modal';
 import WineHuntButton from '../../../common/WineHuntButton';
 import PreferenceModal from '../../../Modal/PreferenceModal';
@@ -35,7 +39,7 @@ const {width} = Dimensions.get('window');
 
 const WineDetail = props => {
   const id = props?.route?.params.item;
-
+  const isFocused = useIsFocused();
   const navigation = useNavigation();
   const inset = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState(1);
@@ -50,7 +54,7 @@ const WineDetail = props => {
 
   useEffect(() => {
     getProductDetail();
-  }, []);
+  }, [isFocused]);
 
   useFocusEffect(
     useCallback(() => {
@@ -386,10 +390,27 @@ const WineDetail = props => {
             <View style={styles.priceRow}>
               <Text style={styles.priceText} allowFontScaling={false}>
                 Price{' '}
-                <Text style={styles.priceValue} allowFontScaling={false}>
-                  £{detail?.price_mappings?.[0]?.price ?? '0.00'}
-                </Text>
               </Text>
+              <View
+                style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+                {detail?.has_discount && (
+                  <Text
+                    style={[
+                      styles.priceValue,
+                      {
+                        textDecorationLine: 'line-through',
+                        color: Colors.gray,
+                      },
+                    ]}
+                    allowFontScaling={false}>
+                    £{detail?.actual_price ?? '0.00'} /
+                  </Text>
+                )}
+                <Text style={styles.priceValue} allowFontScaling={false}>
+                  £{detail?.price ?? '0.00'}
+                </Text>
+              </View>
+
               <View style={styles.ratingContainer}>
                 <AntDesign name="star" size={18} color={Colors.yellow} />
                 <Text style={styles.ratingText} allowFontScaling={false}>
@@ -483,6 +504,7 @@ const WineDetail = props => {
                 contentContainerStyle={{gap: 10}}
                 scrollEnabled={false}
                 renderItem={({item, index}) => {
+                  console.log(item);
                   return (
                     <Pressable
                       style={{
@@ -550,7 +572,7 @@ const WineDetail = props => {
                               fontWeight: '700',
                             }}
                             allowFontScaling={false}>
-                            £{item?.price_mappings?.[0]?.price ?? '0.00'}
+                            £{item.price ?? '0.00'}
                           </Text>
                         </View>
                       </View>
@@ -659,6 +681,7 @@ const WineDetail = props => {
                     navigation.navigate('ReviewList', {
                       reviews: detail,
                       type: 'wines',
+                      wineId: id,
                     })
                   }>
                   View All
@@ -777,6 +800,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     paddingHorizontal: 20,
     paddingTop: 40,
+    gap: 10,
   },
   bottleImage: {
     height: 245,
@@ -802,7 +826,7 @@ const styles = StyleSheet.create({
   priceRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 10,
   },
   priceText: {
     fontSize: 18,
@@ -812,7 +836,7 @@ const styles = StyleSheet.create({
   },
   priceValue: {
     color: Colors.red,
-    fontSize: 25,
+    fontSize: 18,
   },
   ratingContainer: {
     flexDirection: 'row',

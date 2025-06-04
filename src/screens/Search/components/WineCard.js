@@ -35,7 +35,7 @@ const WineCard = ({item, onPress}) => {
             ({item?.title})
           </Text>
           <Text style={styles.price} allowFontScaling={false}>
-            $ {item?.price_mappings[0]?.price}
+            $ {item?.price}
           </Text>
           <Pressable style={styles.button} onPress={onPress}>
             <Text style={styles.buttonText} allowFontScaling={false}>

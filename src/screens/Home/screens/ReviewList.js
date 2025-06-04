@@ -1,103 +1,184 @@
-import {FlatList, Image, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
-import BackNavigationWithTitle from '../../../components/BackNavigationWithTitle';
-import {useNavigation} from '@react-navigation/native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {Colors, Fonts} from '../../../constant/Styles';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
+import BackNavigationWithTitle from '../../../components/BackNavigationWithTitle';
+import { Colors, Fonts } from '../../../constant/Styles';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import Constants from '../../../helper/Constant';
+import { showWarning } from '../../../helper/Toastify';
+
 dayjs.extend(relativeTime);
 
-const ReviewList = props => {
+const ReviewList = ({ route }) => {
   const navigation = useNavigation();
-  const inset = useSafeAreaInsets();
-  const data = props?.route?.params?.reviews;
-  const type = props?.route?.params?.type;
+  const isFocused = useIsFocused();
+  const insets = useSafeAreaInsets();
+
+  const [detail, setDetail] = useState([]);
+
+  const {
+    type,
+    reviews: passedReviews,
+    data: mainData,
+    wineId,
+  } = route?.params || {};
 
 
 
-  function timeAgo(dateString) {
-    const now = new Date();
-    const date = new Date(dateString);
-    const seconds = Math.floor((now - date) / 1000);
+  // useEffect(() => {
+  //   if (!isFocused) return;
 
-    const intervals = [
-      {label: 'year', seconds: 31536000},
-      {label: 'month', seconds: 2592000},
-      {label: 'week', seconds: 604800},
-      {label: 'day', seconds: 86400},
-      {label: 'hour', seconds: 3600},
-      {label: 'minute', seconds: 60},
-      {label: 'second', seconds: 1},
-    ];
+  //   if (type === 'wines') {
+     
+  //     fetchProductDetail();
+  //   } else {
+     
+  //     fetchVendorDetail();
+  //   }
+  // }, [isFocused]);
 
-    for (const interval of intervals) {
-      const count = Math.floor(seconds / interval.seconds);
-      if (count >= 1) {
-        return `${count} ${interval.label}${count > 1 ? 's' : ''} ago`;
-      }
+  useEffect(() => {
+  const unsubscribe = navigation.addListener('focus', () => {
+    if (type === 'wines') {
+      fetchProductDetail();
+    } else {
+      fetchVendorDetail();
     }
+  });
 
-    return 'just now';
-  }
+  return unsubscribe;
+}, [navigation, fetchProductDetail, fetchVendorDetail]);
+
+
+  const fetchProductDetail = useCallback(async () => {
+    try {
+      const userData = await AsyncStorage.getItem('userDetail');
+      const token = JSON.parse(userData)?.token;
+
+      const response = await axios.post(
+        `${Constants.baseUrl4}${Constants.wineDetail}`,
+        { product_id: wineId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setDetail(response.data?.data || {});
+      }
+    } catch (error) {
+      handleAxiosError(error);                                                                                            
+    }
+  }, [wineId]);
+
+  const fetchVendorDetail = useCallback(async () => {
+    try {
+      const userData = await AsyncStorage.getItem('userDetail');
+      const token = JSON.parse(userData)?.token;
+
+      const vendorId = mainData?.product?.user_id ?? mainData?.id;
+
+      const response = await axios.post(
+        `${Constants.baseUrl5}${Constants.vendorDetail}`,
+        { vendor_id: vendorId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setDetail(response.data?.data || {});
+      }
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  }, [mainData]);
+
+  const handleAxiosError = (error) => {
+    if (error?.response) {
+      console.log('Server Error:', error.response.data);
+      showWarning(error.response.data?.message);
+    } else if (error?.request) {
+      console.log('No Response:', error.request);
+    } else {
+      console.log('Request Error:', error.message);
+    }
+  };
+
+  const renderReviewItem = ({ item }) => (
+    <View style={styles.card}>
+      <View style={styles.header}>
+        <Image source={{ uri: item?.user?.image }} style={styles.avatar} />
+        <View style={styles.userInfo}>
+          <Text style={styles.userName}>
+            {item?.user?.first_name} {item?.user?.last_name}
+          </Text>
+          <Text style={styles.dateText}>
+            {dayjs(item?.created_at).fromNow()}
+          </Text>
+        </View>
+        <View style={styles.ratingContainer}>
+          <AntDesign name="star" size={16} color={Colors.yellow} />
+          <Text style={styles.ratingText}>{item?.rating}</Text>
+        </View>
+      </View>
+      <Text style={styles.reviewText}>{item?.review}</Text>
+    </View>
+  );
+
+  const renderEmptyComponent = () => (
+    <Text style={styles.emptyText} allowFontScaling={false}>
+      No reviews at this time
+    </Text>
+  );
+
+  const reviewData = detail?.reviews || passedReviews?.product_reviews || [];
 
   return (
-    <View style={[styles.container, {paddingTop: inset.top}]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <BackNavigationWithTitle
         title="Reviews"
         onPress={() => navigation.goBack()}
-        review={true}
+        review
         onPressReview={() =>
-          navigation.navigate('Review', {vendorId: data?.id, type: type})
+          navigation.navigate('Review', {
+            vendorId: passedReviews?.id,
+            type,
+          })
         }
       />
 
       <FlatList
-        data={data?.reviews || data?.product_reviews}
+        data={reviewData}
         keyExtractor={(item, index) => item?.id?.toString() || index.toString()}
         contentContainerStyle={styles.listContainer}
-        renderItem={({item}) => (
-          <View style={styles.card}>
-            <View style={styles.header}>
-              <Image source={{uri: item?.user?.image}} style={styles.avatar} />
-              <View style={styles.userInfo}>
-                <Text style={styles.userName}>
-                  {item?.user?.first_name} {item?.user?.last_name}
-                </Text>
-                <Text style={styles.dateText}>
-                  {' '}
-                  {dayjs(item?.created_at).fromNow()}
-                </Text>
-              </View>
-              <View style={styles.ratingContainer}>
-                <AntDesign name="star" size={16} color={Colors.yellow} />
-                <Text style={styles.ratingText}>{item?.rating}</Text>
-              </View>
-            </View>
-            <Text style={styles.reviewText}>{item?.review}</Text>
-          </View>
-        )}product_reviews
-        ListEmptyComponent={() => (
-          <Text
-            style={{
-              fontSize: 16,
-              color: Colors.black,
-              fontFamily: Fonts.InterBold,
-              fontWeight: '400',
-              textAlign: 'center',
-            }}
-            allowFontScaling={false}>
-            No review at this time{' '}
-          </Text>
-        )}
+        renderItem={renderReviewItem}
+        ListEmptyComponent={renderEmptyComponent}
       />
     </View>
   );
 };
 
 export default ReviewList;
+
 
 const styles = StyleSheet.create({
   container: {
