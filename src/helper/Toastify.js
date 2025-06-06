@@ -5,6 +5,7 @@ const showError = message => {
     type: ALERT_TYPE.DANGER,
     title: 'Error',
     textBody: message,
+    autoClose: 1000,
   });
 };
 const showWarning = message => {
@@ -12,6 +13,7 @@ const showWarning = message => {
     type: ALERT_TYPE.WARNING,
     title: 'Warning',
     textBody: message,
+    autoClose: 1000,
   });
 };
 const showSucess = message => {
@@ -19,6 +21,7 @@ const showSucess = message => {
     type: ALERT_TYPE.SUCCESS,
     title: 'Success',
     textBody: message,
+    autoClose: 1000,
   });
 };
 

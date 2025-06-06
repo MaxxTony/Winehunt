@@ -152,6 +152,8 @@ const WishList = () => {
         contentContainerStyle={{
           padding: 20,
           gap: 10,
+          flexGrow: 1, 
+        
         }}
         renderItem={({item, index}) => (
           <FavouriteCard
@@ -163,7 +165,7 @@ const WishList = () => {
         ListEmptyComponent={
           !loading ? (
             <Text style={styles.noDataText} allowFontScaling={false}>
-              No data found
+              {type === 'Vendors' ? 'No vendors found' : 'No wines found'}
             </Text>
           ) : null
         }

@@ -81,7 +81,23 @@ const WineDetail = props => {
       });
 
       if (res?.status === 200) {
-        setDetail(res?.data?.data);
+        const product = res?.data?.data;
+
+        // Calculate average rating
+        const reviews = product?.product_reviews || [];
+        const avgRating =
+          reviews.length > 0
+            ? reviews.reduce((sum, r) => sum + parseFloat(r.rating || 0), 0) /
+              reviews.length
+            : 0;
+
+        // Merge average rating into the product object
+        const productWithRating = {
+          ...product,
+          average_rating: avgRating.toFixed(1),
+        };
+
+        setDetail(productWithRating);
       }
     } catch (error) {
       if (error.response) {
@@ -392,7 +408,12 @@ const WineDetail = props => {
                 Price{' '}
               </Text>
               <View
-                style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6,
+                  flex: 1,
+                }}>
                 {detail?.has_discount && (
                   <Text
                     style={[
@@ -414,7 +435,7 @@ const WineDetail = props => {
               <View style={styles.ratingContainer}>
                 <AntDesign name="star" size={18} color={Colors.yellow} />
                 <Text style={styles.ratingText} allowFontScaling={false}>
-                  0
+                  {detail?.average_rating}
                 </Text>
               </View>
             </View>
@@ -504,7 +525,6 @@ const WineDetail = props => {
                 contentContainerStyle={{gap: 10}}
                 scrollEnabled={false}
                 renderItem={({item, index}) => {
-                  console.log(item);
                   return (
                     <Pressable
                       style={{
@@ -836,7 +856,7 @@ const styles = StyleSheet.create({
   },
   priceValue: {
     color: Colors.red,
-    fontSize: 18,
+    fontSize: 15,
   },
   ratingContainer: {
     flexDirection: 'row',

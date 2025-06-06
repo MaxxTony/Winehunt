@@ -277,9 +277,9 @@ const Home = () => {
               Play Quiz
             </Text>
 
-            {/* Show Milestone Progress */}
+            {/* Show Quiz Points Progress */}
             <Text style={styles.milestoneText} allowFontScaling={false}>
-              Milestone: {userData?.milestone || 0} / 40 Points
+              Quiz Points: {userData?.milestone || 0} / 40
             </Text>
 
             <View style={styles.progressBarContainer}>
@@ -290,6 +290,7 @@ const Home = () => {
                 ]}
               />
             </View>
+
             <View
               style={{
                 flexDirection: 'row',
@@ -297,25 +298,22 @@ const Home = () => {
                 marginTop: 10,
                 justifyContent: 'space-between',
               }}>
-              {/* Convert Button */}
-              {userData?.milestone > 0 && (
+              {/* Convert Quiz Points to Milestone */}
+              {(userData?.milestone || 0) >= 40 && (
                 <Pressable
                   style={styles.convertButton}
                   onPress={() => {
-                    if ((userData?.coins || 0) <= 40) {
-                      showWarning(
-                        'You need more than 40 coins to convert into milestone.',
-                      );
-                      return;
-                    }
+                    // Trigger conversion logic here
+                    // e.g. update milestone and reduce quiz_points
                   }}>
                   <Text
                     style={styles.convertButtonText}
                     allowFontScaling={false}>
-                    Convert Coins to Milestone
+                    Convert 40 Quiz Points to 1 Milestone
                   </Text>
                 </Pressable>
               )}
+
               {/* Start Quiz Button */}
               <Pressable
                 style={styles.button}
@@ -337,19 +335,19 @@ const Home = () => {
               Milestone Point Score
             </Text>
             <Text style={styles.milestoneText} allowFontScaling={false}>
-              Milestone: {userData?.milestone || 0} / 10 Points
+              Milestone: 0 / 10 Points
             </Text>
             <View style={styles.progressBarContainer}>
               <View
                 style={[
                   styles.progressBar,
-                  {width: `${((userData?.milestone || 0) / 10) * 100}%`}, // milestone max is 10 in this card
+                  {width: `${(0 / 10) * 100}%`}, // milestone max is 10 in this card
                 ]}
               />
             </View>
 
             {/* 🎁 Reward Options when milestone >= 10 */}
-            {userData?.milestone >= 1000 && (
+            {0 >= 10 && (
               <View style={styles.rewardContainer}>
                 <Text style={styles.rewardTitle} allowFontScaling={false}>
                   🎉 Choose Your Reward:

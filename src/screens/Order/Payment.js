@@ -55,6 +55,7 @@ const Payment = props => {
           address: `${item.block}, ${item.street}, ${item.city}, ${item.state_name}, ${item.zip_code}, ${item.country_name}`,
         }));
         setAddressList(addresstype);
+        setSelectedAddress(addresstype[0])
       }
     } catch (error) {
       if (error.response) {

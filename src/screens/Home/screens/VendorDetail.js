@@ -470,7 +470,7 @@ const VendorDetail = props => {
                   borderColor: Colors.gray10,
                   borderRadius: 10,
                 }}>
-                <Text allowFontScaling={false}>{item?.name}</Text>
+                <Text allowFontScaling={false} style={{color:"#000"}}>{item?.name}</Text>
               </View>
             )}
             ListEmptyComponent={() => (

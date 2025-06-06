@@ -87,9 +87,9 @@ const Quiz = () => {
 
       <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
         {/* Coin badge */}
-        <View style={styles.coinBadge}>
+        {/* <View style={styles.coinBadge}>
           <Text style={styles.coinText}>+3</Text>
-        </View>
+        </View> */}
         {item.isComplete === 1 ? (
           <View style={styles.completeButton}>
             <Text style={styles.completeText} allowFontScaling={false}>

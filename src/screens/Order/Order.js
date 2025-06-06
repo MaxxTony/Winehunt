@@ -331,9 +331,9 @@ const Order = () => {
                       style={{
                         fontWeight: 'bold',
                         fontSize: 16,
-                        color: Colors.red,
+                        color: Colors.black,
                       }}>
-                      Refund: {item?.refund_status}
+                      Refund Status: <Text style={{ color: Colors.red2}}>{item?.refund_status}</Text>
                     </Text>
                   ))}
 

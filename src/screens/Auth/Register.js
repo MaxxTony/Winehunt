@@ -74,7 +74,7 @@ const Register = ({route}) => {
             console.error('Error getting location:', error);
           },
           {
-            enableHighAccuracy: true,
+            enableHighAccuracy: Platform.OS =="ios" ? true : false,
             timeout: 10000,
           },
         );

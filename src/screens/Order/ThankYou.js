@@ -10,6 +10,8 @@ const ThankYou = props => {
   const navigation = useNavigation();
   const info = props?.route?.params?.info;
 
+  console.log(info)
+
   return (
     <View style={[styles.container, {paddingTop: insets.top}]}>
       <View style={styles.content}>
@@ -56,11 +58,11 @@ const ThankYou = props => {
             Mobile - {info?.user?.phone}
           </Text>
 
-          <View style={styles.separator} />
+          {/* <View style={styles.separator} />
 
           <Text style={styles.infoText} allowFontScaling={false}>
             Scheduled delivery: Saturday, 16th March
-          </Text>
+          </Text> */}
 
           <View style={styles.separator} />
 

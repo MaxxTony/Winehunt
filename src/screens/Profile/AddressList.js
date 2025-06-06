@@ -36,7 +36,7 @@ const AddressList = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAddAddressModal, setShowAddAddressModal] = useState(false);
 
-  const [countries, setCountries] = useState([]);
+  // const [countries, setCountries] = useState([]);
   const [country, setCountry] = useState(null);
   const [countryCode, setCountryCode] = useState(null);
 
@@ -52,31 +52,12 @@ const AddressList = () => {
   const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
-    fetchCountries();
     getAddress();
   }, []);
 
-  const fetchCountries = async () => {
-    try {
-      const response = await fetch('https://restcountries.com/v3.1/all');
-      const data = await response.json();
-      const filtered = data.filter(
-        country =>
-          country.name.common === 'United Kingdom' ||
-          country.cca2 === 'GB' ||
-          country.cca3 === 'GBR',
-      );
-      const countryList = filtered.map(country => ({
-        id: country.cca2,
-        name: country.name.common,
-      }));
+  const countries = [{id: 'GB', name: 'United Kingdom'}];
 
-      setCountries(countryList);
-    } catch (error) {
-      console.error('Error fetching countries:', error);
-    }
-  };
-
+  
   const getAddress = async () => {
     const data = await AsyncStorage.getItem('userDetail');
     const userInfo = JSON.parse(data);
@@ -222,7 +203,7 @@ const AddressList = () => {
         },
       });
       if (res?.status == 200) {
-        console.log(res?.data);
+     
         showSucess(res?.data?.message);
         setShowEditModal(false);
         getAddress();
@@ -255,7 +236,7 @@ const AddressList = () => {
         },
       });
       if (res?.status == 200) {
-        console.log(res?.data);
+       
         showSucess(res?.data?.message);
         setShowDeleteModal(false);
         getAddress();
@@ -384,71 +365,68 @@ const AddressList = () => {
         style={styles.modal}
         onBackdropPress={() => setShowAddAddressModal(false)}
         onBackButtonPress={() => setShowAddAddressModal(false)}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.keyboardAvoidingView}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            bounces={false}
-            keyboardShouldPersistTaps="handled">
-            <View style={[styles.modalContent, {paddingBottom: inset.bottom}]}>
-              <View style={styles.dragIndicator} />
-              <Text style={styles.title} allowFontScaling={false}>
-                Add Address
-              </Text>
-              {countries && countries.length > 0 && (
-                <Dropdown
-                  style={styles.dropdown}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  itemTextStyle={styles.itemTextStyle}
-                  data={countries}
-                  maxHeight={250}
-                  dropdownPosition={'auto'}
-                  labelField="name"
-                  valueField="id"
-                  placeholder="Country"
-                  value={country}
-                  onChange={item => {
-                    setCountry(item?.name);
-                    setCountryCode(item?.name);
-                  }}
-                />
-              )}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          bounces={false}
+          keyboardShouldPersistTaps="handled">
+          <View
+            style={[styles.modalContent, {paddingBottom: inset.bottom + 30}]}>
+            <View style={styles.dragIndicator} />
+            <Text style={styles.title} allowFontScaling={false}>
+              Add Address
+            </Text>
+            {countries && countries.length > 0 && (
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                itemTextStyle={styles.itemTextStyle}
+                data={countries}
+                maxHeight={250}
+                dropdownPosition={'auto'}
+                labelField="name"
+                valueField="id"
+                placeholder="Country"
+                value={country}
+                onChange={item => {
+                  setCountry(item?.name);
+                  setCountryCode(item?.name);
+                }}
+              />
+            )}
 
-              <TextInput
-                value={city}
-                onChangeText={setCity}
-                style={styles.input}
-                placeholder="City"
-                placeholderTextColor={Colors.gray10}
-              />
-              <TextInput
-                value={flat}
-                onChangeText={setFlat}
-                style={styles.input}
-                placeholder="Flat/Block"
-                placeholderTextColor={Colors.gray10}
-              />
-              <TextInput
-                value={area}
-                onChangeText={setArea}
-                style={styles.input}
-                placeholder="Apartment/Street/Area"
-                placeholderTextColor={Colors.gray10}
-              />
-              <TextInput
-                value={pincode}
-                onChangeText={setPincode}
-                style={styles.input}
-                placeholder="ZIP Code"
-                placeholderTextColor={Colors.gray10}
-              />
+            <TextInput
+              value={city}
+              onChangeText={setCity}
+              style={styles.input}
+              placeholder="City"
+              placeholderTextColor={Colors.gray10}
+            />
+            <TextInput
+              value={flat}
+              onChangeText={setFlat}
+              style={styles.input}
+              placeholder="Flat/Block"
+              placeholderTextColor={Colors.gray10}
+            />
+            <TextInput
+              value={area}
+              onChangeText={setArea}
+              style={styles.input}
+              placeholder="Apartment/Street/Area"
+              placeholderTextColor={Colors.gray10}
+            />
+            <TextInput
+              value={pincode}
+              onChangeText={setPincode}
+              style={styles.input}
+              placeholder="ZIP Code"
+              placeholderTextColor={Colors.gray10}
+            />
 
-              <WineHuntButton text="Save" onPress={() => addAddress()} />
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+            <WineHuntButton text="Save" onPress={() => addAddress()} />
+          </View>
+        </ScrollView>
       </Modal>
       {/* edit address */}
       <Modal
@@ -461,13 +439,11 @@ const AddressList = () => {
         style={styles.modal}
         onBackButtonPress={() => setShowEditModal(false)}
         onBackdropPress={() => setShowEditModal(false)}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.keyboardAvoidingView}>
+       
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             bounces={false}>
-            <View style={[styles.modalContent, {paddingBottom: inset.bottom}]}>
+            <View style={[styles.modalContent, {paddingBottom: inset.bottom + 30}]}>
               <View style={styles.dragIndicator} />
               <Text style={styles.title} allowFontScaling={false}>
                 Update Address
@@ -523,7 +499,7 @@ const AddressList = () => {
               <WineHuntButton text="Update" onPress={() => updateAddress()} />
             </View>
           </ScrollView>
-        </KeyboardAvoidingView>
+       
       </Modal>
     </View>
   );
@@ -555,7 +531,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     gap: 20,
-    minHeight: 500,
+    // minHeight: 500,
   },
   dragIndicator: {
     height: 5,
@@ -598,6 +574,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderColor: Colors.gray2,
     borderRadius: 8,
+    color:"#000"
   },
   currentLocationContainer: {
     flexDirection: 'row',

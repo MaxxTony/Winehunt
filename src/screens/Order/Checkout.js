@@ -28,7 +28,7 @@ const Checkout = props => {
     return amount?.toLocaleString();
   };
 
-  const TotalAmount = parseFloat(data?.amount) + DELIVERY_FEE;
+  const TotalAmount = parseFloat(data?.amount);
 
 
   const [payStatus, setPayStatus] = useState(false);
@@ -241,7 +241,7 @@ const Checkout = props => {
           <Text style={styles.cardTitle} allowFontScaling={false}>
             Order Summary
           </Text>
-          <View style={styles.rowBetween}>
+          {/* <View style={styles.rowBetween}>
             <Text style={styles.text} allowFontScaling={false}>
               SubTotal
             </Text>
@@ -256,7 +256,7 @@ const Checkout = props => {
             <Text style={styles.amountText} allowFontScaling={false}>
               ${formatAmount(DELIVERY_FEE)}
             </Text>
-          </View>
+          </View> */}
           <View style={styles.rowBetween}>
             <Text style={styles.grandTotalText} allowFontScaling={false}>
               Grand Total

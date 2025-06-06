@@ -86,18 +86,12 @@ const OrderDetail = props => {
             <Text style={styles.label}>Sub Total</Text>
             <Text style={styles.label}>${data?.amount}</Text>
           </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Shipping Charges</Text>
-            <Text style={styles.label}>${shippingCharge}</Text>
-          </View>
 
           <View style={styles.divider} />
 
           <View style={styles.row}>
             <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.label}>
-              ${parseFloat(data?.amount) + shippingCharge}
-            </Text>
+            <Text style={styles.label}>${parseFloat(data?.amount)}</Text>
           </View>
         </View>
 
