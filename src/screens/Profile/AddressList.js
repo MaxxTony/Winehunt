@@ -57,7 +57,6 @@ const AddressList = () => {
 
   const countries = [{id: 'GB', name: 'United Kingdom'}];
 
-  
   const getAddress = async () => {
     const data = await AsyncStorage.getItem('userDetail');
     const userInfo = JSON.parse(data);
@@ -117,7 +116,7 @@ const AddressList = () => {
     const datas = {
       user_id: userInfo?.user?.id,
       country_name: countryCode,
-      state_name: 'delhi',
+      // state_name: 'delhi',
       city: city,
       block: flat,
       street: area,
@@ -140,6 +139,11 @@ const AddressList = () => {
         showSucess(res?.data?.message);
         setShowAddAddressModal(false);
         getAddress();
+        setCity('');
+        setArea('');
+        setPincode('');
+        setCountry(null);
+        setFlat('');
       }
     } catch (error) {
       if (error.response) {
@@ -183,7 +187,7 @@ const AddressList = () => {
     const datas = {
       user_id: userInfo?.user?.id,
       country_name: country,
-      state_name: 'delhi',
+      // state_name: 'delhi',
       city: city,
       block: flat,
       street: area,
@@ -203,7 +207,6 @@ const AddressList = () => {
         },
       });
       if (res?.status == 200) {
-     
         showSucess(res?.data?.message);
         setShowEditModal(false);
         getAddress();
@@ -236,7 +239,6 @@ const AddressList = () => {
         },
       });
       if (res?.status == 200) {
-       
         showSucess(res?.data?.message);
         setShowDeleteModal(false);
         getAddress();
@@ -264,6 +266,7 @@ const AddressList = () => {
         data={addressList}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({item, index}) => {
+          console.log(item);
           return (
             <View
               style={{
@@ -424,7 +427,18 @@ const AddressList = () => {
               placeholderTextColor={Colors.gray10}
             />
 
-            <WineHuntButton text="Save" onPress={() => addAddress()} />
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
+              <WineHuntButton
+                text="Cancel"
+                onPress={() => setShowAddAddressModal(false)}
+                extraButtonStyle={{flex: 1, backgroundColor: Colors.black}}
+              />
+              <WineHuntButton
+                text="Save"
+                onPress={() => addAddress()}
+                extraButtonStyle={{flex: 1}}
+              />
+            </View>
           </View>
         </ScrollView>
       </Modal>
@@ -439,67 +453,78 @@ const AddressList = () => {
         style={styles.modal}
         onBackButtonPress={() => setShowEditModal(false)}
         onBackdropPress={() => setShowEditModal(false)}>
-       
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            bounces={false}>
-            <View style={[styles.modalContent, {paddingBottom: inset.bottom + 30}]}>
-              <View style={styles.dragIndicator} />
-              <Text style={styles.title} allowFontScaling={false}>
-                Update Address
-              </Text>
-              {countries && countries.length > 0 && (
-                <Dropdown
-                  style={styles.dropdown}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  itemTextStyle={styles.itemTextStyle}
-                  data={countries}
-                  maxHeight={250}
-                  dropdownPosition={'auto'}
-                  labelField="name"
-                  valueField="name"
-                  placeholder="Country"
-                  value={country}
-                  onChange={item => {
-                    setCountry(item?.name);
-                    setCountryCode(item?.name);
-                  }}
-                />
-              )}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          bounces={false}>
+          <View
+            style={[styles.modalContent, {paddingBottom: inset.bottom + 30}]}>
+            <View style={styles.dragIndicator} />
+            <Text style={styles.title} allowFontScaling={false}>
+              Update Address
+            </Text>
+            {countries && countries.length > 0 && (
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                itemTextStyle={styles.itemTextStyle}
+                data={countries}
+                maxHeight={250}
+                dropdownPosition={'auto'}
+                labelField="name"
+                valueField="name"
+                placeholder="Country"
+                value={country}
+                onChange={item => {
+                  setCountry(item?.name);
+                  setCountryCode(item?.name);
+                }}
+              />
+            )}
 
-              <TextInput
-                value={city}
-                onChangeText={setCity}
-                style={styles.input}
-                placeholder="City"
-                placeholderTextColor={Colors.gray10}
+            <TextInput
+              value={city}
+              onChangeText={setCity}
+              style={styles.input}
+              placeholder="City"
+              placeholderTextColor={Colors.gray10}
+            />
+            <TextInput
+              value={flat}
+              onChangeText={setFlat}
+              style={styles.input}
+              placeholder="Flat/Block"
+              placeholderTextColor={Colors.gray10}
+            />
+            <TextInput
+              value={area}
+              onChangeText={setArea}
+              style={styles.input}
+              placeholder="Apartment/Street/Area"
+              placeholderTextColor={Colors.gray10}
+            />
+            <TextInput
+              value={pincode}
+              onChangeText={setPincode}
+              style={styles.input}
+              placeholder="ZIP Code"
+              placeholderTextColor={Colors.gray10}
+            />
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
+              <WineHuntButton
+                text="Cancel"
+                onPress={() => setShowEditModal(false)}
+                extraButtonStyle={{flex: 1, backgroundColor: Colors.black}}
               />
-              <TextInput
-                value={flat}
-                onChangeText={setFlat}
-                style={styles.input}
-                placeholder="Flat/Block"
-                placeholderTextColor={Colors.gray10}
+
+              <WineHuntButton
+                text="Update"
+                onPress={() => updateAddress()}
+                extraButtonStyle={{flex: 1}}
               />
-              <TextInput
-                value={area}
-                onChangeText={setArea}
-                style={styles.input}
-                placeholder="Apartment/Street/Area"
-                placeholderTextColor={Colors.gray10}
-              />
-              <TextInput
-                value={pincode}
-                onChangeText={setPincode}
-                style={styles.input}
-                placeholder="ZIP Code"
-                placeholderTextColor={Colors.gray10}
-              />
-              <WineHuntButton text="Update" onPress={() => updateAddress()} />
             </View>
-          </ScrollView>
-       
+          </View>
+        </ScrollView>
       </Modal>
     </View>
   );
@@ -574,7 +599,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderColor: Colors.gray2,
     borderRadius: 8,
-    color:"#000"
+    color: '#000',
   },
   currentLocationContainer: {
     flexDirection: 'row',

@@ -46,16 +46,17 @@ const Login = () => {
       showWarning('Please enter your number');
       return;
     }
-
+    if (!/^\d{10}$/.test(phoneNumber)) {
+      showWarning('Phone number must be exactly 10 digits and numeric');
+      return;
+    }
     const data = {
       phone: phoneNumber,
       country_code: phoneCountryCode,
       app_type: 'user',
     };
-
     setLoading(true);
     const url = Constants.baseUrl + Constants.login;
-
     try {
       const res = await axios.post(url, data, {
         headers: {

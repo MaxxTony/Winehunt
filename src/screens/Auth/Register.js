@@ -280,12 +280,14 @@ const Register = ({route}) => {
                 onChangeText={e => setFirstName(e)}
                 placeholder="Enter Your First Name"
                 label="First Name"
+                isRequired
               />
               <WineHuntLabelInput
                 value={lastName}
                 onChangeText={e => setLastName(e)}
                 placeholder="Enter Your Last Name"
                 label="Last Name"
+                isRequired
               />
               <WineHuntLabelInput
                 value={email}
@@ -293,6 +295,7 @@ const Register = ({route}) => {
                 placeholder="Enter Your Email"
                 label="Email"
                 keyboardType="email-address"
+                isRequired
               />
               <WineHuntLabelInput
                 value={password}
@@ -300,6 +303,7 @@ const Register = ({route}) => {
                 placeholder="Enter Your Password"
                 label="Password"
                 isPassword={true}
+                isRequired
               />
               <WineHuntLabelInput
                 value={confirmPassword}
@@ -307,6 +311,7 @@ const Register = ({route}) => {
                 placeholder="Confirm Password"
                 label="Confirm Password"
                 isPassword={true}
+                isRequired
               />
               <View
                 style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>

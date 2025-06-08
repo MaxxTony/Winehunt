@@ -228,49 +228,54 @@ const Home = () => {
             tintColor={Colors.red}
           />
         }>
-        <View style={styles.carouselContainer}>
-          {loading ? (
-            <SkeletonPlaceholder borderRadius={10}>
-              <SkeletonPlaceholder.Item
-                width={Dimensions.get('window').width - 40}
-                height={220}
+        {offers?.length > 0 && (
+          <View style={styles.carouselContainer}>
+            {loading ? (
+              <SkeletonPlaceholder borderRadius={10}>
+                <SkeletonPlaceholder.Item
+                  width={Dimensions.get('window').width - 40}
+                  height={220}
+                />
+              </SkeletonPlaceholder>
+            ) : (
+              <Carousel
+                loop
+                width={width - 40}
+                height={width / 2}
+                autoPlay={true}
+                data={offers}
+                scrollAnimationDuration={1000}
+                pagingEnabled={true}
+                renderItem={({item}) => (
+                  <Pressable
+                    style={{position: 'relative'}}
+                    onPress={() =>
+                      navigation.navigate('WineDetail', {
+                        item: item?.product_id,
+                      })
+                    }>
+                    <Image
+                      source={{uri: item.image}}
+                      style={styles.carouselImage}
+                    />
+                    <Text
+                      style={{
+                        color: '#fff',
+                        fontSize: 20,
+                        position: 'absolute',
+                        right: 10,
+                        bottom: 20,
+                        fontWeight: 'bold',
+                      }}>
+                      {item?.offer_desc}
+                    </Text>
+                  </Pressable>
+                )}
               />
-            </SkeletonPlaceholder>
-          ) : (
-            <Carousel
-              loop
-              width={width - 40}
-              height={width / 2}
-              autoPlay={true}
-              data={offers}
-              scrollAnimationDuration={1000}
-              pagingEnabled={true}
-              renderItem={({item}) => (
-                <Pressable
-                  style={{position: 'relative'}}
-                  onPress={() =>
-                    navigation.navigate('WineDetail', {item: item?.product_id})
-                  }>
-                  <Image
-                    source={{uri: item.image}}
-                    style={styles.carouselImage}
-                  />
-                  <Text
-                    style={{
-                      color: '#fff',
-                      fontSize: 20,
-                      position: 'absolute',
-                      right: 10,
-                      bottom: 20,
-                      fontWeight: 'bold',
-                    }}>
-                    {item?.offer_desc}
-                  </Text>
-                </Pressable>
-              )}
-            />
-          )}
-        </View>
+            )}
+          </View>
+        )}
+
         <View style={styles.card}>
           <View style={styles.quizInfo}>
             <Text style={styles.title} allowFontScaling={false}>

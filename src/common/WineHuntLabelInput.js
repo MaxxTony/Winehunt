@@ -30,6 +30,7 @@ const WineHuntLabelInput = props => {
         }}
         allowFontScaling={false}>
         {props?.label}
+        {props?.isRequired && <Text style={styles.asterisk}> *</Text>}
       </Text>
       <View
         style={{
@@ -83,4 +84,8 @@ const WineHuntLabelInput = props => {
 
 export default WineHuntLabelInput;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  asterisk: {
+    color: 'red',
+  },
+});

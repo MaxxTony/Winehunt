@@ -145,7 +145,7 @@ const ReviewList = ({ route }) => {
   );
 
   const renderEmptyComponent = () => (
-    <Text style={styles.emptyText} allowFontScaling={false}>
+    <Text style={{ color: '#888', fontSize: 16,textAlign:"center" }}>
       No reviews at this time
     </Text>
   );
@@ -172,6 +172,7 @@ const ReviewList = ({ route }) => {
         contentContainerStyle={styles.listContainer}
         renderItem={renderReviewItem}
         ListEmptyComponent={renderEmptyComponent}
+        
       />
     </View>
   );

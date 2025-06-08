@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     padding: 20,
     marginTop: 'auto',
     marginBottom: 20,
-    gap: 20,
+    gap: 10,
   },
   codeFieldRoot: {
     marginTop: 20,
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   footerText: {
-    fontSize: 16,
+    fontSize: 14,
     color: Colors.gray,
     fontFamily: Fonts.InterRegular,
     fontWeight: '400',

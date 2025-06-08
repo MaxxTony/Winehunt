@@ -111,6 +111,7 @@ const VendorDetail = props => {
           latitude: res?.data?.data?.latitude,
           longitude: res?.data?.data?.longitude,
         });
+        console.log(vendorData);
         setLikedItems(prev => ({
           ...prev,
           [vendorData?.id]: vendorData?.is_wishlist,
@@ -276,6 +277,15 @@ const VendorDetail = props => {
       console.log(error);
       showWarning(error.response?.data?.message || 'Error updating cart');
     }
+  };
+
+  const formatDate = dateStr => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
   };
 
   return (
@@ -446,6 +456,15 @@ const VendorDetail = props => {
                 </View>
               );
             }}
+            ListEmptyComponent={
+              <Text
+                style={{
+                  marginVertical: 20,
+                  color: '#888',
+                }}>
+                No products available.
+              </Text>
+            }
           />
 
           <Text style={styles.sectionTitle} allowFontScaling={false}>
@@ -458,40 +477,94 @@ const VendorDetail = props => {
             keyExtractor={(item, index) => index.toString()}
             contentContainerStyle={{
               gap: 10,
-              paddingHorizontal: 16,
               paddingVertical: 8,
             }}
             showsHorizontalScrollIndicator={false}
             renderItem={({item}) => (
               <View
                 style={{
-                  padding: 10,
-                  borderWidth: 1,
-                  borderColor: Colors.gray10,
-                  borderRadius: 10,
+                  width: 250,
+                  borderRadius: 16,
+                  backgroundColor: Colors.white,
+                  elevation: 3,
+                  shadowColor: '#000',
+                  shadowOffset: {width: 0, height: 2},
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
                 }}>
-                <Text allowFontScaling={false} style={{color:"#000"}}>{item?.name}</Text>
+                {/* Image */}
+                <Image
+                  source={{uri: item.image}}
+                  style={{
+                    width: '100%',
+                    height: 140,
+                    borderTopLeftRadius: 16,
+                    borderTopRightRadius: 16,
+                  }}
+                  resizeMode="cover"
+                />
+
+                {/* Content */}
+                <View style={{padding: 12}}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontFamily: Fonts.InterBold,
+                      color: Colors.black,
+                      marginBottom: 4,
+                    }}
+                    numberOfLines={1}
+                    allowFontScaling={false}>
+                    {item?.name}
+                  </Text>
+
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontFamily: Fonts.InterRegular,
+                      color: Colors.black,
+                      marginBottom: 4,
+                    }}
+                    numberOfLines={2}
+                    allowFontScaling={false}>
+                    {item?.offer_desc}
+                  </Text>
+
+                  {item?.discount?.name && (
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        color: Colors.primary,
+                        fontFamily: Fonts.InterMedium,
+                        marginTop: 2,
+                      }}
+                      allowFontScaling={false}>
+                      🎁 {item.discount.name}% OFF
+                    </Text>
+                  )}
+
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      fontFamily: Fonts.InterRegular,
+                      color: Colors.gray15,
+                      marginTop: 6,
+                    }}
+                    allowFontScaling={false}>
+                    {formatDate(item.from_date)} - {formatDate(item.to_date)}
+                  </Text>
+                </View>
               </View>
             )}
             ListEmptyComponent={() => (
-              <View
+              <Text
                 style={{
-                  width: '100%',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  textAlign: 'center',
+                  marginVertical: 20,
+                  color: '#888',
                 }}>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: Colors.black,
-                    fontFamily: Fonts.InterBold,
-                    fontWeight: '400',
-                    textAlign: 'center',
-                  }}
-                  allowFontScaling={false}>
-                  No offers at this time
-                </Text>
-              </View>
+                No Offers  right now.
+              </Text>
             )}
           />
 
@@ -504,7 +577,7 @@ const VendorDetail = props => {
             keyExtractor={(item, index) => index.toString()}
             contentContainerStyle={{
               gap: 10,
-              paddingHorizontal: 16,
+              // paddingHorizontal: 16,
               paddingVertical: 8,
             }}
             showsHorizontalScrollIndicator={false}
@@ -524,16 +597,12 @@ const VendorDetail = props => {
               </View>
             )}
             ListEmptyComponent={() => (
-              <Text
+             <Text
                 style={{
-                  fontSize: 16,
-                  color: Colors.black,
-                  fontFamily: Fonts.InterBold,
-                  fontWeight: '400',
-                  textAlign: 'center',
-                }}
-                allowFontScaling={false}>
-                No images at this time{' '}
+                  marginVertical: 20,
+                  color: '#888',
+                }}>
+                No images available.
               </Text>
             )}
           />
@@ -595,16 +664,12 @@ const VendorDetail = props => {
               </View>
             )}
             ListEmptyComponent={() => (
-              <Text
+               <Text
                 style={{
-                  fontSize: 16,
-                  color: Colors.black,
-                  fontFamily: Fonts.InterBold,
-                  fontWeight: '400',
-                  textAlign: 'center',
-                }}
-                allowFontScaling={false}>
-                No review at this time{' '}
+                  marginVertical: 20,
+                  color: '#888',
+                }}>
+                No review available.
               </Text>
             )}
           />
