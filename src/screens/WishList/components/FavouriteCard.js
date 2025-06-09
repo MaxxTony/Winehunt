@@ -24,7 +24,11 @@ const FavouriteCard = ({item, type, onPress}) => {
             });
           }}>
           <Image
-            source={require('../images/wine.png')}
+            source={
+              item?.vendor?.image
+                ? {uri: item?.vendor?.image}
+                : require('../images/wine.png')
+            }
             style={styles.vendorImage}
           />
           <View style={styles.textContainer}>
@@ -36,7 +40,7 @@ const FavouriteCard = ({item, type, onPress}) => {
             </Text>
             <View style={styles.ratingRow}>
               <Text style={styles.ratingText} allowFontScaling={false}>
-                 120 Review
+                {item?.vendor?.total_reviews} Review
               </Text>
             </View>
           </View>
@@ -53,18 +57,20 @@ const FavouriteCard = ({item, type, onPress}) => {
                 resizeMode="contain"
               />
             </Pressable>
-            <View style={styles.distanceRow}>
+            {/* <View style={styles.distanceRow}>
               <Feather name="navigation" size={15} color={Colors.black} />
               <Text style={styles.distanceText} allowFontScaling={false}>
                 2.5 Km
               </Text>
-            </View>
+            </View> */}
           </View>
         </Pressable>
       ) : (
         <Pressable
           style={styles.cardContainer}
-          onPress={() => navigation.navigate('WineDetail', {item: item?.product?.id})}>
+          onPress={() =>
+            navigation.navigate('WineDetail', {item: item?.product?.id})
+          }>
           <Image
             source={
               item?.product?.product_images[0]?.image
@@ -72,7 +78,7 @@ const FavouriteCard = ({item, type, onPress}) => {
                 : require('../images/bottle4.png')
             }
             style={styles.bottleImage}
-            resizeMode="contain"
+            // resizeMode="contain"
           />
 
           <View style={styles.cardDetailsContainer}>
@@ -80,14 +86,8 @@ const FavouriteCard = ({item, type, onPress}) => {
               {item?.product?.name} ({item?.product?.title})
             </Text>
             <Text style={styles.cardPrice} allowFontScaling={false}>
-               £  12.00
+              £ {item?.product?.price}
             </Text>
-            {/* <WineHuntButton
-              text="Add to cart"
-              extraButtonStyle={styles.addToCartButton}
-              extraTextStyle={styles.addToCartText}
-              onPress={() => Alert.alert('Product Added !!')}
-            /> */}
           </View>
 
           <View style={styles.cardActionsContainer}>
@@ -101,7 +101,7 @@ const FavouriteCard = ({item, type, onPress}) => {
             <View style={styles.ratingContainer}>
               <AntDesign name="star" size={18} color={Colors.yellow} />
               <Text style={styles.ratingText} allowFontScaling={false}>
-                4.3
+                {item?.product?.average_rating}
               </Text>
             </View>
           </View>
@@ -183,6 +183,7 @@ const styles = StyleSheet.create({
   vendorImage: {
     height: 65,
     width: 65,
+    borderRadius: 100,
   },
   textContainer: {
     gap: 5,

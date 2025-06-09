@@ -50,7 +50,11 @@ const Home = () => {
   const [offers, setOffers] = useState([]);
 
   useEffect(() => {
-    if (isFocused) getCartData();
+    if (isFocused) {
+      getCartData();
+      getHomePageData();
+      getOffers();
+    }
   }, [isFocused]);
 
   const getCartData = async () => {
@@ -70,10 +74,7 @@ const Home = () => {
     }
   };
 
-  useEffect(() => {
-    getHomePageData();
-    getOffers();
-  }, []);
+  useEffect(() => {}, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -537,7 +538,7 @@ const Home = () => {
       {cartData?.length > 0 && (
         <AnimatedCartModal
           visible={isCartVisible}
-                    setIsCartVisible={setIsCartVisible}
+          setIsCartVisible={setIsCartVisible}
           cartData={cartData}
           onClose={() => setIsCartVisible(false)}
           navigation={navigation}

@@ -86,8 +86,6 @@ const WineDetail = props => {
     }, [dispatch]),
   );
 
-
-
   const getProductDetail = async () => {
     const data = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(data)?.token;
@@ -122,7 +120,7 @@ const WineDetail = props => {
       }
     } catch (error) {
       if (error.response) {
-        console.log('Server Error:', error.response.data);
+        console.log('Server Error:sssss', error.response.data);
         showWarning(error.response.data?.message);
       } else if (error.request) {
         console.log('No Response:', error.request);
@@ -355,8 +353,6 @@ const WineDetail = props => {
     }
   };
 
-  console.log(detail,"vishal")
-
   return (
     <View
       style={[
@@ -494,13 +490,25 @@ const WineDetail = props => {
             </View>
             <View style={styles.buttonContainer}>
               {detail?.cart_type?.includes(1) && (
-                <Pressable
-                  style={styles.button}
-                  onPress={() => setShowModal(true)}>
-                  <Text style={styles.buttonText} allowFontScaling={false}>
-                    Add To Cart
-                  </Text>
-                </Pressable>
+                <>
+                  {detail?.is_cart ? (
+                    <Pressable
+                      style={styles.button}
+                      onPress={() => navigation.navigate('Cart')}>
+                      <Text style={styles.buttonText} allowFontScaling={false}>
+                        Go To Cart
+                      </Text>
+                    </Pressable>
+                  ) : (
+                    <Pressable
+                      style={styles.button}
+                      onPress={() => setShowModal(true)}>
+                      <Text style={styles.buttonText} allowFontScaling={false}>
+                        Add To Cart
+                      </Text>
+                    </Pressable>
+                  )}
+                </>
               )}
 
               {detail?.cart_type?.includes(2) && (
@@ -578,6 +586,7 @@ const WineDetail = props => {
                 contentContainerStyle={{gap: 10}}
                 scrollEnabled={false}
                 renderItem={({item, index}) => {
+                  console.log(item);
                   return (
                     <Pressable
                       style={{
@@ -649,7 +658,7 @@ const WineDetail = props => {
                           </Text>
                         </View>
                       </View>
-                      <View style={{justifyContent: 'space-between'}}>
+                      <View style={{justifyContent: 'space-between',alignItems:"flex-end"}}>
                         <Pressable
                           onPress={() => {
                             if (!suggestionLikes[item?.id]) {
@@ -670,13 +679,25 @@ const WineDetail = props => {
                             }
                           />
                         </Pressable>
-                        <Pressable onPress={() => setShowModal(true)}>
-                          <Ionicons
-                            name="add-circle"
-                            size={25}
-                            color={Colors.black}
-                          />
-                        </Pressable>
+                        {item?.is_cart ? (
+                          <Pressable
+                            style={styles.button}
+                            onPress={() => navigation.navigate('Cart')}>
+                            <Text
+                              style={styles.buttonText}
+                              allowFontScaling={false}>
+                              Go To Cart
+                            </Text>
+                          </Pressable>
+                        ) : (
+                          <Pressable onPress={() => setShowModal(true)}>
+                            <Ionicons
+                              name="add-circle"
+                              size={25}
+                              color={Colors.black}
+                            />
+                          </Pressable>
+                        )}
                       </View>
                     </Pressable>
                   );

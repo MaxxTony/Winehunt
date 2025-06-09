@@ -55,6 +55,8 @@ const WishList = () => {
   };
 
 
+
+
   const onDelete = async item => {
    
     const info = await AsyncStorage.getItem('userDetail');

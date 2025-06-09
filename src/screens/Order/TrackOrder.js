@@ -1,4 +1,11 @@
-import {Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -9,10 +16,12 @@ import WineHuntLabelInput from '../../common/WineHuntLabelInput';
 const TrackOrder = props => {
   const data = props?.route?.params?.item;
   const [orderId, setOrderId] = useState(data?.id ? data?.id.toString() : '');
-  const [trakingNumber, setTrakingNumber] = useState('3RSydIEw5S69YHnU0SBdnAlY');
-  const [trakingLink, setTrakingLink] = useState('https://www.delhivery.com/tracking');
-
-
+  const [trakingNumber, setTrakingNumber] = useState(
+    '3RSydIEw5S69YHnU0SBdnAlY',
+  );
+  const [trakingLink, setTrakingLink] = useState(
+    'https://www.delhivery.com/tracking',
+  );
 
   const navigation = useNavigation();
   const inset = useSafeAreaInsets();
@@ -27,64 +36,45 @@ const TrackOrder = props => {
         showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <View style={styles.orderInfo}>
-            <Text style={styles.orderId}>Orders ID: {data?.id}</Text>
+            <Text style={styles.orderId}>
+              Orders Number: {data?.order_number}
+            </Text>
           </View>
         </View>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryTitle}>Track Order</Text>
-          <Text
-            style={{
-              fontFamily: Fonts.InterRegular,
-              color: Colors.black,
-              fontSize: 15,
-            }}>
-            Transport Company Name -{' '}
-            <Text style={{color: '#326EFF'}}>FreightWings Express</Text>
-          </Text>
+
           <View style={styles.divider} />
-          <WineHuntLabelInput
-            value={orderId}
-            onChangeText={e => setOrderId(e)}
-            placeholder="Enter Your Order ID"
-            label="Order ID"
-          />
-          <WineHuntLabelInput
-            value={trakingNumber}
-            onChangeText={e => setTrakingNumber(e)}
-            placeholder="Enter Your Tracking Number"
-            label="Tracking Number"
-          />
-          <WineHuntLabelInput
-            value={trakingLink}
-            onChangeText={e => setTrakingLink(e)}
-            placeholder="Enter Your Tracking Link"
-            label="Tracking Link"
-          />
-          <TouchableOpacity
-            onPress={() => {
-              const link = trakingLink.trim();
-              if (link) {
-                const validLink = link.startsWith('http')
-                  ? link
-                  : `https://${link}`;
-                Linking.openURL(validLink).catch(err =>
-                  console.warn('Failed to open URL:', err),
-                );
-              }
-            }}
-            
-            >
-            <Text
-              style={{
-                color: '#326EFF',
-                textDecorationLine: 'underline',
-                marginTop: 5,
-                textAlign: 'center',  
-                fontWeight: '600',
-              }}>
-              Open Tracking Link
-            </Text>
-          </TouchableOpacity>
+          {data?.order_number ? (
+            <View style={styles.row}>
+              <Text style={styles.label}>Order Number:</Text>
+              <Text style={styles.value}>{data?.order_number}</Text>
+            </View>
+          ) : null}
+
+          {data?.tracking_number ? (
+            <View style={styles.row}>
+              <Text style={styles.label}>Tracking Number:</Text>
+              <Text style={styles.value}>{data?.tracking_number}</Text>
+            </View>
+          ) : null}
+
+          {data?.transport_company_name ? (
+            <View style={styles.row}>
+              <Text style={styles.label}>Tracking Company:</Text>
+              <Text style={styles.value}>{data?.transport_company_name}</Text>
+            </View>
+          ) : null}
+          {data?.tracking_link ? (
+            <View style={styles.row}>
+              <Text style={styles.label}>Tracking Company:</Text>
+              <Text
+                style={[styles.value, {color: 'blue', fontWeight: '700'}]}
+               onPress={() => Linking.openURL('https://www.google.com')}>
+                {data?.tracking_link}
+              </Text>
+            </View>
+          ) : null}
         </View>
       </ScrollView>
     </View>
@@ -113,7 +103,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.InterRegular,
     color: Colors.red2,
     fontWeight: '800',
-    fontSize: 20,
+    fontSize: 17,
   },
   orderDate: {
     fontFamily: Fonts.InterRegular,
@@ -139,5 +129,21 @@ const styles = StyleSheet.create({
     color: Colors.red2,
     fontWeight: '700',
     fontSize: 16,
+  },
+  row: {
+    marginBottom: 10,
+  },
+
+  label: {
+    fontFamily: Fonts.InterMedium,
+    fontSize: 14,
+    color: Colors.gray4,
+  },
+
+  value: {
+    fontFamily: Fonts.InterSemiBold,
+    fontSize: 15,
+    color: Colors.black,
+    marginTop: 2,
   },
 });

@@ -110,12 +110,43 @@ const Order = () => {
     }
   };
 
-  const onDownloadInvoice = async () => {
+  const getInvoice = async item => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl9 + 'get-invoice';
+    const params = {
+      order_id: item?.id,
+    };
+    try {
+      const res = await axios.post(url, params, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (res?.status === 200) {
+        console.log(res?.data, 'lp');
+        onDownloadInvoice(res?.data?.url);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    }
+  };
+
+  const onDownloadInvoice = async url => {
     try {
       const fileName = `invoice_${Date.now()}.pdf`;
       const downloadDest = `${RNFS.DownloadDirectoryPath}/${fileName}`;
       const options = {
-        fromUrl: 'https://www.wmaccess.com/downloads/sample-invoice.pdf',
+        fromUrl: url,
         toFile: downloadDest,
       };
       const result = await RNFS.downloadFile(options).promise;
@@ -173,7 +204,6 @@ const Order = () => {
       showWarning(error.response?.data?.message || 'Error updating cart');
     }
   };
-
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
@@ -233,15 +263,16 @@ const Order = () => {
                     fontWeight: 'bold',
                     color: Colors.black,
                     marginBottom: 10,
+                    fontSize: 13,
                   }}>
-                  Order ID: {item.id}
+                  Order No: {item.order_number}
                 </Text>
                 {item?.status === 'Rejected' ||
                 item?.status === 'Canceled' ||
                 item?.status === 'Confirmed' ? (
                   <Text
                     style={{
-                      padding: 8,
+                      padding: 5,
                       backgroundColor: Colors.red2,
                       borderRadius: 40,
                       paddingHorizontal: 20,
@@ -298,9 +329,9 @@ const Order = () => {
                         <Text style={styles.productName} numberOfLines={1}>
                           {orderItem.product_name}
                         </Text>
-                        <Text style={styles.productSize}>
+                        {/* <Text style={styles.productSize}>
                           Size: {orderItem.size}
-                        </Text>
+                        </Text> */}
                         <Text style={styles.productSize}>
                           Qty: {orderItem.quantity}
                         </Text>
@@ -333,7 +364,10 @@ const Order = () => {
                         fontSize: 16,
                         color: Colors.black,
                       }}>
-                      Refund Status: <Text style={{ color: Colors.red2}}>{item?.refund_status}</Text>
+                      Refund Status:{' '}
+                      <Text style={{color: Colors.red2}}>
+                        {item?.refund_status}
+                      </Text>
                     </Text>
                   ))}
 
@@ -401,7 +435,7 @@ const Order = () => {
                           color: Colors.red,
                           textDecorationLine: 'underline',
                         }}
-                        onPress={() => onDownloadInvoice()}>
+                        onPress={() => getInvoice(item)}>
                         Get Invoice
                       </Text>
                     </View>
@@ -418,7 +452,7 @@ const Order = () => {
         onConfirm={() => onDelete()}
       />
 
-        {cartData?.length > 0 && (
+      {cartData?.length > 0 && (
         <Pressable
           style={{
             position: 'absolute',
@@ -450,7 +484,7 @@ const Order = () => {
       {cartData?.length > 0 && (
         <AnimatedCartModal
           visible={isCartVisible}
-                    setIsCartVisible={setIsCartVisible}
+          setIsCartVisible={setIsCartVisible}
           cartData={cartData}
           onClose={() => setIsCartVisible(false)}
           navigation={navigation}

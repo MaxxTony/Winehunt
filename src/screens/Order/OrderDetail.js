@@ -15,11 +15,14 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Feather from 'react-native-vector-icons/Feather';
 import WineHuntLabelInput from '../../common/WineHuntLabelInput';
 import RNFS from 'react-native-fs';
-import {showError, showSucess} from '../../helper/Toastify';
+import {showError, showSucess, showWarning} from '../../helper/Toastify';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from '../../helper/Constant';
+import axios from 'axios';
 
 const OrderDetail = props => {
   const data = props?.route?.params?.item;
-  console.log(data?.refund_status);
+
   const navigation = useNavigation();
   const inset = useSafeAreaInsets();
   const [orderId, setOrderId] = useState(data?.id ? data?.id.toString() : '');
@@ -37,13 +40,44 @@ const OrderDetail = props => {
     return `Date: ${date.toLocaleDateString('en-GB', options)}`;
   };
 
-  const onDownloadInvoice = async () => {
+   const getInvoice = async data => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl9 + 'get-invoice';
+    const params = {
+      order_id: data?.id,
+    };
+    try {
+      const res = await axios.post(url, params, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (res?.status === 200) {
+        console.log(res?.data, 'lp');
+        onDownloadInvoice(res?.data?.url);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Server Error:', error.response.data);
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Request Error:', error.message);
+      }
+    }
+  };
+
+  const onDownloadInvoice = async (url) => {
     try {
       const fileName = `invoice_${Date.now()}.pdf`;
       const downloadDest = `${RNFS.DownloadDirectoryPath}/${fileName}`;
 
       const options = {
-        fromUrl: 'https://www.wmaccess.com/downloads/sample-invoice.pdf', // Your PDF link
+        fromUrl: url, // Your PDF link
         toFile: downloadDest,
       };
 
@@ -70,13 +104,13 @@ const OrderDetail = props => {
         showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <View style={styles.orderInfo}>
-            <Text style={styles.orderId}>Orders ID: {data?.id}</Text>
+            <Text style={styles.orderId}>Orders No: {data?.order_number}</Text>
             <Text style={styles.orderDate}>{formatDate(data?.created_at)}</Text>
           </View>
-          <Text style={styles.downloadText} onPress={() => onDownloadInvoice()}>
-            Download Invoice
-          </Text>
         </View>
+        <Text style={styles.downloadText} onPress={() => getInvoice(data)}>
+          Download Invoice
+        </Text>
 
         <View style={styles.summaryCard}>
           <Text style={styles.summaryTitle}>Order Summary</Text>
@@ -125,6 +159,7 @@ const OrderDetail = props => {
               resizeMode="contain"
             />
             <View style={{gap: 5}}>
+
               <Text
                 style={{
                   fontFamily: Fonts.InterRegular,
@@ -132,8 +167,9 @@ const OrderDetail = props => {
                   fontWeight: '600',
                   fontSize: 16,
                 }}>
-                {data?.payment_method}
+                Transaction ID
               </Text>
+
               <Text
                 style={{
                   fontFamily: Fonts.InterRegular,
@@ -141,11 +177,20 @@ const OrderDetail = props => {
                   fontWeight: '600',
                   fontSize: 16,
                 }}>
-                XXXXXXXXXX5865
+                {data?.transaction_id}
+              </Text>
+                <Text
+                style={{
+                  fontFamily: Fonts.InterRegular,
+                  color: Colors.green,
+                  fontWeight: '600',
+                  fontSize: 16,
+                }}>
+                {data?.payment_status}
               </Text>
             </View>
           </View>
-          <Text
+          {/* <Text
             style={{
               textAlign: 'center',
               textDecorationLine: 'underline',
@@ -154,61 +199,38 @@ const OrderDetail = props => {
               fontWeight: 'bold',
             }}>
             View Transaction Detail
-          </Text>
+          </Text> */}
         </View>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryTitle}>Track Order</Text>
-          <Text
-            style={{
-              fontFamily: Fonts.InterRegular,
-              color: Colors.black,
-              fontSize: 15,
-            }}>
-            Transport Company Name -{' '}
-            <Text style={{color: '#326EFF'}}>FreightWings Express</Text>
-          </Text>
+
           <View style={styles.divider} />
-          <WineHuntLabelInput
-            value={orderId}
-            onChangeText={e => setOrderId(e)}
-            placeholder="Enter Your Order ID"
-            label="Order ID"
-          />
-          <WineHuntLabelInput
-            value={trakingNumber}
-            onChangeText={e => setTrakingNumber(e)}
-            placeholder="Enter Your Tracking Number"
-            label="Tracking Number"
-          />
-          <WineHuntLabelInput
-            value={trakingLink}
-            onChangeText={e => setTrakingLink(e)}
-            placeholder="Enter Your Tracking Link"
-            label="Tracking Link"
-          />
-          <TouchableOpacity
-            onPress={() => {
-              const link = trakingLink.trim();
-              if (link) {
-                const validLink = link.startsWith('http')
-                  ? link
-                  : `https://${link}`;
-                Linking.openURL(validLink).catch(err =>
-                  console.warn('Failed to open URL:', err),
-                );
-              }
-            }}>
-            <Text
-              style={{
-                color: '#326EFF',
-                textDecorationLine: 'underline',
-                marginTop: 5,
-                textAlign: 'center',
-                fontWeight: '600',
-              }}>
-              Open Tracking Link
-            </Text>
-          </TouchableOpacity>
+          {data?.order_number ? (
+            <View style={styles.row}>
+              <Text style={styles.label}>Order Number:</Text>
+              <Text style={styles.value}>{data?.order_number}</Text>
+            </View>
+          ) : null}
+
+          {data?.tracking_number ? (
+            <View style={styles.row}>
+              <Text style={styles.label}>Tracking Number:</Text>
+              <Text style={styles.value}>{data?.tracking_number}</Text>
+            </View>
+          ) : null}
+
+          {data?.transport_company_name ? (
+            <View style={styles.row}>
+              <Text style={styles.label}>Tracking Company:</Text>
+              <Text style={styles.value}>{data?.transport_company_name}</Text>
+            </View>
+          ) : null}
+          {data?.tracking_link ? (
+            <View style={styles.row}>
+              <Text style={styles.label}>Tracking Company:</Text>
+              <Text style={styles.value}>{data?.tracking_link}</Text>
+            </View>
+          ) : null}
         </View>
       </ScrollView>
     </View>
@@ -250,6 +272,8 @@ const styles = StyleSheet.create({
     color: '#5FC27B',
     fontWeight: '700',
     fontSize: 15,
+    textAlign: 'right',
+    marginVertical: 10,
   },
   summaryCard: {
     backgroundColor: '#fff',
@@ -285,5 +309,22 @@ const styles = StyleSheet.create({
     color: Colors.red2,
     fontWeight: '700',
     fontSize: 18,
+  },
+
+  row: {
+    marginBottom: 10,
+  },
+
+  label: {
+    fontFamily: Fonts.InterMedium,
+    fontSize: 14,
+    color: Colors.gray4,
+  },
+
+  value: {
+    fontFamily: Fonts.InterSemiBold,
+    fontSize: 15,
+    color: Colors.black,
+    marginTop: 2,
   },
 });
