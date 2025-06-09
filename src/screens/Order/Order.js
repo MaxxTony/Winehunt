@@ -450,6 +450,7 @@ const Order = () => {
       {cartData?.length > 0 && (
         <AnimatedCartModal
           visible={isCartVisible}
+                    setIsCartVisible={setIsCartVisible}
           cartData={cartData}
           onClose={() => setIsCartVisible(false)}
           navigation={navigation}

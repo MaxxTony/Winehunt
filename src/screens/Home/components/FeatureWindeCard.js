@@ -34,7 +34,7 @@ const FeatureWindeCard = ({item, onPress}) => {
             </Text>
           </Text>
           <Text style={styles.price} numberOfLines={1} allowFontScaling={false}>
-            $ {item?.price}
+             £  {item?.price}
           </Text>
           <Pressable style={styles.button} onPress={onPress}>
             <Text style={styles.buttonText} allowFontScaling={false}>

@@ -1,29 +1,22 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import {
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, {useEffect, useState, useCallback} from 'react';
+import {FlatList, Image, StyleSheet, Text, View} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
 import BackNavigationWithTitle from '../../../components/BackNavigationWithTitle';
-import { Colors, Fonts } from '../../../constant/Styles';
+import {Colors, Fonts} from '../../../constant/Styles';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Constants from '../../../helper/Constant';
-import { showWarning } from '../../../helper/Toastify';
+import {showWarning} from '../../../helper/Toastify';
 
 dayjs.extend(relativeTime);
 
-const ReviewList = ({ route }) => {
+const ReviewList = ({route}) => {
   const navigation = useNavigation();
-  const isFocused = useIsFocused();
   const insets = useSafeAreaInsets();
 
   const [detail, setDetail] = useState([]);
@@ -35,32 +28,17 @@ const ReviewList = ({ route }) => {
     wineId,
   } = route?.params || {};
 
-
-
-  // useEffect(() => {
-  //   if (!isFocused) return;
-
-  //   if (type === 'wines') {
-     
-  //     fetchProductDetail();
-  //   } else {
-     
-  //     fetchVendorDetail();
-  //   }
-  // }, [isFocused]);
-
   useEffect(() => {
-  const unsubscribe = navigation.addListener('focus', () => {
-    if (type === 'wines') {
-      fetchProductDetail();
-    } else {
-      fetchVendorDetail();
-    }
-  });
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (type === 'wines') {
+        fetchProductDetail();
+      } else {
+        fetchVendorDetail();
+      }
+    });
 
-  return unsubscribe;
-}, [navigation, fetchProductDetail, fetchVendorDetail]);
-
+    return unsubscribe;
+  }, [navigation, fetchProductDetail, fetchVendorDetail]);
 
   const fetchProductDetail = useCallback(async () => {
     try {
@@ -69,22 +47,22 @@ const ReviewList = ({ route }) => {
 
       const response = await axios.post(
         `${Constants.baseUrl4}${Constants.wineDetail}`,
-        { product_id: wineId },
+        {product_id: wineId},
         {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       if (response.status === 200) {
         setDetail(response.data?.data || {});
       }
     } catch (error) {
-      handleAxiosError(error);                                                                                            
+      handleAxiosError(error);
     }
-  }, [wineId]);
+  }, []);
 
   const fetchVendorDetail = useCallback(async () => {
     try {
@@ -95,13 +73,13 @@ const ReviewList = ({ route }) => {
 
       const response = await axios.post(
         `${Constants.baseUrl5}${Constants.vendorDetail}`,
-        { vendor_id: vendorId },
+        {vendor_id: vendorId},
         {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -112,7 +90,7 @@ const ReviewList = ({ route }) => {
     }
   }, [mainData]);
 
-  const handleAxiosError = (error) => {
+  const handleAxiosError = error => {
     if (error?.response) {
       console.log('Server Error:', error.response.data);
       showWarning(error.response.data?.message);
@@ -123,10 +101,10 @@ const ReviewList = ({ route }) => {
     }
   };
 
-  const renderReviewItem = ({ item }) => (
+  const renderReviewItem = ({item}) => (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Image source={{ uri: item?.user?.image }} style={styles.avatar} />
+        <Image source={{uri: item?.user?.image}} style={styles.avatar} />
         <View style={styles.userInfo}>
           <Text style={styles.userName}>
             {item?.user?.first_name} {item?.user?.last_name}
@@ -135,25 +113,25 @@ const ReviewList = ({ route }) => {
             {dayjs(item?.created_at).fromNow()}
           </Text>
         </View>
-        <View style={styles.ratingContainer}>
-          <AntDesign name="star" size={16} color={Colors.yellow} />
-          <Text style={styles.ratingText}>{item?.rating}</Text>
-        </View>
+        {type == 'wines' && (
+          <View style={styles.ratingContainer}>
+            <AntDesign name="star" size={16} color={Colors.yellow} />
+            <Text style={styles.ratingText}>{item?.rating}</Text>
+          </View>
+        )}
       </View>
       <Text style={styles.reviewText}>{item?.review}</Text>
     </View>
   );
 
   const renderEmptyComponent = () => (
-    <Text style={{ color: '#888', fontSize: 16,textAlign:"center" }}>
+    <Text style={{color: '#888', fontSize: 16, textAlign: 'center'}}>
       No reviews at this time
     </Text>
   );
 
-  const reviewData = detail?.reviews || passedReviews?.product_reviews || [];
-
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, {paddingTop: insets.top}]}>
       <BackNavigationWithTitle
         title="Reviews"
         onPress={() => navigation.goBack()}
@@ -167,19 +145,17 @@ const ReviewList = ({ route }) => {
       />
 
       <FlatList
-        data={reviewData}
+        data={detail?.reviews ? detail?.reviews : detail?.product_reviews}
         keyExtractor={(item, index) => item?.id?.toString() || index.toString()}
         contentContainerStyle={styles.listContainer}
         renderItem={renderReviewItem}
         ListEmptyComponent={renderEmptyComponent}
-        
       />
     </View>
   );
 };
 
 export default ReviewList;
-
 
 const styles = StyleSheet.create({
   container: {

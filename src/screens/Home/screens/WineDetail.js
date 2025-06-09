@@ -32,6 +32,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {fetchProfile} from '../../../redux/slices/profileSlice';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import AnimatedCartModal from '../components/AnimatedCartModal';
 
 dayjs.extend(relativeTime);
 
@@ -48,13 +49,36 @@ const WineDetail = props => {
   const [detail, setDetail] = useState([]);
   const [likedItems, setLikedItems] = useState({});
   const [quantity, setQuantity] = useState(1);
+  const [cartData, setCartData] = useState([]);
+
+  const [isCartVisible, setIsCartVisible] = useState(false);
 
   const dispatch = useDispatch();
   const {userData} = useSelector(state => state.profile);
 
+  const [suggestionLikes, setSuggestionLikes] = useState({});
+
   useEffect(() => {
     getProductDetail();
+    getCartData();
   }, [isFocused]);
+
+  const getCartData = async () => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl8 + Constants.getCart;
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      setCartData(res?.data?.cart);
+    } catch (error) {
+      showWarning(error.response?.data?.message || 'Error fetching cart');
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -62,16 +86,16 @@ const WineDetail = props => {
     }, [dispatch]),
   );
 
+
+
   const getProductDetail = async () => {
     const data = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(data)?.token;
     const url = Constants.baseUrl4 + Constants.wineDetail;
     setLoading(true);
-
     const body = {
       product_id: id,
     };
-
     try {
       const res = await axios.post(url, body, {
         headers: {
@@ -79,25 +103,22 @@ const WineDetail = props => {
           'Content-Type': 'application/json',
         },
       });
-
       if (res?.status === 200) {
         const product = res?.data?.data;
-
-        // Calculate average rating
-        const reviews = product?.product_reviews || [];
-        const avgRating =
-          reviews.length > 0
-            ? reviews.reduce((sum, r) => sum + parseFloat(r.rating || 0), 0) /
-              reviews.length
-            : 0;
-
-        // Merge average rating into the product object
-        const productWithRating = {
-          ...product,
-          average_rating: avgRating.toFixed(1),
-        };
-
-        setDetail(productWithRating);
+        // Set main product wishlist status
+        setLikedItems(prev => ({
+          ...prev,
+          [product?.id]: product?.is_wishlist,
+        }));
+        // Set suggested products wishlist status
+        const suggestionLikesMap = {};
+        if (product?.suggestions) {
+          product.suggestions.forEach(suggestion => {
+            suggestionLikesMap[suggestion.id] = suggestion.is_wishlist;
+          });
+        }
+        setSuggestionLikes(suggestionLikesMap);
+        setDetail(product);
       }
     } catch (error) {
       if (error.response) {
@@ -163,7 +184,7 @@ const WineDetail = props => {
 
   const [addOn, setAddOn] = useState(AddonList[0]?.id);
 
-  const onLike = async id => {
+  const onLike = async (id, isSuggestion = false) => {
     const info = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(info)?.token;
     const url = Constants.baseUrl7 + Constants.addToWishList;
@@ -180,8 +201,11 @@ const WineDetail = props => {
         },
       });
       if (res?.data?.status === 200) {
-        setLikedItems(prev => ({...prev, [id]: true}));
-
+        if (isSuggestion) {
+          setSuggestionLikes(prev => ({...prev, [id]: true}));
+        } else {
+          setLikedItems(prev => ({...prev, [id]: true}));
+        }
         showSucess(res?.data?.message);
       }
     } catch (error) {
@@ -198,7 +222,7 @@ const WineDetail = props => {
     }
   };
 
-  const onDisLike = async id => {
+  const onDisLike = async (id, isSuggestion = false) => {
     const info = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(info)?.token;
 
@@ -218,7 +242,11 @@ const WineDetail = props => {
       });
 
       if (res?.data?.status === 200) {
-        setLikedItems(prev => ({...prev, [id]: false}));
+        if (isSuggestion) {
+          setSuggestionLikes(prev => ({...prev, [id]: false}));
+        } else {
+          setLikedItems(prev => ({...prev, [id]: false}));
+        }
         showWarning(res?.data?.message);
       }
     } catch (error) {
@@ -302,6 +330,32 @@ const WineDetail = props => {
     //   }
     // }
   };
+
+  const handleRemoveItem = async itemId => {
+    const info = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(info)?.token;
+    const url = Constants.baseUrl8 + Constants.deleteCart;
+    const data = {
+      id: itemId,
+    };
+    try {
+      const res = await axios.post(url, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.data?.status == 200) {
+        // setCartData(prev => prev.filter(item => item.id !== itemId));
+        getCartData();
+      }
+    } catch (error) {
+      console.log(error);
+      showWarning(error.response?.data?.message || 'Error updating cart');
+    }
+  };
+
+  console.log(detail,"vishal")
 
   return (
     <View
@@ -431,13 +485,12 @@ const WineDetail = props => {
                   £{detail?.price ?? '0.00'}
                 </Text>
               </View>
-
-              <View style={styles.ratingContainer}>
-                <AntDesign name="star" size={18} color={Colors.yellow} />
-                <Text style={styles.ratingText} allowFontScaling={false}>
-                  {detail?.average_rating}
-                </Text>
-              </View>
+            </View>
+            <View style={styles.ratingContainer}>
+              <AntDesign name="star" size={14} color={Colors.yellow} />
+              <Text style={styles.ratingText} allowFontScaling={false}>
+                {detail?.average_rating}
+              </Text>
             </View>
             <View style={styles.buttonContainer}>
               {detail?.cart_type?.includes(1) && (
@@ -599,17 +652,21 @@ const WineDetail = props => {
                       <View style={{justifyContent: 'space-between'}}>
                         <Pressable
                           onPress={() => {
-                            if (!likedItems[item?.id]) {
-                              onLike(item?.id);
+                            if (!suggestionLikes[item?.id]) {
+                              onLike(item?.id, true);
                             } else {
-                              onDisLike(item?.id);
+                              onDisLike(item?.id, true);
                             }
                           }}>
                           <AntDesign
                             size={25}
-                            name={likedItems[item?.id] ? 'heart' : 'hearto'}
+                            name={
+                              suggestionLikes[item?.id] ? 'heart' : 'hearto'
+                            }
                             color={
-                              likedItems[item?.id] ? Colors.red : Colors.black
+                              suggestionLikes[item?.id]
+                                ? Colors.red
+                                : Colors.black
                             }
                           />
                         </Pressable>
@@ -759,6 +816,47 @@ const WineDetail = props => {
           )}
         </View>
       </ScrollView>
+
+      {cartData?.length > 0 && (
+        <Pressable
+          style={{
+            position: 'absolute',
+            bottom: 20,
+            alignSelf: 'center',
+            width: '60%',
+            paddingVertical: 12,
+            backgroundColor: Colors.blue,
+            borderRadius: 25,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.2,
+            shadowRadius: 3,
+            elevation: 5,
+          }}
+          onPress={() => setIsCartVisible(true)}>
+          <Text
+            style={{
+              color: Colors.white,
+              textAlign: 'center',
+              fontSize: 16,
+              fontWeight: 'bold',
+            }}>
+            View Cart ({cartData.length} items)
+          </Text>
+        </Pressable>
+      )}
+
+      {cartData?.length > 0 && (
+        <AnimatedCartModal
+          visible={isCartVisible}
+          setIsCartVisible={setIsCartVisible}
+          cartData={cartData}
+          onClose={() => setIsCartVisible(false)}
+          navigation={navigation}
+          onRemoveItem={handleRemoveItem}
+        />
+      )}
+
       <PreferenceModal
         AddonList={AddonList}
         addOn={addOn}
@@ -849,14 +947,14 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   priceText: {
-    fontSize: 18,
+    fontSize: 15,
     fontFamily: Fonts.InterMedium,
     fontWeight: '800',
     color: Colors.black,
   },
   priceValue: {
     color: Colors.red,
-    fontSize: 15,
+    fontSize: 14,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -864,7 +962,7 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   ratingText: {
-    fontSize: 16,
+    fontSize: 14,
     color: Colors.black,
     fontFamily: Fonts.InterRegular,
     fontWeight: '600',
@@ -880,7 +978,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.red,
     alignItems: 'center',
     borderRadius: 5,
-    flex: 0.43,
+    // flex: 0.43,
   },
   buttonText: {
     fontSize: 12,

@@ -95,8 +95,7 @@ const Cart = () => {
   const calculateSubtotal = () => {
     if (!Array.isArray(cartData)) return 0;
     return cartData.reduce(
-      (acc, item) =>
-        acc + item.quantity * (item?.product?.price || 0),
+      (acc, item) => acc + item.quantity * (item?.product?.price || 0),
       0,
     );
   };
@@ -145,7 +144,6 @@ const Cart = () => {
           scrollEnabled={false}
           contentContainerStyle={{gap: 5, paddingBottom: 10}}
           renderItem={({item, index}) => {
-          
             return (
               <View style={styles.cartItemContainer} key={index}>
                 <Pressable
@@ -176,7 +174,7 @@ const Cart = () => {
                   <View style={styles.priceQuantityContainer}>
                     <View style={styles.priceTag}>
                       <Text style={styles.priceText} allowFontScaling={false}>
-                        ${item?.product?.price}
+                         £ {item?.product?.price}
                       </Text>
                     </View>
                     <View style={styles.quantityContainer}>
@@ -256,45 +254,46 @@ const Cart = () => {
             </Text>
           </View>
         )}
-      </ScrollView>
-      {cartData && cartData.length > 0 && (
-        <View style={styles.summaryContainer}>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel} allowFontScaling={false}>
-              Sub Total
-            </Text>
-            <Text style={styles.summaryValue} allowFontScaling={false}>
-              ${subtotal.toFixed(2)}
-            </Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel} allowFontScaling={false}>
-              Delivery
-            </Text>
-            <Text style={styles.summaryValue} allowFontScaling={false}>
-              ${DELIVERY_FEE}
-            </Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.totalLabel} allowFontScaling={false}>
-              Grand Total
-            </Text>
-            <Text style={styles.totalValue} allowFontScaling={false}>
-              ${grandTotal.toFixed(2)}
-            </Text>
-          </View>
-          <WineHuntButton
-            text="Next"
-            onPress={() =>
-              navigation.navigate('Payment', {
-                total: grandTotal,
-                cartData: cartData,
+
+        {cartData && cartData.length > 0 && (
+          <View style={styles.summaryContainer}>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel} allowFontScaling={false}>
+                Sub Total
+              </Text>
+              <Text style={styles.summaryValue} allowFontScaling={false}>
+                 £ {subtotal.toFixed(2)}
+              </Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel} allowFontScaling={false}>
+                Delivery
+              </Text>
+              <Text style={styles.summaryValue} allowFontScaling={false}>
+                 £ {DELIVERY_FEE}
+              </Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.totalLabel} allowFontScaling={false}>
+                Grand Total
+              </Text>
+              <Text style={styles.totalValue} allowFontScaling={false}>
+                 £ {grandTotal.toFixed(2)}
+              </Text>
+            </View>
+            <WineHuntButton
+              text="Next"
+              onPress={() =>
+                navigation.navigate('Payment', {
+                  total: grandTotal,
+                  cartData: cartData,
                   vendorId: cartData?.[0]?.product?.user_id,
-              })
-            }
-          />
-        </View>
-      )}
+                })
+              }
+            />
+          </View>
+        )}
+      </ScrollView>
     </View>
   );
 };

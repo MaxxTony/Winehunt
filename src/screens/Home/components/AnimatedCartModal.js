@@ -19,6 +19,7 @@ const AnimatedCartModal = ({
   cartData,
   navigation,
   onRemoveItem,
+  setIsCartVisible,
 }) => {
   const slideAnim = useRef(new Animated.Value(500)).current;
 
@@ -39,7 +40,6 @@ const AnimatedCartModal = ({
       }).start();
     }
   }, [visible]);
-
 
   const renderItem = ({item}) => (
     <View
@@ -83,10 +83,7 @@ const AnimatedCartModal = ({
             currency: 'USD',
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
-          }).format(
-            item?.quantity *
-              parseFloat(item?.product?.price),
-          )}
+          }).format(item?.quantity * parseFloat(item?.product?.price))}
         </Text>
         <TouchableOpacity onPress={() => onRemoveItem(item.id)}>
           <Icon name="delete" size={22} color={Colors.red} />
@@ -140,7 +137,10 @@ const AnimatedCartModal = ({
                 alignItems: 'center',
                 marginTop: 20,
               }}
-              onPress={() => navigation.navigate('Cart')}>
+              onPress={() => {
+                setIsCartVisible(false);
+                navigation.navigate('Cart');
+              }}>
               <Text style={{color: Colors.white, fontWeight: 'bold'}}>
                 Proceed to Checkout
               </Text>

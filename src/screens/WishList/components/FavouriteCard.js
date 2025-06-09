@@ -35,9 +35,8 @@ const FavouriteCard = ({item, type, onPress}) => {
               Best Rated this Month
             </Text>
             <View style={styles.ratingRow}>
-              <AntDesign name="star" size={15} color={Colors.yellow} />
               <Text style={styles.ratingText} allowFontScaling={false}>
-                4.3 | 120 Review
+                 120 Review
               </Text>
             </View>
           </View>
@@ -81,7 +80,7 @@ const FavouriteCard = ({item, type, onPress}) => {
               {item?.product?.name} ({item?.product?.title})
             </Text>
             <Text style={styles.cardPrice} allowFontScaling={false}>
-              $12.00
+               £  12.00
             </Text>
             {/* <WineHuntButton
               text="Add to cart"

@@ -84,14 +84,14 @@ const OrderDetail = props => {
 
           <View style={styles.row}>
             <Text style={styles.label}>Sub Total</Text>
-            <Text style={styles.label}>${data?.amount}</Text>
+            <Text style={styles.label}> £ {data?.amount}</Text>
           </View>
 
           <View style={styles.divider} />
 
           <View style={styles.row}>
             <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.label}>${parseFloat(data?.amount)}</Text>
+            <Text style={styles.label}> £ {parseFloat(data?.amount)}</Text>
           </View>
         </View>
 

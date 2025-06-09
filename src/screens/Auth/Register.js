@@ -176,8 +176,8 @@ const Register = ({route}) => {
       showWarning('Password is required.');
       return;
     }
-    if (trimmedPassword.length < 8) {
-      showWarning('Password must be at least 8 characters long.');
+    if (trimmedPassword.length < 6) {
+      showWarning('Password must be at least 6 characters long.');
       return;
     }
     if (!trimmedConfirmPassword) {

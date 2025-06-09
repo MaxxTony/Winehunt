@@ -57,6 +57,7 @@ const VendorDetail = props => {
   const [detail, setDetail] = useState([]);
   const [like, setLike] = useState(false);
   const [likedItems, setLikedItems] = useState({});
+  const [suggestionLikes, setSuggestionLikes] = useState({});
 
   const [vendorCoordinates, setVendorCoordinates] = useState({});
   const [cartData, setCartData] = useState([]);
@@ -97,6 +98,7 @@ const VendorDetail = props => {
     const body = {
       vendor_id: data?.product?.user_id ? data?.product?.user_id : data?.id,
     };
+   
     try {
       const res = await axios.post(url, body, {
         headers: {
@@ -111,11 +113,19 @@ const VendorDetail = props => {
           latitude: res?.data?.data?.latitude,
           longitude: res?.data?.data?.longitude,
         });
-        console.log(vendorData);
         setLikedItems(prev => ({
           ...prev,
           [vendorData?.id]: vendorData?.is_wishlist,
         }));
+
+        // Set suggested products wishlist status
+        const suggestionLikesMap = {};
+        if (vendorData?.products) {
+          vendorData?.products.forEach(suggestion => {
+            suggestionLikesMap[suggestion.id] = suggestion.is_wishlist;
+          });
+        }
+        setSuggestionLikes(suggestionLikesMap);
       }
     } catch (error) {
       if (error.response) {
@@ -180,14 +190,14 @@ const VendorDetail = props => {
     {id: 4, name: 'Website', image: require('../images/global.png')},
   ];
 
-  const onLike = async (id, str) => {
+  const onLike = async (id, isSuggestion = false) => {
     const info = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(info)?.token;
     const url = Constants.baseUrl7 + Constants.addToWishList;
     setLoading(true);
     const body = {
-      type: str === 'vendors' ? 'vendors' : 'wines',
-      [str === 'vendors' ? 'vendor_id' : 'product_id']: id,
+      type: isSuggestion ? 'wines' : 'vendors',
+      [isSuggestion ? 'product_id' : 'vendor_id']: id,
     };
     try {
       const res = await axios.post(url, body, {
@@ -197,7 +207,11 @@ const VendorDetail = props => {
         },
       });
       if (res?.data?.status === 200) {
-        setLikedItems(prev => ({...prev, [id]: true}));
+        if (isSuggestion) {
+          setSuggestionLikes(prev => ({...prev, [id]: true}));
+        } else {
+          setLikedItems(prev => ({...prev, [id]: true}));
+        }
         showSucess(res?.data?.message);
       }
     } catch (error) {
@@ -214,14 +228,14 @@ const VendorDetail = props => {
     }
   };
 
-  const onDisLike = async (id, str) => {
+  const onDisLike = async (id, isSuggestion = false) => {
     const info = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(info)?.token;
     const url = Constants.baseUrl7 + Constants.removeToWishList;
     setLoading(true);
     const body = {
       id: id,
-      type: str == 'vendors' ? 'vendors' : 'wines',
+      type: isSuggestion ? 'wines' : 'vendors',
     };
 
     try {
@@ -233,7 +247,11 @@ const VendorDetail = props => {
       });
 
       if (res?.data?.status === 200) {
-        setLikedItems(prev => ({...prev, [id]: false}));
+        if (isSuggestion) {
+          setSuggestionLikes(prev => ({...prev, [id]: false}));
+        } else {
+          setLikedItems(prev => ({...prev, [id]: false}));
+        }
         showWarning(res?.data?.message);
       }
     } catch (error) {
@@ -270,7 +288,6 @@ const VendorDetail = props => {
         },
       });
       if (res?.data?.status == 200) {
-        // setCartData(prev => prev.filter(item => item.id !== itemId));
         getCartData();
       }
     } catch (error) {
@@ -314,16 +331,18 @@ const VendorDetail = props => {
               style={styles.shopImage}
             />
             <View style={styles.infoContainer}>
-              <View style={styles.infoItem}>
-                <Ionicons
-                  name="navigate-outline"
-                  size={18}
-                  color={Colors.black}
-                />
-                <Text style={styles.infoText} allowFontScaling={false}>
-                  {formattedDistance}km
-                </Text>
-              </View>
+              {detail?.latitude !== 'undefined' && (
+                <View style={styles.infoItem}>
+                  <Ionicons
+                    name="navigate-outline"
+                    size={18}
+                    color={Colors.black}
+                  />
+                  <Text style={styles.infoText} allowFontScaling={false}>
+                    {formattedDistance}km
+                  </Text>
+                </View>
+              )}
               {/* <View style={styles.infoItem}>
                 <AntDesign name="star" size={18} color={Colors.yellow} />
                 <Text style={styles.infoText} allowFontScaling={false}>
@@ -334,9 +353,9 @@ const VendorDetail = props => {
                 style={styles.favoriteButton}
                 onPress={() => {
                   if (!likedItems[detail?.id]) {
-                    onLike(detail?.id, 'vendors');
+                    onLike(detail?.id, false);
                   } else {
-                    onDisLike(detail?.id, 'vendors');
+                    onDisLike(detail?.id, false);
                   }
                 }}>
                 <AntDesign
@@ -352,12 +371,18 @@ const VendorDetail = props => {
           <Text style={styles.vendorName} allowFontScaling={false}>
             {detail?.shop_name}
           </Text>
-          <View style={styles.locationContainer}>
-            <Ionicons name="location-outline" size={15} color={Colors.gray15} />
-            <Text style={styles.locationText} allowFontScaling={false}>
-              {detail?.address}
-            </Text>
-          </View>
+          {detail?.address !== '' && (
+            <View style={styles.locationContainer}>
+              <Ionicons
+                name="location-outline"
+                size={15}
+                color={Colors.gray15}
+              />
+              <Text style={styles.locationText} allowFontScaling={false}>
+                {detail?.address}
+              </Text>
+            </View>
+          )}
           <Text style={styles.description} allowFontScaling={false}>
             {detail?.description}
           </Text>
@@ -389,9 +414,17 @@ const VendorDetail = props => {
           </Text>
           <FlatList
             data={detail?.products}
-            renderItem={({item, index}) => {
+            renderItem={({item}) => {
+             
+              
+            
+             
               return (
-                <View style={styles.productContainer}>
+                <Pressable
+                  style={styles.productContainer}
+                  onPress={() =>
+                    navigation.navigate('WineDetail', {item: item?.id})
+                  }>
                   <Image
                     source={
                       item?.product_images[0]?.image
@@ -411,24 +444,24 @@ const VendorDetail = props => {
                       </Text>
                       <Pressable
                         onPress={() => {
-                          if (!likedItems[item?.id]) {
-                            onLike(item?.id, 'wines');
+                          if (!suggestionLikes[item?.id]) {
+                            onLike(item?.id, true);
                           } else {
-                            onDisLike(item?.id, 'wines');
+                            onDisLike(item?.id, true);
                           }
                         }}>
                         <AntDesign
-                          size={18}
-                          name={likedItems[item?.id] ? 'heart' : 'hearto'}
+                          size={20}
+                          name={suggestionLikes[item?.id] ? 'heart' : 'hearto'}
                           color={
-                            likedItems[item?.id] ? Colors.red : Colors.black
+                            suggestionLikes[item?.id]
+                              ? Colors.red
+                              : Colors.black
                           }
                         />
                       </Pressable>
                     </View>
-                    <Text style={styles.productTag} allowFontScaling={false}>
-                      Best Rated this Month
-                    </Text>
+
                     <View style={styles.productFooter}>
                       <Pressable
                         style={styles.viewMoreButton}
@@ -441,27 +474,31 @@ const VendorDetail = props => {
                           View More
                         </Text>
                       </Pressable>
-                      <View style={styles.ratingContainer}>
-                        <AntDesign
-                          name="star"
-                          size={18}
-                          color={Colors.yellow}
-                        />
-                        <Text style={styles.infoText} allowFontScaling={false}>
-                          {item?.average_rating}
+
+                      <View style={styles.bottomRight}>
+                        <View style={styles.ratingContainer}>
+                          <AntDesign
+                            name="star"
+                            size={16}
+                            color={Colors.yellow}
+                          />
+                          <Text
+                            style={styles.infoText}
+                            allowFontScaling={false}>
+                            {item?.average_rating || '0.0'}
+                          </Text>
+                        </View>
+                        <Text style={styles.priceText} allowFontScaling={false}>
+                          £ {item?.price}
                         </Text>
                       </View>
                     </View>
                   </View>
-                </View>
+                </Pressable>
               );
             }}
             ListEmptyComponent={
-              <Text
-                style={{
-                  marginVertical: 20,
-                  color: '#888',
-                }}>
+              <Text style={{marginVertical: 20, color: '#888'}}>
                 No products available.
               </Text>
             }
@@ -563,7 +600,7 @@ const VendorDetail = props => {
                   marginVertical: 20,
                   color: '#888',
                 }}>
-                No Offers  right now.
+                No Offers right now.
               </Text>
             )}
           />
@@ -597,7 +634,7 @@ const VendorDetail = props => {
               </View>
             )}
             ListEmptyComponent={() => (
-             <Text
+              <Text
                 style={{
                   marginVertical: 20,
                   color: '#888',
@@ -634,7 +671,7 @@ const VendorDetail = props => {
           </View>
 
           <FlatList
-            data={detail?.reviews || []}
+            data={detail?.reviews}
             keyExtractor={(item, index) =>
               item?.id?.toString() || index.toString()
             }
@@ -651,20 +688,19 @@ const VendorDetail = props => {
                       {item?.user?.first_name} {item?.user?.last_name}
                     </Text>
                     <Text style={styles.dateText}>
-                      {' '}
                       {dayjs(item?.created_at).fromNow()}
                     </Text>
                   </View>
-                  <View style={styles.ratingContainer}>
+                  {/* <View style={styles.ratingContainer}>
                     <AntDesign name="star" size={16} color={Colors.yellow} />
                     <Text style={styles.ratingText}>{item?.rating}</Text>
-                  </View>
+                  </View> */}
                 </View>
                 <Text style={styles.reviewText}>{item?.review}</Text>
               </View>
             )}
             ListEmptyComponent={() => (
-               <Text
+              <Text
                 style={{
                   marginVertical: 20,
                   color: '#888',
@@ -709,6 +745,7 @@ const VendorDetail = props => {
         <AnimatedCartModal
           visible={isCartVisible}
           cartData={cartData}
+          setIsCartVisible={setIsCartVisible}
           onClose={() => setIsCartVisible(false)}
           navigation={navigation}
           onRemoveItem={handleRemoveItem}
@@ -805,32 +842,84 @@ const styles = StyleSheet.create({
     color: Colors.black,
   },
   productContainer: {
-    padding: 10,
-    margin: 3,
+    padding: 12,
+    marginVertical: 6,
+    marginHorizontal: 5,
     backgroundColor: Colors.white,
-    elevation: 5,
-    borderRadius: 8,
+    elevation: 4,
+    borderRadius: 10,
     flexDirection: 'row',
-    gap: 10,
+    gap: 12,
+    alignItems: 'center',
   },
-  productFooter: {flexDirection: 'row', justifyContent: 'space-between'},
-  productImage: {height: 75, width: 38},
-  productDetails: {flex: 1, gap: 5},
+
+  productImage: {
+    height: 90,
+    width: 50,
+    borderRadius: 6,
+  },
+
+  productDetails: {
+    flex: 1,
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+
   productHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  productTitle: {fontSize: 13, color: Colors.black, fontWeight: '700'},
-  productTag: {fontSize: 12, color: Colors.gray, fontWeight: '700'},
-  viewMoreButton: {
-    padding: 5,
-    backgroundColor: Colors.red,
-    borderRadius: 10,
-    paddingHorizontal: 20,
+
+  productTitle: {
+    fontSize: 14,
+    color: Colors.black,
+    fontWeight: '700',
+    flex: 1,
+    marginRight: 10,
   },
-  viewMoreText: {fontSize: 12, color: Colors.white, fontWeight: '700'},
-  ratingContainer: {flexDirection: 'row', alignItems: 'center', gap: 5},
+
+  productFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  viewMoreButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    backgroundColor: Colors.red,
+    borderRadius: 12,
+  },
+
+  viewMoreText: {
+    fontSize: 12,
+    color: Colors.white,
+    fontWeight: '600',
+  },
+
+  bottomRight: {
+    alignItems: 'flex-end',
+    gap: 4,
+  },
+
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+
+  infoText: {
+    fontSize: 12,
+    color: Colors.black,
+    fontWeight: '600',
+  },
+
+  priceText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: Colors.green,
+  },
 
   card: {
     padding: 15,

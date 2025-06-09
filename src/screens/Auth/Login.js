@@ -46,8 +46,10 @@ const Login = () => {
       showWarning('Please enter your number');
       return;
     }
-    if (!/^\d{10}$/.test(phoneNumber)) {
-      showWarning('Phone number must be exactly 10 digits and numeric');
+    const normalizedPhone = phoneNumber.replace(/\D/g, ''); // Remove non-digit characters
+
+    if (normalizedPhone.length < 10 || normalizedPhone.length > 11) {
+      showWarning('Phone number must be 10 to 11 digits');
       return;
     }
     const data = {
@@ -125,7 +127,7 @@ const Login = () => {
                   placeholder="Enter Mobile Number"
                   keyboardType="number-pad"
                   placeholderTextColor={Colors.gray}
-                  maxLength={10}
+                  maxLength={13}
                   style={styles.textInput}
                 />
               </View>
@@ -221,6 +223,7 @@ const styles = StyleSheet.create({
   footer: {
     padding: 20,
     marginTop: 'auto',
-    marginBottom: 20,
+    paddingBottom: 10,
+    // marginBottom: 20,
   },
 });

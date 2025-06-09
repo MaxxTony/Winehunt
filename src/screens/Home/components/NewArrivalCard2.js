@@ -44,7 +44,7 @@ const NewArrivalCard2 = ({onPress, item}) => {
             ({item?.title})
           </Text>
           <Text style={styles.price} allowFontScaling={false}>
-            $ 25.99
+             £  {item?.price}
           </Text>
           <Pressable style={styles.button} onPress={onPress}>
             <Text style={styles.buttonText} allowFontScaling={false}>

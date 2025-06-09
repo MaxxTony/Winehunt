@@ -54,13 +54,15 @@ const WishList = () => {
     }
   };
 
+
   const onDelete = async item => {
+   
     const info = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(info)?.token;
     const url = Constants.baseUrl7 + Constants.removeToWishList;
     setLoading(true);
     const body = {
-      id: item?.id,
+      id: type === 'Vendors' ? item?.vendor_id : item?.product_id,
       type: type === 'Vendors' ? 'vendors' : 'wines',
     };
     try {
@@ -152,8 +154,7 @@ const WishList = () => {
         contentContainerStyle={{
           padding: 20,
           gap: 10,
-          flexGrow: 1, 
-        
+          flexGrow: 1,
         }}
         renderItem={({item, index}) => (
           <FavouriteCard

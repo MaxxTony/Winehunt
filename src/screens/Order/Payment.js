@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useIsFocused, useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {Colors, Fonts} from '../../constant/Styles';
@@ -29,10 +29,11 @@ const Payment = props => {
   const dispatch = useDispatch();
   const {userData} = useSelector(state => state.profile);
   const [addressList, setAddressList] = useState([]);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     getAddress();
-  }, []);
+  }, [isFocused]);
 
   const getAddress = async () => {
     const data = await AsyncStorage.getItem('userDetail');
@@ -55,7 +56,7 @@ const Payment = props => {
           address: `${item.block}, ${item.street}, ${item.city}, ${item.state_name}, ${item.zip_code}, ${item.country_name}`,
         }));
         setAddressList(addresstype);
-        setSelectedAddress(addresstype[0])
+        setSelectedAddress(addresstype[0]);
       }
     } catch (error) {
       if (error.response) {
@@ -119,37 +120,56 @@ const Payment = props => {
             </TouchableOpacity>
           )}
         />
-        <Text style={styles.paymentTitle} allowFontScaling={false}>
-          Shipping Address:
-        </Text>
-        <FlatList
-          data={addressList}
-          keyExtractor={item => item.id.toString()}
-          contentContainerStyle={styles.listContainer}
-          renderItem={({item}) => (
+        {addressList?.length > 0 ? (
+          <>
+            <Text style={styles.paymentTitle} allowFontScaling={false}>
+              Shipping Address:
+            </Text>
+            <FlatList
+              data={addressList}
+              keyExtractor={item => item.id.toString()}
+              contentContainerStyle={styles.listContainer}
+              renderItem={({item}) => (
+                <TouchableOpacity
+                  style={[
+                    styles.paymentOption,
+                    item.id === selectedAddress?.id && styles.selectedOption,
+                  ]}
+                  onPress={() => setSelectedAddress(item)}>
+                  <View
+                    style={[
+                      styles.radioButton,
+                      item.id === selectedAddress?.id &&
+                        styles.radioButtonSelected,
+                    ]}
+                  />
+                  <View>
+                    <Text style={styles.paymentText} allowFontScaling={false}>
+                      {item.name}
+                    </Text>
+                    <Text style={styles.addressText} allowFontScaling={false}>
+                      {item.address}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          </>
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText} allowFontScaling={false}>
+              No address found.
+            </Text>
             <TouchableOpacity
-              style={[
-                styles.paymentOption,
-                item.id === selectedAddress.id && styles.selectedOption,
-              ]}
-              onPress={() => setSelectedAddress(item)}>
-              <View
-                style={[
-                  styles.radioButton,
-                  item.id === selectedAddress.id && styles.radioButtonSelected,
-                ]}
-              />
-              <View>
-                <Text style={styles.paymentText} allowFontScaling={false}>
-                  {item.name}
-                </Text>
-                <Text style={styles.addressText} allowFontScaling={false}>
-                  {item.address}
-                </Text>
-              </View>
+              style={styles.addButton}
+              onPress={() => navigation.navigate('AddressList')}>
+              <Text style={styles.addButtonText} allowFontScaling={false}>
+                + Add Address
+              </Text>
             </TouchableOpacity>
-          )}
-        />
+          </View>
+        )}
+
         <View
           style={{
             flexDirection: 'row',
@@ -172,7 +192,7 @@ const Payment = props => {
               fontSize: 16,
             }}
             allowFontScaling={false}>
-            $ {total.toFixed(0)}
+             £  {total.toFixed(0)}
           </Text>
         </View>
       </ScrollView>
@@ -185,9 +205,14 @@ const Payment = props => {
               address: selectedAddress,
               amount: total.toFixed(0),
               cartData: cartData,
-              vendorId:vendorId
+              vendorId: vendorId,
             };
-            navigation.navigate('Checkout', {data: data});
+
+            if (addressList?.length > 0) {
+              navigation.navigate('Checkout', {data});
+            } else {
+              showWarning('Please add an address');
+            }
           }}
         />
       </View>
@@ -258,5 +283,31 @@ const styles = StyleSheet.create({
   radioButtonSelected: {
     borderColor: Colors.primary,
     backgroundColor: Colors.primary,
+  },
+  emptyContainer: {
+    flex: 1,
+    // justifyContent: 'center',
+    // alignItems: 'center',
+    paddingVertical: 20,
+    backgroundColor: '#fff',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 15,
+    // textAlign: 'center',
+  },
+  addButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: Colors.red2,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

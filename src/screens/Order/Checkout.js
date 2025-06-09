@@ -262,7 +262,7 @@ const Checkout = props => {
               Grand Total
             </Text>
             <Text style={styles.grandTotalAmount} allowFontScaling={false}>
-              ${TotalAmount}
+               £ {TotalAmount}
             </Text>
           </View>
         </View>

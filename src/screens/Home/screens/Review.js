@@ -28,8 +28,13 @@ const Review = props => {
   const type = props?.route?.params?.type;
 
   const handleSubmit = async () => {
-    if (!message.trim() || rating === 0) {
-      showWarning('Please fill in all fields before submitting.');
+    if (!message.trim()) {
+      showWarning('Please enter a message before submitting.');
+      return;
+    }
+
+    if (type === 'wines' && rating === 0) {
+      showWarning('Please provide a rating for the wine.');
       return;
     }
 
@@ -39,11 +44,9 @@ const Review = props => {
     const param = {
       type: type,
       review: message,
-      rating: rating,
+      ...(type === 'wines' && {rating: rating}),
       ...(type === 'wines' ? {product_id: vendorId} : {vendor_id: vendorId}),
     };
-
-   
 
     const url = Constants.baseUrl10 + Constants.createReview;
 
@@ -90,9 +93,12 @@ const Review = props => {
             placeholderTextColor={Colors.gray2}
             textAlignVertical="top"
           />
-
-          <Text style={styles.label}>Rate Your Experience</Text>
-          <StarRating rating={rating} onChange={setRating} />
+          {type == 'wines' && (
+            <>
+              <Text style={styles.label}>Rate Your Experience</Text>
+              <StarRating rating={rating} onChange={setRating} />
+            </>
+          )}
 
           <View style={styles.buttonContainer}>
             <WineHuntButton text="Submit" onPress={handleSubmit} />
