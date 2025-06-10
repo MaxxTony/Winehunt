@@ -26,6 +26,7 @@ import haversine from 'haversine';
 import AnimatedCartModal from '../components/AnimatedCartModal';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import ImageView from 'react-native-image-viewing';
 
 dayjs.extend(relativeTime);
 
@@ -64,6 +65,10 @@ const VendorDetail = props => {
 
   const [isCartVisible, setIsCartVisible] = useState(false);
 
+  const [isImageViewVisible, setIsImageViewVisible] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [images, setImages] = useState([]);
+
   useEffect(() => {
     getVendorDetail();
   }, [isFocused]);
@@ -98,7 +103,7 @@ const VendorDetail = props => {
     const body = {
       vendor_id: data?.product?.user_id ? data?.product?.user_id : data?.id,
     };
-   
+
     try {
       const res = await axios.post(url, body, {
         headers: {
@@ -108,6 +113,7 @@ const VendorDetail = props => {
       });
       if (res?.status === 200) {
         const vendorData = res?.data?.data;
+        console.log(vendorData);
         setDetail(vendorData);
         setVendorCoordinates({
           latitude: res?.data?.data?.latitude,
@@ -117,6 +123,15 @@ const VendorDetail = props => {
           ...prev,
           [vendorData?.id]: vendorData?.is_wishlist,
         }));
+        if (vendorData.vendor_images?.length > 0) {
+          setImages(
+            vendorData.vendor_images.map(img => ({
+              uri: img?.image,
+            })),
+          );
+        } else {
+          setImages([]);
+        }
 
         // Set suggested products wishlist status
         const suggestionLikesMap = {};
@@ -305,6 +320,13 @@ const VendorDetail = props => {
     });
   };
 
+  const handleImagePress = index => {
+    if (images && images.length > 0) {
+      setSelectedImageIndex(index);
+      setIsImageViewVisible(true);
+    }
+  };
+
   return (
     <View style={{flex: 1, backgroundColor: Colors.white}}>
       <ScrollView
@@ -415,10 +437,6 @@ const VendorDetail = props => {
           <FlatList
             data={detail?.products}
             renderItem={({item}) => {
-             
-              
-            
-             
               return (
                 <Pressable
                   style={styles.productContainer}
@@ -618,20 +636,21 @@ const VendorDetail = props => {
               paddingVertical: 8,
             }}
             showsHorizontalScrollIndicator={false}
-            renderItem={({item}) => (
-              <View
+            renderItem={({item, index}) => (
+              <Pressable
                 style={{
                   padding: 10,
                   borderWidth: 1,
                   borderColor: Colors.gray10,
                   borderRadius: 10,
-                }}>
+                }}
+                onPress={() => handleImagePress(index)}>
                 <Image
                   source={{uri: item?.image}}
                   style={{height: 100, width: 100}}
                   resizeMode="contain"
                 />
-              </View>
+              </Pressable>
             )}
             ListEmptyComponent={() => (
               <Text
@@ -751,6 +770,13 @@ const VendorDetail = props => {
           onRemoveItem={handleRemoveItem}
         />
       )}
+
+          <ImageView
+          images={images}
+          imageIndex={selectedImageIndex}
+          visible={isImageViewVisible}
+          onRequestClose={() => setIsImageViewVisible(false)}
+        />
     </View>
   );
 };

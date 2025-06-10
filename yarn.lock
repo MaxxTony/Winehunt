@@ -3227,6 +3227,7 @@ __metadata:
     react-native-geolocation-service: ^5.3.1
     react-native-gesture-handler: ^2.14.0
     react-native-image-picker: ^7.1.2
+    react-native-image-viewing: ^0.2.2
     react-native-linear-gradient: ^2.8.3
     react-native-maps: 1.8.0
     react-native-maps-directions: 1.9.0
@@ -9509,6 +9510,16 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: af52328b7cb06c28549442f0d923cfa92dde8d5a968a642336df4c882f81adbf0e5e606a14de27f96883a76fa1e03230061c4080011c9107942edebc8e09c478
+  languageName: node
+  linkType: hard
+
+"react-native-image-viewing@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "react-native-image-viewing@npm:0.2.2"
+  peerDependencies:
+    react: ">=16.11.0"
+    react-native: ">=0.61.3"
+  checksum: 17f16958ebc00787453d68ca0a695ee5fd9c59865fc525e192de6f200f4b91caa3af3da5a9908e28c94370ea28382074328f917c5398a27b112dd986985f77a0
   languageName: node
   linkType: hard
 

@@ -21,31 +21,36 @@ const ChangePassword = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const onSubmit = async () => {
-    if (!oldPassword) {
-      showWarning('Please enter old password');
-      return;
+ const onSubmit = async () => {
+    // 🔐 Validation
+    if (!oldPassword?.trim()) {
+      return showWarning('Please enter your current password.');
     }
-    if (!newPassword) {
-      showWarning('Please enter new password');
-      return;
+
+    if (!newPassword?.trim()) {
+      return showWarning('Please enter a new password.');
     }
+
     if (newPassword.length < 6) {
-      showWarning('Password must be at least 6 characters');
-      return;
+      return showWarning('New password must be at least 6 characters long.');
     }
+
+    if (!confirmNewPassword?.trim()) {
+      return showWarning('Please confirm your new password.');
+    }
+
     if (newPassword !== confirmNewPassword) {
-      showWarning('Password does not match');
-      return;
+      return showWarning('New password and confirm password do not match.');
     }
+
     try {
       const data = await AsyncStorage.getItem('userDetail');
       const token = JSON.parse(data)?.token;
       const url = Constants.baseUrl3 + Constants.changePassword;
 
       const Info = {
-        oldPassword: oldPassword,
-        newPassword: newPassword,
+        oldPassword: oldPassword.trim(),
+        newPassword: newPassword.trim(),
       };
 
       const response = await axios.post(url, Info, {
@@ -61,8 +66,13 @@ const ChangePassword = () => {
       }
     } catch (error) {
       if (error.response) {
-        showWarning(error.response.data.message);
-        console.log('Server error: ' + error.response.data);
+        const message =
+          error.response.data?.message || 'Failed to change password';
+        showWarning(message);
+        console.log('Server error:', error.response.data);
+      } else {
+        showWarning('Something went wrong. Please try again.');
+        console.error('Error:', error.message);
       }
     }
   };
