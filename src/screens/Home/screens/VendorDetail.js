@@ -113,7 +113,6 @@ const VendorDetail = props => {
       });
       if (res?.status === 200) {
         const vendorData = res?.data?.data;
-        console.log(vendorData);
         setDetail(vendorData);
         setVendorCoordinates({
           latitude: res?.data?.data?.latitude,
@@ -336,7 +335,11 @@ const VendorDetail = props => {
           {paddingTop: Platform.OS == 'ios' ? inset.top : 0},
         ]}>
         <ImageBackground
-          source={require('../images/bg.png')}
+          source={
+            detail?.background
+              ? {uri: detail?.background}
+              : require('../images/bg.png')
+          }
           style={styles.headerBackground}>
           <Pressable
             style={styles.backButton}
@@ -771,12 +774,12 @@ const VendorDetail = props => {
         />
       )}
 
-          <ImageView
-          images={images}
-          imageIndex={selectedImageIndex}
-          visible={isImageViewVisible}
-          onRequestClose={() => setIsImageViewVisible(false)}
-        />
+      <ImageView
+        images={images}
+        imageIndex={selectedImageIndex}
+        visible={isImageViewVisible}
+        onRequestClose={() => setIsImageViewVisible(false)}
+      />
     </View>
   );
 };
