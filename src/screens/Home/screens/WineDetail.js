@@ -301,32 +301,7 @@ const WineDetail = props => {
 
   const onsubmit = async () => {
     navigation.navigate('ScanCode');
-    // const info = await AsyncStorage.getItem('userDetail');
-    // const token = JSON.parse(info)?.token;
-
-    // const url = Constants.baseUrl4 + Constants.tryProduct;
-
-    // const body = {
-    //   product_id: detail?.id,
-    // };
-
-    // try {
-    //   const res = await axios.post(url, body, {
-    //     headers: {
-    //       Authorization: `Bearer ${token}`,
-    //       'Content-Type': 'application/json',
-    //     },
-    //   });
-    // } catch (error) {
-    //   if (error.response) {
-    //     console.log('Server Error:', error.response.data);
-    //     showWarning(error.response.data?.error);
-    //   } else if (error.request) {
-    //     console.log('No Response:', error.request);
-    //   } else {
-    //     console.log('Request Error:', error.message);
-    //   }
-    // }
+    
   };
 
   const handleRemoveItem = async itemId => {
@@ -438,7 +413,7 @@ const WineDetail = props => {
                     color: Colors.white,
                   }}
                   allowFontScaling={false}>
-                  View Detail
+                  Vendor Detail
                 </Text>
               </Pressable>
             </View>

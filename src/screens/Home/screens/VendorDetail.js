@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback, useMemo} from 'react';
 import {
   Dimensions,
   FlatList,
@@ -11,6 +11,8 @@ import {
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
+  Animated,
 } from 'react-native';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -46,93 +48,317 @@ const formatTime = time => {
   return `${formattedHour} ${suffix}`;
 };
 
+const formatDate = dateStr => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+};
+
+const VendorHeader = React.memo(
+  ({detail, onBack, onLike, isLiked, distance}) => (
+    <ImageBackground
+      source={
+        detail?.background
+          ? {uri: detail?.background}
+          : require('../images/bg.png')
+      }
+      style={styles.headerBackground}>
+      <Pressable style={styles.backButton} onPress={onBack}>
+        <View style={styles.backButtonInner}>
+          <Fontisto name="angle-left" size={20} color={Colors.white} />
+        </View>
+      </Pressable>
+      <View style={styles.headerInfoContainer}>
+        <Image
+          source={
+            detail?.image
+              ? {uri: detail?.image}
+              : require('../images/shopbg.png')
+          }
+          style={styles.shopImage}
+        />
+        <View style={styles.infoContainer}>
+          {detail?.latitude !== 'undefined' && (
+            <View style={styles.infoItem}>
+              <Ionicons
+                name="navigate-outline"
+                size={18}
+                color={Colors.black}
+              />
+              <Text style={styles.infoText} allowFontScaling={false}>
+                {formatNumber(distance)}km
+              </Text>
+            </View>
+          )}
+          <Pressable style={styles.favoriteButton} onPress={onLike}>
+            <AntDesign
+              size={18}
+              name={isLiked ? 'heart' : 'hearto'}
+              color={isLiked ? Colors.red : Colors.black}
+            />
+          </Pressable>
+        </View>
+      </View>
+    </ImageBackground>
+  ),
+);
+
+const ContactOptions = React.memo(({onContactPress}) => {
+  const contactOptions = [
+    {id: 1, name: 'Call', image: require('../images/call.png')},
+    {id: 2, name: 'Message', image: require('../images/sms.png')},
+    {id: 3, name: 'View Map', image: require('../images/location.png')},
+    {id: 4, name: 'Website', image: require('../images/global.png')},
+  ];
+
+  const renderContactOption = ({item}) => (
+    <View style={styles.contactOptionContainer}>
+      <Pressable
+        style={styles.contactOptionIcon}
+        onPress={() => onContactPress(item.name)}>
+        <Image source={item.image} style={styles.contactImage} />
+      </Pressable>
+      <Text style={styles.contactOptionText}>{item.name}</Text>
+    </View>
+  );
+
+  return (
+    <FlatList
+      data={contactOptions}
+      horizontal
+      scrollEnabled={false}
+      contentContainerStyle={styles.contactList}
+      renderItem={renderContactOption}
+    />
+  );
+});
+
+const ProductCard = React.memo(({item, onLike, isLiked, onPress}) => (
+  <Pressable style={styles.productContainer} onPress={onPress}>
+    <Image
+      source={
+        item?.product_images[0]?.image
+          ? {uri: item?.product_images[0]?.image}
+          : require('../images/bottle.png')
+      }
+      style={styles.productImage}
+      resizeMode="contain"
+    />
+    <View style={styles.productDetails}>
+      <View style={styles.productHeader}>
+        <Text
+          style={styles.productTitle}
+          numberOfLines={1}
+          allowFontScaling={false}>
+          {item?.name} ({item?.title})
+        </Text>
+        <Pressable onPress={onLike}>
+          <AntDesign
+            size={20}
+            name={isLiked ? 'heart' : 'hearto'}
+            color={isLiked ? Colors.red : Colors.black}
+          />
+        </Pressable>
+      </View>
+
+      <View style={styles.productFooter}>
+        <Pressable style={styles.viewMoreButton} onPress={onPress}>
+          <Text style={styles.viewMoreText} allowFontScaling={false}>
+            View More
+          </Text>
+        </Pressable>
+
+        <View style={styles.bottomRight}>
+          <View style={styles.ratingContainer}>
+            <AntDesign name="star" size={16} color={Colors.yellow} />
+            <Text style={styles.infoText} allowFontScaling={false}>
+              {item?.average_rating || '0.0'}
+            </Text>
+          </View>
+          <View style={styles.priceContainer}>
+            {item?.has_discount && (
+              <Text style={styles.originalPrice} allowFontScaling={false}>
+                £ {item?.actual_price}
+              </Text>
+            )}
+            <Text style={styles.priceText} allowFontScaling={false}>
+              £ {item?.price}
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  </Pressable>
+));
+
+const ReviewCard = React.memo(({review}) => (
+  <View style={styles.card}>
+    <View style={styles.header}>
+      <Image source={{uri: review?.user?.image}} style={styles.avatar} />
+      <View style={styles.userInfo}>
+        <Text style={styles.userName}>
+          {review?.user?.first_name} {review?.user?.last_name}
+        </Text>
+        <Text style={styles.dateText}>
+          {dayjs(review?.created_at).fromNow()}
+        </Text>
+      </View>
+    </View>
+    <Text style={styles.reviewText}>{review?.review}</Text>
+  </View>
+));
+
+const SkeletonLoader = () => {
+  const animatedValue = new Animated.Value(0);
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(animatedValue, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animatedValue, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+  }, []);
+
+  const opacity = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.3, 0.7],
+  });
+
+  return (
+    <View style={styles.loadingContainer}>
+      <View style={styles.skeletonHeader}>
+        <View style={styles.skeletonBackButton} />
+        <View style={styles.skeletonShopInfo}>
+          <View style={styles.skeletonShopImage} />
+          <View style={styles.skeletonShopDetails}>
+            <Animated.View style={[styles.skeletonText, {opacity}]} />
+            <Animated.View
+              style={[styles.skeletonText, {opacity, width: '60%'}]}
+            />
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.skeletonContent}>
+        <Animated.View style={[styles.skeletonTitle, {opacity}]} />
+        <Animated.View style={[styles.skeletonText, {opacity, width: '80%'}]} />
+        <Animated.View style={[styles.skeletonText, {opacity, width: '90%'}]} />
+
+        <View style={styles.skeletonContactOptions}>
+          {[1, 2, 3, 4].map(item => (
+            <Animated.View
+              key={item}
+              style={[styles.skeletonContactItem, {opacity}]}
+            />
+          ))}
+        </View>
+
+        <View style={styles.skeletonSeparator} />
+
+        <Animated.View style={[styles.skeletonTitle, {opacity}]} />
+        {[1, 2, 3].map(item => (
+          <View key={item} style={styles.skeletonProductCard}>
+            <Animated.View style={[styles.skeletonProductImage, {opacity}]} />
+            <View style={styles.skeletonProductDetails}>
+              <Animated.View
+                style={[styles.skeletonText, {opacity, width: '70%'}]}
+              />
+              <Animated.View
+                style={[styles.skeletonText, {opacity, width: '40%'}]}
+              />
+            </View>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+};
+
 const VendorDetail = props => {
   const navigation = useNavigation();
   const data = props?.route?.params?.item;
   const isFocused = useIsFocused();
-
   const userCoords = props?.route?.params?.userCoordinates;
-
   const inset = useSafeAreaInsets();
-  const [loading, setLoading] = useState([]);
-  const [detail, setDetail] = useState([]);
-  const [like, setLike] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  const [detail, setDetail] = useState(null);
   const [likedItems, setLikedItems] = useState({});
   const [suggestionLikes, setSuggestionLikes] = useState({});
-
   const [vendorCoordinates, setVendorCoordinates] = useState({});
   const [cartData, setCartData] = useState([]);
-
   const [isCartVisible, setIsCartVisible] = useState(false);
-
   const [isImageViewVisible, setIsImageViewVisible] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [images, setImages] = useState([]);
 
-  useEffect(() => {
-    getVendorDetail();
-  }, [isFocused]);
+  const distance = useMemo(
+    () => haversine(userCoords, vendorCoordinates, {unit: 'km'}),
+    [userCoords, vendorCoordinates],
+  );
 
-  useEffect(() => {
-    if (isFocused) getCartData();
-  }, [isFocused]);
-
-  const getCartData = async () => {
-    const info = await AsyncStorage.getItem('userDetail');
-    const token = JSON.parse(info)?.token;
-    const url = Constants.baseUrl8 + Constants.getCart;
+  const getCartData = useCallback(async () => {
     try {
-      const res = await axios.get(url, {
+      const info = await AsyncStorage.getItem('userDetail');
+      const token = JSON.parse(info)?.token;
+      const res = await axios.get(Constants.baseUrl8 + Constants.getCart, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
-
       setCartData(res?.data?.cart);
     } catch (error) {
       showWarning(error.response?.data?.message || 'Error fetching cart');
     }
-  };
+  }, []);
 
-  const getVendorDetail = async () => {
-    const info = await AsyncStorage.getItem('userDetail');
-    const token = JSON.parse(info)?.token;
-    const url = Constants.baseUrl5 + Constants.vendorDetail;
-    setLoading(true);
-    const body = {
-      vendor_id: data?.product?.user_id ? data?.product?.user_id : data?.id,
-    };
-
+  const getVendorDetail = useCallback(async () => {
     try {
-      const res = await axios.post(url, body, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+      setLoading(true);
+      const info = await AsyncStorage.getItem('userDetail');
+      const token = JSON.parse(info)?.token;
+      const res = await axios.post(
+        Constants.baseUrl5 + Constants.vendorDetail,
+        {
+          vendor_id: data?.product?.user_id ? data?.product?.user_id : data?.id,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
       if (res?.status === 200) {
         const vendorData = res?.data?.data;
         setDetail(vendorData);
         setVendorCoordinates({
-          latitude: res?.data?.data?.latitude,
-          longitude: res?.data?.data?.longitude,
+          latitude: vendorData?.latitude,
+          longitude: vendorData?.longitude,
         });
         setLikedItems(prev => ({
           ...prev,
           [vendorData?.id]: vendorData?.is_wishlist,
         }));
+
         if (vendorData.vendor_images?.length > 0) {
-          setImages(
-            vendorData.vendor_images.map(img => ({
-              uri: img?.image,
-            })),
-          );
-        } else {
-          setImages([]);
+          setImages(vendorData.vendor_images.map(img => ({uri: img?.image})));
         }
 
-        // Set suggested products wishlist status
         const suggestionLikesMap = {};
         if (vendorData?.products) {
           vendorData?.products.forEach(suggestion => {
@@ -142,84 +368,67 @@ const VendorDetail = props => {
         setSuggestionLikes(suggestionLikesMap);
       }
     } catch (error) {
-      if (error.response) {
-        console.log('Server Error:', error.response.data);
-        showWarning(error.response.data?.message);
-      } else if (error.request) {
-        console.log('No Response:', error.request);
-      } else {
-        console.log('Request Error:', error.message);
-      }
+      showWarning(
+        error.response?.data?.message || 'Error fetching vendor details',
+      );
     } finally {
       setLoading(false);
     }
-  };
+  }, [data]);
 
-  const openMaps = (latitude, longitude) => {
-    const url =
-      Platform.OS === 'ios'
-        ? `maps://app?saddr=${latitude},${longitude}`
-        : `geo:${latitude},${longitude}?q=${latitude},${longitude}`;
-
-    Linking.openURL(url).catch(err => console.error('An error occurred', err));
-  };
-
-  const handleContactPress = type => {
-    if (!detail) return;
-
-    switch (type) {
-      case 'Call':
-        if (detail.phone) Linking.openURL(`tel:${detail.phone}`);
-        break;
-      case 'Message':
-        if (detail.email) Linking.openURL(`mailto:${detail.email}`);
-        break;
-      case 'View Map':
-        if (detail.latitude && detail.longitude)
-          openMaps(detail.latitude, detail.longitude);
-        break;
-      case 'Website':
-        if (detail.website) Linking.openURL('https://www.isynbus.com/');
-        break;
-      default:
-        break;
+  useEffect(() => {
+    if (isFocused) {
+      getVendorDetail();
+      getCartData();
     }
-  };
+  }, [isFocused, getVendorDetail, getCartData]);
 
-  const renderContactOption = ({item}) => (
-    <View style={styles.contactOptionContainer}>
-      <Pressable
-        style={styles.contactOptionIcon}
-        onPress={() => handleContactPress(item.name)}>
-        <Image source={item.image} style={styles.contactImage} />
-      </Pressable>
-      <Text style={styles.contactOptionText}>{item.name}</Text>
-    </View>
+  const handleContactPress = useCallback(
+    type => {
+      if (!detail) return;
+
+      switch (type) {
+        case 'Call':
+          if (detail.phone) Linking.openURL(`tel:${detail.phone}`);
+          break;
+        case 'Message':
+          if (detail.email) Linking.openURL(`mailto:${detail.email}`);
+          break;
+        case 'View Map':
+          if (detail.latitude && detail.longitude) {
+            const url =
+              Platform.OS === 'ios'
+                ? `maps://app?saddr=${detail.latitude},${detail.longitude}`
+                : `geo:${detail.latitude},${detail.longitude}?q=${detail.latitude},${detail.longitude}`;
+            Linking.openURL(url);
+          }
+          break;
+        case 'Website':
+          if (detail.website) Linking.openURL(detail.website);
+          break;
+      }
+    },
+    [detail],
   );
 
-  const contactOptions = [
-    {id: 1, name: 'Call', image: require('../images/call.png')},
-    {id: 2, name: 'Message', image: require('../images/sms.png')},
-    {id: 3, name: 'View Map', image: require('../images/location.png')},
-    {id: 4, name: 'Website', image: require('../images/global.png')},
-  ];
-
-  const onLike = async (id, isSuggestion = false) => {
-    const info = await AsyncStorage.getItem('userDetail');
-    const token = JSON.parse(info)?.token;
-    const url = Constants.baseUrl7 + Constants.addToWishList;
-    setLoading(true);
-    const body = {
-      type: isSuggestion ? 'wines' : 'vendors',
-      [isSuggestion ? 'product_id' : 'vendor_id']: id,
-    };
+  const handleLike = useCallback(async (id, isSuggestion = false) => {
     try {
-      const res = await axios.post(url, body, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+      const info = await AsyncStorage.getItem('userDetail');
+      const token = JSON.parse(info)?.token;
+      const res = await axios.post(
+        Constants.baseUrl7 + Constants.addToWishList,
+        {
+          type: isSuggestion ? 'wines' : 'vendors',
+          [isSuggestion ? 'product_id' : 'vendor_id']: id,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
       if (res?.data?.status === 200) {
         if (isSuggestion) {
           setSuggestionLikes(prev => ({...prev, [id]: true}));
@@ -229,36 +438,27 @@ const VendorDetail = props => {
         showSucess(res?.data?.message);
       }
     } catch (error) {
-      if (error.response) {
-        console.log('Server Error:', error.response.data);
-        showWarning(error.response.data?.message);
-      } else if (error.request) {
-        console.log('No Response:', error.request);
-      } else {
-        console.log('Request Error:', error.message);
-      }
-    } finally {
-      setLoading(false);
+      showWarning(error.response?.data?.message || 'Error updating wishlist');
     }
-  };
+  }, []);
 
-  const onDisLike = async (id, isSuggestion = false) => {
-    const info = await AsyncStorage.getItem('userDetail');
-    const token = JSON.parse(info)?.token;
-    const url = Constants.baseUrl7 + Constants.removeToWishList;
-    setLoading(true);
-    const body = {
-      id: id,
-      type: isSuggestion ? 'wines' : 'vendors',
-    };
-
+  const handleDislike = useCallback(async (id, isSuggestion = false) => {
     try {
-      const res = await axios.post(url, body, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+      const info = await AsyncStorage.getItem('userDetail');
+      const token = JSON.parse(info)?.token;
+      const res = await axios.post(
+        Constants.baseUrl7 + Constants.removeToWishList,
+        {
+          id: id,
+          type: isSuggestion ? 'wines' : 'vendors',
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
 
       if (res?.data?.status === 200) {
         if (isSuggestion) {
@@ -269,62 +469,38 @@ const VendorDetail = props => {
         showWarning(res?.data?.message);
       }
     } catch (error) {
-      if (error.response) {
-        console.log('Server Error:', error.response.data);
-        showWarning(error.response.data?.message);
-      } else if (error.request) {
-        console.log('No Response:', error.request);
-      } else {
-        console.log('Request Error:', error.message);
+      showWarning(error.response?.data?.message || 'Error updating wishlist');
+    }
+  }, []);
+
+  const handleRemoveItem = useCallback(
+    async itemId => {
+      try {
+        const info = await AsyncStorage.getItem('userDetail');
+        const token = JSON.parse(info)?.token;
+        const res = await axios.post(
+          Constants.baseUrl8 + Constants.deleteCart,
+          {id: itemId},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+        if (res?.data?.status === 200) {
+          getCartData();
+        }
+      } catch (error) {
+        showWarning(error.response?.data?.message || 'Error updating cart');
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [getCartData],
+  );
 
-  const distance = haversine(userCoords, vendorCoordinates, {
-    unit: 'km',
-  });
-  const formattedDistance = formatNumber(distance);
-
-  const handleRemoveItem = async itemId => {
-    const info = await AsyncStorage.getItem('userDetail');
-    const token = JSON.parse(info)?.token;
-    const url = Constants.baseUrl8 + Constants.deleteCart;
-    const data = {
-      id: itemId,
-    };
-    try {
-      const res = await axios.post(url, data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      if (res?.data?.status == 200) {
-        getCartData();
-      }
-    } catch (error) {
-      console.log(error);
-      showWarning(error.response?.data?.message || 'Error updating cart');
-    }
-  };
-
-  const formatDate = dateStr => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
-
-  const handleImagePress = index => {
-    if (images && images.length > 0) {
-      setSelectedImageIndex(index);
-      setIsImageViewVisible(true);
-    }
-  };
+  if (loading) {
+    return <SkeletonLoader />;
+  }
 
   return (
     <View style={{flex: 1, backgroundColor: Colors.white}}>
@@ -332,71 +508,26 @@ const VendorDetail = props => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.container,
-          {paddingTop: Platform.OS == 'ios' ? inset.top : 0},
+          {paddingTop: Platform.OS === 'ios' ? inset.top : 0},
         ]}>
-        <ImageBackground
-          source={
-            detail?.background
-              ? {uri: detail?.background}
-              : require('../images/bg.png')
+        <VendorHeader
+          detail={detail}
+          onBack={() => navigation.goBack()}
+          onLike={() =>
+            likedItems[detail?.id]
+              ? handleDislike(detail?.id)
+              : handleLike(detail?.id)
           }
-          style={styles.headerBackground}>
-          <Pressable
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}>
-            <Fontisto name="angle-left" size={20} color={Colors.white} />
-          </Pressable>
-          <View style={styles.headerInfoContainer}>
-            <Image
-              source={
-                detail?.image
-                  ? {uri: detail?.image}
-                  : require('../images/shopbg.png')
-              }
-              style={styles.shopImage}
-            />
-            <View style={styles.infoContainer}>
-              {detail?.latitude !== 'undefined' && (
-                <View style={styles.infoItem}>
-                  <Ionicons
-                    name="navigate-outline"
-                    size={18}
-                    color={Colors.black}
-                  />
-                  <Text style={styles.infoText} allowFontScaling={false}>
-                    {formattedDistance}km
-                  </Text>
-                </View>
-              )}
-              {/* <View style={styles.infoItem}>
-                <AntDesign name="star" size={18} color={Colors.yellow} />
-                <Text style={styles.infoText} allowFontScaling={false}>
-                  {detail?.total_reviews}
-                </Text>
-              </View> */}
-              <Pressable
-                style={styles.favoriteButton}
-                onPress={() => {
-                  if (!likedItems[detail?.id]) {
-                    onLike(detail?.id, false);
-                  } else {
-                    onDisLike(detail?.id, false);
-                  }
-                }}>
-                <AntDesign
-                  size={18}
-                  name={likedItems[detail?.id] ? 'heart' : 'hearto'}
-                  color={likedItems[detail?.id] ? Colors.red : Colors.black}
-                />
-              </Pressable>
-            </View>
-          </View>
-        </ImageBackground>
+          isLiked={likedItems[detail?.id]}
+          distance={distance}
+        />
+
         <View style={styles.contentContainer}>
           <Text style={styles.vendorName} allowFontScaling={false}>
             {detail?.shop_name}
           </Text>
-          {detail?.address !== '' && (
+
+          {detail?.address && (
             <View style={styles.locationContainer}>
               <Ionicons
                 name="location-outline"
@@ -408,120 +539,50 @@ const VendorDetail = props => {
               </Text>
             </View>
           )}
+
           <Text style={styles.description} allowFontScaling={false}>
             {detail?.description}
           </Text>
-          <View>
-            {detail &&
-              detail?.business_hours?.map(item => (
-                <Text
-                  key={item.id}
-                  style={styles.openStatus}
-                  allowFontScaling={false}>
-                  Open {'  '}
-                  <Text style={styles.openTime} allowFontScaling={false}>
-                    {item.weekday} {formatTime(item.open_time)} to{' '}
-                    {formatTime(item.close_time)}
-                  </Text>
-                </Text>
-              ))}
-          </View>
-          <FlatList
-            data={contactOptions}
-            horizontal
-            scrollEnabled={false}
-            contentContainerStyle={styles.contactList}
-            renderItem={renderContactOption}
-          />
+
+          {detail?.business_hours?.map(item => (
+            <Text
+              key={item.id}
+              style={styles.openStatus}
+              allowFontScaling={false}>
+              Open {'  '}
+              <Text style={styles.openTime} allowFontScaling={false}>
+                {item.weekday} {formatTime(item.open_time)} to{' '}
+                {formatTime(item.close_time)}
+              </Text>
+            </Text>
+          ))}
+
+          <ContactOptions onContactPress={handleContactPress} />
+
           <View style={styles.separator} />
+
           <Text style={styles.sectionTitle} allowFontScaling={false}>
             Product for you
           </Text>
+
           <FlatList
             data={detail?.products}
-            renderItem={({item}) => {
-              return (
-                <Pressable
-                  style={styles.productContainer}
-                  onPress={() =>
-                    navigation.navigate('WineDetail', {item: item?.id})
-                  }>
-                  <Image
-                    source={
-                      item?.product_images[0]?.image
-                        ? {uri: item?.product_images[0]?.image}
-                        : require('../images/bottle.png')
-                    }
-                    style={styles.productImage}
-                    resizeMode="contain"
-                  />
-                  <View style={styles.productDetails}>
-                    <View style={styles.productHeader}>
-                      <Text
-                        style={styles.productTitle}
-                        numberOfLines={1}
-                        allowFontScaling={false}>
-                        {item?.name} ({item?.title})
-                      </Text>
-                      <Pressable
-                        onPress={() => {
-                          if (!suggestionLikes[item?.id]) {
-                            onLike(item?.id, true);
-                          } else {
-                            onDisLike(item?.id, true);
-                          }
-                        }}>
-                        <AntDesign
-                          size={20}
-                          name={suggestionLikes[item?.id] ? 'heart' : 'hearto'}
-                          color={
-                            suggestionLikes[item?.id]
-                              ? Colors.red
-                              : Colors.black
-                          }
-                        />
-                      </Pressable>
-                    </View>
-
-                    <View style={styles.productFooter}>
-                      <Pressable
-                        style={styles.viewMoreButton}
-                        onPress={() =>
-                          navigation.navigate('WineDetail', {item: item?.id})
-                        }>
-                        <Text
-                          style={styles.viewMoreText}
-                          allowFontScaling={false}>
-                          View More
-                        </Text>
-                      </Pressable>
-
-                      <View style={styles.bottomRight}>
-                        <View style={styles.ratingContainer}>
-                          <AntDesign
-                            name="star"
-                            size={16}
-                            color={Colors.yellow}
-                          />
-                          <Text
-                            style={styles.infoText}
-                            allowFontScaling={false}>
-                            {item?.average_rating || '0.0'}
-                          </Text>
-                        </View>
-                        <Text style={styles.priceText} allowFontScaling={false}>
-                          £ {item?.price}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                </Pressable>
-              );
-            }}
+            renderItem={({item}) => (
+              <ProductCard
+                item={item}
+                onLike={() =>
+                  suggestionLikes[item?.id]
+                    ? handleDislike(item?.id, true)
+                    : handleLike(item?.id, true)
+                }
+                isLiked={suggestionLikes[item?.id]}
+                onPress={() =>
+                  navigation.navigate('WineDetail', {item: item?.id})
+                }
+              />
+            )}
             ListEmptyComponent={
-              <Text style={{marginVertical: 20, color: '#888'}}>
-                No products available.
-              </Text>
+              <Text style={styles.emptyText}>No products available.</Text>
             }
           />
 
@@ -533,154 +594,87 @@ const VendorDetail = props => {
             data={detail?.offers || []}
             horizontal
             keyExtractor={(item, index) => index.toString()}
-            contentContainerStyle={{
-              gap: 10,
-              paddingVertical: 8,
-            }}
+            contentContainerStyle={styles.offersContainer}
             showsHorizontalScrollIndicator={false}
             renderItem={({item}) => (
-              <View
-                style={{
-                  width: 250,
-                  borderRadius: 16,
-                  backgroundColor: Colors.white,
-                  elevation: 3,
-                  shadowColor: '#000',
-                  shadowOffset: {width: 0, height: 2},
-                  shadowOpacity: 0.1,
-                  shadowRadius: 4,
-                }}>
-                {/* Image */}
-                <Image
+              <Pressable
+                style={styles.offerCard}
+                onPress={() =>
+                  navigation.navigate('WineDetail', {item: item?.id})
+                }>
+                <ImageBackground
                   source={{uri: item.image}}
-                  style={{
-                    width: '100%',
-                    height: 140,
-                    borderTopLeftRadius: 16,
-                    borderTopRightRadius: 16,
-                  }}
-                  resizeMode="cover"
-                />
-
-                {/* Content */}
-                <View style={{padding: 12}}>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontFamily: Fonts.InterBold,
-                      color: Colors.black,
-                      marginBottom: 4,
-                    }}
-                    numberOfLines={1}
-                    allowFontScaling={false}>
-                    {item?.name}
-                  </Text>
-
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      fontFamily: Fonts.InterRegular,
-                      color: Colors.black,
-                      marginBottom: 4,
-                    }}
-                    numberOfLines={2}
-                    allowFontScaling={false}>
-                    {item?.offer_desc}
-                  </Text>
-
-                  {item?.discount?.name && (
+                  style={styles.offerImageBackground}
+                  imageStyle={styles.offerImageStyle}>
+                  <View style={styles.offerContent}>
                     <Text
-                      style={{
-                        fontSize: 13,
-                        color: Colors.primary,
-                        fontFamily: Fonts.InterMedium,
-                        marginTop: 2,
-                      }}
+                      style={styles.offerTitle}
+                      numberOfLines={1}
                       allowFontScaling={false}>
-                      🎁 {item.discount.name}% OFF
+                      {item?.name}
                     </Text>
-                  )}
-
-                  <Text
-                    style={{
-                      fontSize: 11,
-                      fontFamily: Fonts.InterRegular,
-                      color: Colors.gray15,
-                      marginTop: 6,
-                    }}
-                    allowFontScaling={false}>
-                    {formatDate(item.from_date)} - {formatDate(item.to_date)}
-                  </Text>
-                </View>
-              </View>
+                    <Text
+                      style={styles.offerDescription}
+                      numberOfLines={2}
+                      allowFontScaling={false}>
+                      {item?.offer_desc}
+                    </Text>
+                    {item?.discount?.name && (
+                      <View style={styles.discountContainer}>
+                        <Text
+                          style={styles.discountText}
+                          allowFontScaling={false}>
+                          🎁 {item.discount.name}% OFF
+                        </Text>
+                      </View>
+                    )}
+                    <Text style={styles.offerDate} allowFontScaling={false}>
+                      {formatDate(item.from_date)} - {formatDate(item.to_date)}
+                    </Text>
+                  </View>
+                </ImageBackground>
+              </Pressable>
             )}
-            ListEmptyComponent={() => (
-              <Text
-                style={{
-                  textAlign: 'center',
-                  marginVertical: 20,
-                  color: '#888',
-                }}>
-                No Offers right now.
-              </Text>
-            )}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>No Offers right now.</Text>
+            }
           />
 
           <Text style={styles.sectionTitle} allowFontScaling={false}>
             Image Gallery
           </Text>
+
           <FlatList
             data={detail?.vendor_images || []}
             horizontal
             keyExtractor={(item, index) => index.toString()}
-            contentContainerStyle={{
-              gap: 10,
-              // paddingHorizontal: 16,
-              paddingVertical: 8,
-            }}
+            contentContainerStyle={styles.galleryContainer}
             showsHorizontalScrollIndicator={false}
             renderItem={({item, index}) => (
               <Pressable
-                style={{
-                  padding: 10,
-                  borderWidth: 1,
-                  borderColor: Colors.gray10,
-                  borderRadius: 10,
-                }}
-                onPress={() => handleImagePress(index)}>
+                style={styles.galleryItem}
+                onPress={() => {
+                  setSelectedImageIndex(index);
+                  setIsImageViewVisible(true);
+                }}>
                 <Image
                   source={{uri: item?.image}}
-                  style={{height: 100, width: 100}}
+                  style={styles.galleryImage}
                   resizeMode="contain"
                 />
               </Pressable>
             )}
-            ListEmptyComponent={() => (
-              <Text
-                style={{
-                  marginVertical: 20,
-                  color: '#888',
-                }}>
-                No images available.
-              </Text>
-            )}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>No images available.</Text>
+            }
           />
 
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}>
+          <View style={styles.reviewHeader}>
             <Text style={styles.sectionTitle} allowFontScaling={false}>
               Review
             </Text>
             <Text
-              style={{
-                fontSize: 14,
-                fontFamily: Fonts.InterRegular,
-                color: Colors.black,
-              }}
+              style={styles.viewAllText}
               onPress={() =>
                 navigation.navigate('ReviewList', {
                   reviews: detail,
@@ -697,67 +691,20 @@ const VendorDetail = props => {
             keyExtractor={(item, index) =>
               item?.id?.toString() || index.toString()
             }
-            contentContainerStyle={{gap: 15}}
-            renderItem={({item}) => (
-              <View style={styles.card}>
-                <View style={styles.header}>
-                  <Image
-                    source={{uri: item?.user?.image}}
-                    style={styles.avatar}
-                  />
-                  <View style={styles.userInfo}>
-                    <Text style={styles.userName}>
-                      {item?.user?.first_name} {item?.user?.last_name}
-                    </Text>
-                    <Text style={styles.dateText}>
-                      {dayjs(item?.created_at).fromNow()}
-                    </Text>
-                  </View>
-                  {/* <View style={styles.ratingContainer}>
-                    <AntDesign name="star" size={16} color={Colors.yellow} />
-                    <Text style={styles.ratingText}>{item?.rating}</Text>
-                  </View> */}
-                </View>
-                <Text style={styles.reviewText}>{item?.review}</Text>
-              </View>
-            )}
-            ListEmptyComponent={() => (
-              <Text
-                style={{
-                  marginVertical: 20,
-                  color: '#888',
-                }}>
-                No review available.
-              </Text>
-            )}
+            contentContainerStyle={styles.reviewsContainer}
+            renderItem={({item}) => <ReviewCard review={item} />}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>No review available.</Text>
+            }
           />
         </View>
       </ScrollView>
 
       {cartData?.length > 0 && (
         <Pressable
-          style={{
-            position: 'absolute',
-            bottom: 20,
-            alignSelf: 'center',
-            width: '60%',
-            paddingVertical: 12,
-            backgroundColor: Colors.blue,
-            borderRadius: 25,
-            shadowColor: '#000',
-            shadowOffset: {width: 0, height: 2},
-            shadowOpacity: 0.2,
-            shadowRadius: 3,
-            elevation: 5,
-          }}
+          style={styles.cartButton}
           onPress={() => setIsCartVisible(true)}>
-          <Text
-            style={{
-              color: Colors.white,
-              textAlign: 'center',
-              fontSize: 16,
-              fontWeight: 'bold',
-            }}>
+          <Text style={styles.cartButtonText}>
             View Cart ({cartData.length} items)
           </Text>
         </Pressable>
@@ -784,12 +731,119 @@ const VendorDetail = props => {
   );
 };
 
-export default VendorDetail;
-
 const styles = StyleSheet.create({
-  container: {backgroundColor: Colors.white, paddingBottom: 80},
-  headerBackground: {width: '100%', height: 250, marginBottom: 100},
-  backButton: {flexDirection: 'row', alignItems: 'center', padding: 20},
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: Colors.white,
+  },
+  skeletonHeader: {
+    height: 250,
+    backgroundColor: Colors.gray4,
+    marginBottom: 100,
+  },
+  skeletonBackButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.gray10,
+    margin: 20,
+  },
+  skeletonShopInfo: {
+    flexDirection: 'row',
+    padding: 20,
+    position: 'absolute',
+    bottom: -100,
+  },
+  skeletonShopImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    backgroundColor: Colors.gray10,
+  },
+  skeletonShopDetails: {
+    flex: 1,
+    marginLeft: 20,
+    justifyContent: 'center',
+    gap: 10,
+  },
+  skeletonContent: {
+    padding: 20,
+    gap: 15,
+  },
+  skeletonTitle: {
+    height: 24,
+    backgroundColor: Colors.gray10,
+    borderRadius: 4,
+    width: '40%',
+  },
+  skeletonText: {
+    height: 16,
+    backgroundColor: Colors.gray10,
+    borderRadius: 4,
+    width: '100%',
+  },
+  skeletonContactOptions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 20,
+  },
+  skeletonContactItem: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: Colors.gray10,
+  },
+  skeletonSeparator: {
+    height: 1,
+    backgroundColor: Colors.gray4,
+    marginVertical: 20,
+  },
+  skeletonProductCard: {
+    flexDirection: 'row',
+    padding: 12,
+    backgroundColor: Colors.white,
+    borderRadius: 10,
+    marginVertical: 6,
+    gap: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  skeletonProductImage: {
+    width: 50,
+    height: 90,
+    borderRadius: 6,
+    backgroundColor: Colors.gray10,
+  },
+  skeletonProductDetails: {
+    flex: 1,
+    gap: 10,
+  },
+  container: {
+    backgroundColor: Colors.white,
+    paddingBottom: 80,
+  },
+  headerBackground: {
+    width: '100%',
+    height: 250,
+    marginBottom: 100,
+  },
+  backButton: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 50 : 20,
+    left: 20,
+    zIndex: 1,
+  },
+  backButtonInner: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   headerInfoContainer: {
     padding: 20,
     flexDirection: 'row',
@@ -797,7 +851,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -100,
   },
-  shopImage: {height: 100, width: 100, borderRadius: 10},
+  shopImage: {
+    height: 100,
+    width: 100,
+    borderRadius: 10,
+  },
   infoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -818,8 +876,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.InterRegular,
     fontWeight: '600',
   },
-  favoriteButton: {marginHorizontal: 10},
-  contentContainer: {paddingHorizontal: 20, gap: 10},
+  favoriteButton: {
+    marginHorizontal: 10,
+  },
+  contentContainer: {
+    paddingHorizontal: 20,
+    gap: 10,
+  },
   vendorName: {
     fontSize: 18,
     fontFamily: Fonts.PhilosopherBold,
@@ -848,9 +911,18 @@ const styles = StyleSheet.create({
     color: Colors.green,
     fontWeight: '600',
   },
-  openTime: {color: Colors.gray4, fontSize: 12, fontWeight: '400'},
-  contactList: {gap: 20},
-  contactOptionContainer: {alignItems: 'center', gap: 5},
+  openTime: {
+    color: Colors.gray4,
+    fontSize: 12,
+    fontWeight: '400',
+  },
+  contactList: {
+    gap: 20,
+  },
+  contactOptionContainer: {
+    alignItems: 'center',
+    gap: 5,
+  },
   contactOptionIcon: {
     padding: 10,
     borderWidth: 1,
@@ -858,13 +930,20 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     borderColor: Colors.gray4,
   },
-  contactImage: {height: 20, width: 20},
+  contactImage: {
+    height: 20,
+    width: 20,
+  },
   contactOptionText: {
     fontSize: 14,
     fontFamily: Fonts.InterRegular,
     color: Colors.black,
   },
-  separator: {height: 1, width: '100%', backgroundColor: Colors.gray4},
+  separator: {
+    height: 1,
+    width: '100%',
+    backgroundColor: Colors.gray4,
+  },
   sectionTitle: {
     fontSize: 18,
     fontFamily: Fonts.PhilosopherBold,
@@ -881,25 +960,21 @@ const styles = StyleSheet.create({
     gap: 12,
     alignItems: 'center',
   },
-
   productImage: {
     height: 90,
     width: 50,
     borderRadius: 6,
   },
-
   productDetails: {
     flex: 1,
     justifyContent: 'space-between',
     gap: 12,
   },
-
   productHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-
   productTitle: {
     fontSize: 14,
     color: Colors.black,
@@ -907,49 +982,141 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 10,
   },
-
   productFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-
   viewMoreButton: {
     paddingVertical: 6,
     paddingHorizontal: 14,
     backgroundColor: Colors.red,
     borderRadius: 12,
   },
-
   viewMoreText: {
     fontSize: 12,
     color: Colors.white,
     fontWeight: '600',
   },
-
   bottomRight: {
     alignItems: 'flex-end',
     gap: 4,
   },
-
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
-
-  infoText: {
-    fontSize: 12,
-    color: Colors.black,
-    fontWeight: '600',
+  priceContainer: {
+    alignItems: 'flex-end',
+    gap: 2,
   },
-
+  originalPrice: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: Colors.gray15,
+    textDecorationLine: 'line-through',
+  },
   priceText: {
     fontSize: 13,
     fontWeight: '700',
     color: Colors.green,
   },
-
+  offersContainer: {
+    gap: 10,
+    paddingVertical: 8,
+  },
+  offerCard: {
+    width: 250,
+    height: 150,
+    borderRadius: 16,
+    overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  offerImageBackground: {
+    width: '100%',
+    height: '100%',
+  },
+  offerImageStyle: {
+    borderRadius: 16,
+  },
+  offerContent: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  offerTitle: {
+    fontSize: 18,
+    fontFamily: Fonts.InterBold,
+    color: Colors.white,
+    marginBottom: 4,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: {width: -1, height: 1},
+    textShadowRadius: 10,
+  },
+  offerDescription: {
+    fontSize: 13,
+    fontFamily: Fonts.InterRegular,
+    color: Colors.white,
+    marginBottom: 4,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: {width: -1, height: 1},
+    textShadowRadius: 10,
+  },
+  discountContainer: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    marginTop: 4,
+  },
+  discountText: {
+    fontSize: 13,
+    color: Colors.white,
+    fontFamily: Fonts.InterMedium,
+  },
+  offerDate: {
+    fontSize: 11,
+    fontFamily: Fonts.InterRegular,
+    color: Colors.white,
+    marginTop: 6,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: {width: -1, height: 1},
+    textShadowRadius: 10,
+  },
+  galleryContainer: {
+    gap: 10,
+    paddingVertical: 8,
+  },
+  galleryItem: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: Colors.gray10,
+    borderRadius: 10,
+  },
+  galleryImage: {
+    height: 100,
+    width: 100,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  viewAllText: {
+    fontSize: 14,
+    fontFamily: Fonts.InterRegular,
+    color: Colors.black,
+  },
+  reviewsContainer: {
+    gap: 15,
+  },
   card: {
     padding: 15,
     borderRadius: 12,
@@ -987,20 +1154,37 @@ const styles = StyleSheet.create({
     color: Colors.gray15,
     marginTop: 2,
   },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  ratingText: {
-    fontSize: 14,
-    color: Colors.black,
-    fontWeight: '600',
-  },
   reviewText: {
     fontSize: 15,
     color: Colors.gray8,
     lineHeight: 20,
     fontFamily: Fonts.InterRegular,
   },
+  emptyText: {
+    marginVertical: 20,
+    color: '#888',
+    textAlign: 'center',
+  },
+  cartButton: {
+    position: 'absolute',
+    bottom: 20,
+    alignSelf: 'center',
+    width: '60%',
+    paddingVertical: 12,
+    backgroundColor: Colors.blue,
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  cartButtonText: {
+    color: Colors.white,
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
+
+export default VendorDetail;
