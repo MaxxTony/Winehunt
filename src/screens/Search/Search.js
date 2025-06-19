@@ -1,3 +1,11 @@
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+  useRef as useAnimatedRef,
+} from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -9,7 +17,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Colors, Fonts} from '../../constant/Styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
@@ -18,11 +25,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
 import {MultiSwitch} from 'react-native-multiswitch-selector';
 import WineCard from './components/WineCard';
-import MapView, {
-  Callout,
-  Marker,
-  PROVIDER_GOOGLE,
-} from 'react-native-maps';
+import MapView, {Callout, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import FilterModal from './Modal/FilterModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from '../../helper/Constant';
@@ -31,6 +34,190 @@ import {showWarning} from '../../helper/Toastify';
 import Geolocation from '@react-native-community/geolocation';
 import AnimatedCartModal from '../Home/components/AnimatedCartModal';
 import AnimatedCartButton from '../../components/AnimatedCartButton';
+
+// --- Debounce Hook ---
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
+
+// --- SearchBar Component ---
+const rotatingPlaceholders = [
+  'Search by wine',
+  'Search by vendor',
+  'Search by cultivar',
+];
+
+const SearchBar = React.memo(
+  ({searchText, setSearchText, onFilterPress, onMapToggle, showMapType}) => {
+    const [isFocused, setIsFocused] = useState(false);
+    const [placeholderIndex, setPlaceholderIndex] = useState(0);
+
+    useEffect(() => {
+      if (!isFocused && !searchText) {
+        const interval = setInterval(() => {
+          setPlaceholderIndex(prev => (prev + 1) % rotatingPlaceholders.length);
+        }, 2000);
+        return () => clearInterval(interval);
+      }
+    }, [isFocused, searchText]);
+
+    // Reset to first placeholder when user focuses or types
+    useEffect(() => {
+      if (isFocused || searchText) {
+        setPlaceholderIndex(0);
+      }
+    }, [isFocused, searchText]);
+
+    return (
+      <View style={styles.searchContainer}>
+        <View style={[styles.searchBox, styles.flex1]}>
+          <TextInput
+            value={searchText}
+            onChangeText={setSearchText}
+            style={styles.searchInput}
+            placeholder={rotatingPlaceholders[placeholderIndex]}
+            placeholderTextColor={Colors.gray9}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+          />
+          {searchText.length > 0 && (
+            <AntDesign
+              name="closecircle"
+              size={20}
+              color={Colors.gray4}
+              onPress={() => setSearchText('')}
+            />
+          )}
+          <Image
+            source={require('./images/searchIcon.png')}
+            style={styles.iconSmall}
+          />
+        </View>
+        <Pressable style={styles.iconBox} onPress={onMapToggle}>
+          {showMapType ? (
+            <Feather name="map" size={25} color={Colors.black} />
+          ) : (
+            <Feather name="list" size={25} color={Colors.black} />
+          )}
+        </Pressable>
+        <Pressable style={styles.iconBox} onPress={onFilterPress}>
+          <Image
+            source={require('./images/filter.png')}
+            style={styles.iconLarge}
+            resizeMode="contain"
+          />
+        </Pressable>
+      </View>
+    );
+  },
+);
+
+// --- SwitchSelector Component ---
+const SwitchSelector = React.memo(({type, setType}) => (
+  <View style={styles.switchContainer}>
+    <MultiSwitch
+      allStates={['Top Rated', 'Popular']}
+      currentState={type}
+      changeState={setType}
+      mode="white"
+      styleRoot={styles.multiSwitchRoot}
+      styleAllStatesContainer={styles.multiSwitchContainer}
+      styleActiveState={styles.activeState}
+      styleActiveStateText={styles.activeStateText}
+      styleInactiveStateText={styles.inactiveStateText}
+    />
+  </View>
+));
+
+// --- ProductList Component ---
+const ProductList = React.memo(({products, loading, onRefresh, navigation}) =>
+  loading ? (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <ActivityIndicator size={'large'} color={Colors.red2} />
+    </View>
+  ) : products.length === 0 ? (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <Text style={styles.noProductText} allowFontScaling={false}>
+        No products found
+      </Text>
+    </View>
+  ) : (
+    <FlatList
+      data={products}
+      refreshing={loading}
+      onRefresh={onRefresh}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{padding: 20, gap: 10}}
+      keyExtractor={item => String(item.id)}
+      renderItem={({item}) => (
+        <WineCard
+          item={item}
+          onPress={() => navigation.navigate('WineDetail', {item: item?.id})}
+        />
+      )}
+    />
+  ),
+);
+
+// --- MapProductMarkers Component ---
+const MapProductMarkers = React.memo(({region, allMarkers, mapViewRef}) => (
+  <MapView
+    ref={mapViewRef}
+    scrollEnabled
+    showsCompass
+    followsUserLocation
+    mapType="standard"
+    showsScale
+    zoomControlEnabled={true}
+    initialRegion={region}
+    provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+    style={{height: '75%', width: '100%'}}>
+    {allMarkers.map((marker, index) => (
+      <Marker
+        key={index}
+        coordinate={{latitude: marker.latitude, longitude: marker.longitude}}>
+        <Callout tooltip>
+          <View style={styles.calloutContainer}>
+            <Text style={styles.shopName} allowFontScaling={false}>
+              {marker.shopName}
+            </Text>
+          </View>
+        </Callout>
+      </Marker>
+    ))}
+  </MapView>
+));
+
+// --- CartButton Component ---
+const CartButton = React.memo(({count, onPress}) => (
+  <AnimatedCartButton count={count} onPress={onPress} label="View Cart" />
+));
+
+// --- CartModal Component ---
+const CartModal = React.memo(
+  ({
+    visible,
+    setIsCartVisible,
+    cartData,
+    onClose,
+    navigation,
+    onRemoveItem,
+  }) => (
+    <AnimatedCartModal
+      visible={visible}
+      setIsCartVisible={setIsCartVisible}
+      cartData={cartData}
+      onClose={onClose}
+      navigation={navigation}
+      onRemoveItem={onRemoveItem}
+    />
+  ),
+);
 
 const Search = () => {
   const inset = useSafeAreaInsets();
@@ -41,30 +228,24 @@ const Search = () => {
   const [searchText, setSearchText] = useState('');
   const [type, setType] = useState('Popular');
   const [showMapType, setShowMapType] = useState(false);
-  const bottomSheetModalRef2 = useRef(null);
-  const snapPoints2 = useMemo(
-    () => (Platform.OS === 'ios' ? ['80%'] : ['100%']),
-    [],
-  );
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [allMarkers, setAllMarkers] = useState([]);
   const [cartData, setCartData] = useState([]);
   const [isCartVisible, setIsCartVisible] = useState(false);
+  const [locationError, setLocationError] = useState(null);
+  const [homeData, setHomeData] = useState([]);
+  const [filterModal, setFilterModal] = useState(false);
 
-  useEffect(() => {
-    getProducts();
-  }, [searchText, type]);
+  // Debounced search text for API call
+  const debouncedSearchText = useDebounce(searchText, 400);
 
-  useEffect(() => {
-    if (isFocused) getCartData();
-  }, [isFocused]);
-
-  const getCartData = async () => {
-    const info = await AsyncStorage.getItem('userDetail');
-    const token = JSON.parse(info)?.token;
-    const url = Constants.baseUrl8 + Constants.getCart;
+  // --- Fetch Cart Data ---
+  const getCartData = useCallback(async () => {
     try {
+      const info = await AsyncStorage.getItem('userDetail');
+      const token = JSON.parse(info)?.token;
+      const url = Constants.baseUrl8 + Constants.getCart;
       const res = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -75,65 +256,33 @@ const Search = () => {
     } catch (error) {
       showWarning(error.response?.data?.message || 'Error fetching cart');
     }
-  };
+  }, []);
 
-  useEffect(() => {
-    getCurrentPosition();
-  }, [isFocused]);
-
-  const getCurrentPosition = async () => {
+  // --- Fetch Products ---
+  const getProducts = useCallback(async () => {
     try {
-      const position = await new Promise((resolve, reject) => {
-        Geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: Platform.OS === 'ios' ? true : true,
-          timeout: 10000,
-        });
-      });
-      const {latitude, longitude} = position.coords;
-
-      const currentRegion = {
-        latitude,
-        longitude,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.003,
+      setLoading(true);
+      const data = await AsyncStorage.getItem('userDetail');
+      const token = JSON.parse(data)?.token;
+      const url = Constants.baseUrl4 + Constants.searchProducts;
+      const info = {
+        search_name: debouncedSearchText,
+        shop_type: '',
+        product_type: '',
+        categories: '',
+        price_range: 'high_to_low',
+        latest: true,
+        filter_by: type === 'Popular' ? 'popular' : 'top_rated',
       };
-      setRegion(currentRegion);
-      mapViewRef.current?.animateToRegion(currentRegion, 1000);
-    } catch (error) {
-      console.error('Error getting current position:', error);
-    }
-  };
-
-  const getProducts = async () => {
-    const data = await AsyncStorage.getItem('userDetail');
-    const token = JSON.parse(data)?.token;
-    const url = Constants.baseUrl4 + Constants.searchProducts;
-
-    setLoading(true);
-
-    const info = {
-      search_name: searchText,
-      shop_type: '',
-      product_type: '',
-      categories: '',
-      price_range: 'high_to_low',
-      latest: true,
-      filter_by: type === 'Popular' ? 'popular' : 'top_rated',
-    };
-
-
-
-    try {
       const res = await axios.post(url, info, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
-
       if (res?.status === 200) {
         setProducts(res?.data?.products);
-
+        // Memoize unique markers
         const uniqueMarkers = {};
         res?.data?.products.forEach(item => {
           const userId = item?.user?.id;
@@ -153,10 +302,60 @@ const Search = () => {
             uniqueMarkers[userId] = {latitude, longitude, shopName};
           }
         });
+        setAllMarkers(Object.values(uniqueMarkers));
+      }
+    } catch (error) {
+      if (error.response) {
+        showWarning(error.response.data?.message);
+      } else if (error.request) {
+        showWarning('No response from server');
+      } else {
+        showWarning(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [debouncedSearchText, type]);
 
-        const markers = Object.values(uniqueMarkers);
+  // --- Get Current Position (debounced) ---
+  const getCurrentPosition = useCallback(() => {
+    setLocationError(null);
+    Geolocation.getCurrentPosition(
+      position => {
+        const {latitude, longitude} = position.coords;
+        const currentRegion = {
+          latitude,
+          longitude,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.003,
+        };
+        setRegion(currentRegion);
+        mapViewRef.current?.animateToRegion(currentRegion, 1000);
+      },
+      error => {
+        setLocationError(error.message || 'Location error');
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+      },
+    );
+  }, []);
 
-        setAllMarkers(markers);
+  const getHomePageData = async () => {
+    const data = await AsyncStorage.getItem('userDetail');
+    const token = JSON.parse(data)?.token;
+    const url = Constants.baseUrl2 + Constants.home;
+    setLoading(true);
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res?.status == 200) {
+        setHomeData(res?.data?.categories);
       }
     } catch (error) {
       if (error.response) {
@@ -172,6 +371,21 @@ const Search = () => {
     }
   };
 
+  // --- Effects ---
+  useEffect(() => {
+    getProducts();
+  }, [isFocused,type]);
+
+  useEffect(() => {
+    getCartData();
+    getCurrentPosition();
+    getHomePageData();
+  }, [isFocused]);
+
+  console.log(JSON.stringify(homeData),"home")
+ 
+
+  // Fit map to markers when markers change
   useEffect(() => {
     if (allMarkers.length > 0 && mapViewRef.current) {
       mapViewRef.current.fitToCoordinates(
@@ -187,30 +401,31 @@ const Search = () => {
     }
   }, [allMarkers]);
 
-  const handleRemoveItem = async itemId => {
-    const info = await AsyncStorage.getItem('userDetail');
-    const token = JSON.parse(info)?.token;
-    const url = Constants.baseUrl8 + Constants.deleteCart;
-    const data = {
-      id: itemId,
-    };
-    try {
-      const res = await axios.post(url, data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      if (res?.data?.status == 200) {
-        // setCartData(prev => prev.filter(item => item.id !== itemId));
-        getCartData();
+  // --- Remove Item from Cart ---
+  const handleRemoveItem = useCallback(
+    async itemId => {
+      try {
+        const info = await AsyncStorage.getItem('userDetail');
+        const token = JSON.parse(info)?.token;
+        const url = Constants.baseUrl8 + Constants.deleteCart;
+        const data = {id: itemId};
+        const res = await axios.post(url, data, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (res?.data?.status == 200) {
+          getCartData();
+        }
+      } catch (error) {
+        showWarning(error.response?.data?.message || 'Error updating cart');
       }
-    } catch (error) {
-      console.log(error);
-      showWarning(error.response?.data?.message || 'Error updating cart');
-    }
-  };
+    },
+    [getCartData],
+  );
 
+  // --- Render ---
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <BackNavigationWithTitle
@@ -218,137 +433,59 @@ const Search = () => {
         onPress={() => navigation.goBack()}
         extraStyle={styles.backNavigationExtraStyle}
       />
-      <View style={styles.searchContainer}>
-        <View style={[styles.searchBox, styles.flex1]}>
-          <TextInput
-            value={searchText}
-            onChangeText={e => setSearchText(e)}
-            style={styles.searchInput}
-            placeholder="Search by cultivars/wines/vendors"
-            placeholderTextColor={Colors.gray9}
-          />
-          {searchText.length > 0 && (
-            <AntDesign
-              name="closecircle"
-              size={20}
-              color={Colors.gray4}
-              onPress={() => setSearchText('')}
-            />
-          )}
-          <Image
-            source={require('./images/searchIcon.png')}
-            style={styles.iconSmall}
-          />
-        </View>
-        <Pressable
-          style={styles.iconBox}
-          onPress={() => setShowMapType(!showMapType)}>
-          {showMapType ? (
-            <Feather name="map" size={25} color={Colors.black} />
-          ) : (
-            <Feather name="list" size={25} color={Colors.black} />
-          )}
-        </Pressable>
-        <Pressable
-          style={styles.iconBox}
-          onPress={() => bottomSheetModalRef2.current?.snapToIndex(0)}>
-          <Image
-            source={require('./images/filter.png')}
-            style={styles.iconLarge}
-            resizeMode="contain"
-          />
-        </Pressable>
-      </View>
-      <View style={styles.switchContainer}>
-        <MultiSwitch
-          allStates={['Top Rated', 'Popular']}
-          currentState={type}
-          changeState={setType}
-          mode="white"
-          styleRoot={styles.multiSwitchRoot}
-          styleAllStatesContainer={styles.multiSwitchContainer}
-          styleActiveState={styles.activeState}
-          styleActiveStateText={styles.activeStateText}
-          styleInactiveStateText={styles.inactiveStateText}
-        />
-      </View>
-
-      {loading ? (
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <ActivityIndicator size={'large'} color={Colors.red2} />
-        </View>
-      ) : products.length === 0 ? (
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <Text style={styles.noProductText} allowFontScaling={false}>
-            No products found
+      <SearchBar
+        searchText={searchText}
+        setSearchText={setSearchText}
+        onFilterPress={() => setFilterModal(true)}
+        onMapToggle={() => setShowMapType(v => !v)}
+        showMapType={showMapType}
+      />
+      <SwitchSelector type={type} setType={setType} />
+      {locationError && (
+        <View
+          style={{
+            padding: 10,
+            backgroundColor: '#fee',
+            borderRadius: 8,
+            margin: 10,
+          }}>
+          <Text style={{color: '#c00', textAlign: 'center'}}>
+            Location error: {locationError}
           </Text>
         </View>
-      ) : showMapType ? (
-        <MapView
-          ref={mapViewRef}
-          scrollEnabled
-          showsCompass
-          followsUserLocation
-          mapType="standard"
-          showsScale
-          zoomControlEnabled={true}
-          initialRegion={region}
-          provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
-          style={{height: '75%', width: '100%'}}>
-          {allMarkers.map((marker, index) => (
-            <Marker
-              key={index}
-              coordinate={{
-                latitude: marker.latitude,
-                longitude: marker.longitude,
-              }}>
-              {/* Custom Tooltip */}
-              <Callout tooltip>
-                <View style={styles.calloutContainer}>
-                  <Text style={styles.shopName} allowFontScaling={false}>
-                    {marker.shopName}
-                  </Text>
-                </View>
-              </Callout>
-            </Marker>
-          ))}
-        </MapView>
+      )}
+      {showMapType ? (
+        <MapProductMarkers
+          region={region}
+          allMarkers={allMarkers}
+          mapViewRef={mapViewRef}
+        />
       ) : (
-        <FlatList
-          data={products}
-          refreshing={loading}
+        <ProductList
+          products={products}
+          loading={loading}
           onRefresh={getProducts}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            padding: 20,
-            gap: 10,
-          }}
-          renderItem={({item}) => (
-            <WineCard
-              item={item}
-              onPress={() =>
-                navigation.navigate('WineDetail', {item: item?.id})
-              }
-            />
-          )}
+          navigation={navigation}
         />
       )}
-
       <FilterModal
-        bottomSheetModalRef2={bottomSheetModalRef2}
-        snapPoints2={snapPoints2}
+        visible={filterModal}
+        data={homeData}
+        onClose={() => setFilterModal(false)}
+        onApplyFilters={filters => {
+          console.log(filters, 'lolo');
+          // TODO: Use filters to update product search
+          setFilterModal(false);
+        }}
       />
-
       {cartData?.length > 0 && (
-        <AnimatedCartButton
+        <CartButton
           count={cartData.length}
           onPress={() => setIsCartVisible(true)}
-          label="View Cart"
         />
       )}
-
       {cartData?.length > 0 && (
-        <AnimatedCartModal
+        <CartModal
           visible={isCartVisible}
           setIsCartVisible={setIsCartVisible}
           cartData={cartData}

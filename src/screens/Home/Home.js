@@ -75,7 +75,6 @@ const Home = () => {
     }
   };
 
-  useEffect(() => {}, []);
 
   useFocusEffect(
     useCallback(() => {
