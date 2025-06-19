@@ -21,11 +21,8 @@ import WineCard from './components/WineCard';
 import MapView, {
   Callout,
   Marker,
-  PROVIDER_DEFAULT,
   PROVIDER_GOOGLE,
-  Polygon,
 } from 'react-native-maps';
-import VendorLocationFilter from './Modal/VendorLocationFilter';
 import FilterModal from './Modal/FilterModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from '../../helper/Constant';
@@ -82,7 +79,7 @@ const Search = () => {
 
   useEffect(() => {
     getCurrentPosition();
-  }, []);
+  }, [isFocused]);
 
   const getCurrentPosition = async () => {
     try {
@@ -111,6 +108,7 @@ const Search = () => {
     const data = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(data)?.token;
     const url = Constants.baseUrl4 + Constants.searchProducts;
+
     setLoading(true);
 
     const info = {
@@ -122,6 +120,8 @@ const Search = () => {
       latest: true,
       filter_by: type === 'Popular' ? 'popular' : 'top_rated',
     };
+
+
 
     try {
       const res = await axios.post(url, info, {
@@ -316,15 +316,12 @@ const Search = () => {
       ) : (
         <FlatList
           data={products}
-          numColumns={2}
           refreshing={loading}
           onRefresh={getProducts}
           showsVerticalScrollIndicator={false}
-          columnWrapperStyle={{columnGap: 10}}
           contentContainerStyle={{
             padding: 20,
             gap: 10,
-            columnGap: 10,
           }}
           renderItem={({item}) => (
             <WineCard

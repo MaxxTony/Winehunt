@@ -422,7 +422,6 @@ const WineDetail = props => {
     );
   };
 
-  console.log(detail);
 
   // Description Tab Component
   const DescriptionTab = ({
