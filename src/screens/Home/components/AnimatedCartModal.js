@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -18,10 +18,22 @@ import {Colors, Fonts} from '../../../constant/Styles';
 import Lottie from 'lottie-react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useDispatch, useSelector} from 'react-redux';
+import {fetchProfile} from '../../../redux/slices/profileSlice';
 
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 
-const AnimatedCartItem = ({item, onRemove, onChangeQty, index}) => {
+const AnimatedCartItem = ({item, onRemove, onChangeQty, index, setIsCartVisible}) => {
+  const dispatch = useDispatch();
+  const {userData} = useSelector(state => state.profile);
+
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchProfile());
+    }, [dispatch]),
+  );
+  const navigation = useNavigation();
   const anim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.timing(anim, {
@@ -36,12 +48,27 @@ const AnimatedCartItem = ({item, onRemove, onChangeQty, index}) => {
       style={{
         opacity: anim,
         transform: [
-          {translateY: anim.interpolate({inputRange: [0, 1], outputRange: [40, 0]})},
+          {
+            translateY: anim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [40, 0],
+            }),
+          },
         ],
         marginBottom: 15,
-      }}
-    >
-      <View style={styles.cartItemCard}>
+      }}>
+      <Pressable
+        style={styles.cartItemCard}
+        onPress={() => {
+          setIsCartVisible(false);
+          navigation.navigate('VendorDetail', {
+            item: item,
+            userCoordinates: {
+              latitude: userData?.latitude,
+              longitude: userData?.longitude,
+            },
+          });
+        }}>
         <Image
           source={{
             uri:
@@ -65,7 +92,9 @@ const AnimatedCartItem = ({item, onRemove, onChangeQty, index}) => {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 }).format(
-                  item.quantity * (parseFloat(item.product.price) - parseFloat(item.product.discount))
+                  item.quantity *
+                    (parseFloat(item.product.price) -
+                      parseFloat(item.product.discount)),
                 )}
               </Text>
               <Text style={styles.originalPrice}>
@@ -87,11 +116,13 @@ const AnimatedCartItem = ({item, onRemove, onChangeQty, index}) => {
               }).format(item.quantity * parseFloat(item.product.price))}
             </Text>
           )}
-          <TouchableOpacity onPress={() => onRemove(item.id)} style={styles.deleteBtn}>
+          <TouchableOpacity
+            onPress={() => onRemove(item.id)}
+            style={styles.deleteBtn}>
             <Icon name="delete" size={22} color={Colors.red} />
           </TouchableOpacity>
         </View>
-      </View>
+      </Pressable>
     </Animated.View>
   );
 };
@@ -141,7 +172,7 @@ const AnimatedCartModal = ({
   const handleChangeQty = (item, newQty) => {
     if (newQty < 1) return;
     const updated = internalCart.map(ci =>
-      ci.id === item.id ? {...ci, quantity: newQty} : ci
+      ci.id === item.id ? {...ci, quantity: newQty} : ci,
     );
     setInternalCart(updated);
     onChangeQty(item, newQty);
@@ -162,11 +193,7 @@ const AnimatedCartModal = ({
     <Modal transparent visible={visible} animationType="fade">
       <Pressable style={styles.overlay} onPress={onClose} />
       <Animated.View
-        style={[
-          styles.modalContainer,
-          {transform: [{translateY: slideAnim}]},
-        ]}
-      >
+        style={[styles.modalContainer, {transform: [{translateY: slideAnim}]}]}>
         <Text style={styles.title}>Your Cart</Text>
         {internalCart.length > 0 ? (
           <>
@@ -179,6 +206,7 @@ const AnimatedCartModal = ({
                   index={index}
                   onRemove={handleRemove}
                   onChangeQty={handleChangeQty}
+                  setIsCartVisible={setIsCartVisible}
                 />
               )}
               showsVerticalScrollIndicator={false}
@@ -224,7 +252,11 @@ const AnimatedCartModal = ({
 };
 
 // Custom animated checkout button (replaces AnimatedCartButton)
-const CustomCheckoutButton = ({ count = 0, onPress, label = 'Proceed to Checkout' }) => {
+const CustomCheckoutButton = ({
+  count = 0,
+  onPress,
+  label = 'Proceed to Checkout',
+}) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const badgeScale = useRef(new Animated.Value(1)).current;
   const prevCount = useRef(count);
@@ -269,22 +301,26 @@ const CustomCheckoutButton = ({ count = 0, onPress, label = 'Proceed to Checkout
   }, [count, badgeScale]);
 
   return (
-    <Animated.View style={[styles.animatedWrapper, { transform: [{ scale: scaleAnim }] }]}> 
+    <Animated.View
+      style={[styles.animatedWrapper, {transform: [{scale: scaleAnim}]}]}>
       <Pressable
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        style={{ borderRadius: 30, overflow: 'hidden' }}
-      >
+        style={{borderRadius: 30, overflow: 'hidden'}}>
         <Animated.View>
           <LinearGradient
             colors={[Colors.red, Colors.blue]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.gradientButton}
-          >
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            style={styles.gradientButton}>
             <View style={styles.contentRow}>
-              <Ionicons name="cart-outline" size={22} color="#fff" style={{ marginRight: 10 }} />
+              <Ionicons
+                name="cart-outline"
+                size={22}
+                color="#fff"
+                style={{marginRight: 10}}
+              />
               <Text style={styles.buttonText}>{label}</Text>
             </View>
           </LinearGradient>
@@ -423,7 +459,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 32,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 8,

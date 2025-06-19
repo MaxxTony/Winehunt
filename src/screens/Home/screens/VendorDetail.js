@@ -139,7 +139,7 @@ const ContactOptions = React.memo(({onContactPress}) => {
   );
 });
 
-const ProductCard = React.memo(({item, onLike, isLiked, onPress}) => (
+const ProductCard = React.memo(({item, onLike, isLiked, onPress, isOffer, isMilestone}) => (
   <Pressable style={styles.productCardModern} onPress={onPress}>
     <View style={styles.productImageWrapper}>
       <Image
@@ -166,6 +166,17 @@ const ProductCard = React.memo(({item, onLike, isLiked, onPress}) => (
           {item?.average_rating || '0.0'}
         </Text>
       </View>
+      {/* Offer and Milestone Badges */}
+      {isOffer && (
+        <View style={[styles.productBadge, {backgroundColor: Colors.primary, top: 10, left: 10}]}> 
+          <Text style={styles.productBadgeText}>Offer</Text>
+        </View>
+      )}
+      {isMilestone && (
+        <View style={[styles.productBadge, {backgroundColor: Colors.green, top: 40, left: 10}]}> 
+          <Text style={styles.productBadgeText}>Milestone</Text>
+        </View>
+      )}
     </View>
     <View style={styles.productInfoModern}>
       <Text
@@ -501,6 +512,8 @@ const VendorDetail = props => {
     return <SkeletonLoader />;
   }
 
+  
+
   return (
     <View style={{flex: 1, backgroundColor: Colors.white}}>
       <ScrollView
@@ -606,26 +619,87 @@ const VendorDetail = props => {
 
           <View style={styles.separator} />
 
+          {/* Milestone Rewards Section */}
+          {detail?.discounted_products && detail.discounted_products.length > 0 && (
+            <>
+              <Text style={styles.milestoneLabel} allowFontScaling={false}>
+                Milestone Rewards
+              </Text>
+              <FlatList
+                data={detail.discounted_products}
+                horizontal
+                keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+                contentContainerStyle={styles.milestoneListContainer}
+                showsHorizontalScrollIndicator={false}
+                renderItem={({item}) => (
+                  <View style={styles.milestoneCard}>
+                    <View style={styles.milestoneCardHeader}>
+                      <Text style={styles.milestoneProductName} numberOfLines={1} allowFontScaling={false}>
+                        {item.name}
+                      </Text>
+                      <View style={styles.milestoneDiscountBadge}>
+                        <Text style={styles.milestoneDiscountText} allowFontScaling={false}>
+                          -{item.discount}%
+                        </Text>
+                      </View>
+                    </View>
+                    <Text style={styles.milestoneDesc} numberOfLines={2} allowFontScaling={false}>
+                      {item.discount_desc}
+                    </Text>
+                    <View style={styles.milestonePriceRow}>
+                      <Text style={styles.milestoneActualPrice} allowFontScaling={false}>
+                        £ {item.actual_price}
+                      </Text>
+                      <Text style={styles.milestoneFinalPrice} allowFontScaling={false}>
+                        £ {item.final_price}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+                ListEmptyComponent={null}
+              />
+            </>
+          )}
+
           <Text style={styles.sectionTitle} allowFontScaling={false}>
             Product for you
           </Text>
 
+          {/* Legend for badges */}
+          {/* <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 10, marginBottom: 2, gap: 12}}>
+            <View style={[styles.productBadge, {backgroundColor: Colors.primary}]}> 
+              <Text style={styles.productBadgeText}>Offer</Text>
+            </View>
+            <Text style={{fontSize: 13, color: Colors.gray8}}>Active Offer</Text>
+            <View style={[styles.productBadge, {backgroundColor: Colors.green}]}> 
+              <Text style={styles.productBadgeText}>Milestone</Text>
+            </View>
+            <Text style={{fontSize: 13, color: Colors.gray8}}>Milestone Reward</Text>
+          </View> */}
+
           <FlatList
             data={detail?.products}
-            renderItem={({item}) => (
-              <ProductCard
-                item={item}
-                onLike={() =>
-                  suggestionLikes[item?.id]
-                    ? handleDislike(item?.id, true)
-                    : handleLike(item?.id, true)
-                }
-                isLiked={suggestionLikes[item?.id]}
-                onPress={() =>
-                  navigation.navigate('WineDetail', {item: item?.id})
-                }
-              />
-            )}
+            renderItem={({item}) => {
+              // Check if product is in offers or milestone
+              const isOffer = (detail?.offers || []).some(offer => offer.id === item.id);
+              const isMilestone = (detail?.discounted_products || []).some(prod => prod.id === item.id);
+              return (
+                <ProductCard
+                  item={item}
+                  onLike={() =>
+                    suggestionLikes[item?.id]
+                      ? handleDislike(item?.id, true)
+                      : handleLike(item?.id, true)
+                  }
+                  isLiked={suggestionLikes[item?.id]}
+                  onPress={() =>
+                    navigation.navigate('WineDetail', {item: item?.id})
+                  }
+                  isOffer={isOffer}
+                  isMilestone={isMilestone}
+                />
+              );
+            }}
             ListEmptyComponent={
               <Text style={styles.emptyText}>No products available.</Text>
             }
@@ -1412,6 +1486,100 @@ const styles = StyleSheet.create({
   statusText: {
     color: '#fff',
     fontSize: 12,
+    fontFamily: Fonts.InterBold,
+  },
+  milestoneLabel: {
+    fontSize: 18,
+    fontFamily: Fonts.PhilosopherBold,
+    color: Colors.primary,
+    marginBottom: 8,
+    marginTop: 10,
+  },
+  milestoneListContainer: {
+    gap: 12,
+    paddingVertical: 8,
+    marginBottom: 8,
+  },
+  milestoneCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    marginRight: 12,
+    padding: 16,
+    minWidth: 200,
+    maxWidth: 220,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: Colors.gray14,
+    justifyContent: 'space-between',
+  },
+  milestoneCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  milestoneProductName: {
+    fontSize: 16,
+    fontFamily: Fonts.InterBold,
+    color: Colors.black,
+    flex: 1,
+    marginRight: 8,
+  },
+  milestoneDiscountBadge: {
+    backgroundColor: Colors.primary,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    alignSelf: 'flex-start',
+  },
+  milestoneDiscountText: {
+    color: Colors.white,
+    fontSize: 13,
+    fontFamily: Fonts.InterMedium,
+    fontWeight: 'bold',
+  },
+  milestoneDesc: {
+    fontSize: 13,
+    color: Colors.gray8,
+    fontFamily: Fonts.InterRegular,
+    marginBottom: 8,
+    marginTop: 2,
+  },
+  milestonePriceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 4,
+  },
+  milestoneActualPrice: {
+    fontSize: 14,
+    color: Colors.gray15,
+    textDecorationLine: 'line-through',
+    marginRight: 8,
+    fontFamily: Fonts.InterRegular,
+  },
+  milestoneFinalPrice: {
+    fontSize: 16,
+    color: Colors.green,
+    fontWeight: 'bold',
+    fontFamily: Fonts.InterBold,
+  },
+  productBadge: {
+    position: 'absolute',
+    zIndex: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  productBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
     fontFamily: Fonts.InterBold,
   },
 });

@@ -638,6 +638,7 @@ const styles = StyleSheet.create({
   listItemImage: {
     height: 60,
     width: 60,
+    borderRadius:100
   },
   listItemText: {
     fontSize: 14,

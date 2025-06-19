@@ -540,6 +540,7 @@ const WineDetail = props => {
     }, [dispatch]),
   );
 
+
   const getProductDetail = async () => {
     const data = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(data)?.token;
@@ -737,7 +738,7 @@ const WineDetail = props => {
           contentContainerStyle={styles.scrollContainer}>
           <View style={styles.semiCircleContainer}>
             <Image
-              source={require('../images/bg.png')}
+              source={detail?.user?.background ? {uri:detail?.user?.background} :require('../images/bg.png')}
               style={styles.semiCircleImage}
             />
           </View>

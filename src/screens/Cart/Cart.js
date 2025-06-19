@@ -50,6 +50,7 @@ const Cart = () => {
     if (isFocused) getCartData();
   }, [isFocused]);
 
+
   const getCartData = async () => {
     const info = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(info)?.token;
@@ -142,11 +143,12 @@ const Cart = () => {
         <FlatList
           data={cartData}
           scrollEnabled={false}
-          contentContainerStyle={{gap: 5, paddingBottom: 10}}
+          contentContainerStyle={{gap: 16, paddingBottom: 10}}
           renderItem={({item, index}) => {
             return (
-              <View style={styles.cartItemContainer} key={index}>
+              <View style={styles.cartItemCard} key={index}>
                 <Pressable
+                  style={styles.imageWrapper}
                   onPress={() => {
                     navigation.navigate('VendorDetail', {
                       item: item,
@@ -162,38 +164,32 @@ const Cart = () => {
                         ? {uri: item?.product?.product_images[0]?.image}
                         : require('./images/cartBottle.png')
                     }
-                    style={styles.bottleImage}
-                    resizeMode="contain"
+                    style={styles.productImage}
+                    resizeMode="cover"
                   />
                 </Pressable>
-                <View style={styles.cartDetailsContainer}>
-                  <Text style={styles.itemName} allowFontScaling={false}>
-                    {item?.product?.name} ({item?.product?.title})
+                <View style={styles.cartDetailsContainerPro}>
+                  <Text style={styles.itemNamePro} numberOfLines={1} allowFontScaling={false}>
+                    {item?.product?.name}
                   </Text>
-
-                  <View style={styles.priceQuantityContainer}>
-                    <View style={styles.priceTag}>
-                      <Text style={styles.priceText} allowFontScaling={false}>
-                         £ {item?.product?.price}
-                      </Text>
-                    </View>
-                    <View style={styles.quantityContainer}>
+                  <Text style={styles.itemDescriptionPro} numberOfLines={1} allowFontScaling={false}>
+                    {item?.product?.product_desc || item?.product?.title}
+                  </Text>
+                  <View style={styles.priceQuantityRow}>
+                    <Text style={styles.priceTextPro} allowFontScaling={false}>
+                      £ {parseFloat(item?.product?.price).toFixed(2)}
+                    </Text>
+                    <View style={styles.quantityControlPro}>
                       <TouchableOpacity
-                        onPress={() =>
-                          updateQuantity(item.id, item.quantity + 1)
-                        }>
-                        <Entypo
-                          name="squared-plus"
-                          color={Colors.red}
-                          size={25}
-                        />
+                        style={styles.qtyBtn}
+                        onPress={() => updateQuantity(item.id, item.quantity + 1)}>
+                        <Entypo name="squared-plus" color={Colors.red} size={22} />
                       </TouchableOpacity>
-                      <Text
-                        style={styles.quantityText}
-                        allowFontScaling={false}>
+                      <Text style={styles.quantityTextPro} allowFontScaling={false}>
                         {item?.quantity}
                       </Text>
                       <TouchableOpacity
+                        style={styles.qtyBtn}
                         onPress={() => {
                           if (item?.quantity == 1) {
                             deleteCart(item?.id);
@@ -201,21 +197,22 @@ const Cart = () => {
                             updateQuantity(item.id, item.quantity - 1);
                           }
                         }}>
-                        <Entypo
-                          name="squared-minus"
-                          color={Colors.red}
-                          size={25}
-                        />
+                        <Entypo name="squared-minus" color={Colors.red} size={22} />
                       </TouchableOpacity>
                     </View>
                   </View>
                 </View>
+                <TouchableOpacity
+                  style={styles.deleteBtn}
+                  onPress={() => deleteCart(item?.id)}>
+                  <Entypo name="trash" color={Colors.gray7} size={20} />
+                </TouchableOpacity>
               </View>
             );
           }}
         />
         {cartData && cartData.length > 0 ? (
-          <View style={styles.couponContainer}>
+          <View style={styles.couponContainerPro}>
             <Image
               source={require('./images/coupon.png')}
               style={styles.couponImage}
@@ -225,13 +222,13 @@ const Cart = () => {
               value={couponCode}
               onChangeText={setCouponCode}
               placeholderTextColor={Colors.gray4}
-              style={styles.couponInput}
+              style={styles.couponInputPro}
               placeholder="Enter Promo Code/ Milestone reward"
             />
             <WineHuntButton
               text="Apply"
               extraButtonStyle={[
-                styles.applyButton,
+                styles.applyButtonPro,
                 {
                   backgroundColor:
                     couponCode.length > 0 ? Colors.red : Colors.gray,
@@ -241,44 +238,42 @@ const Cart = () => {
             />
           </View>
         ) : (
-          <View style={{alignItems: 'center'}}>
-            <Text
-              style={{
-                fontFamily: Fonts.InterMedium,
-                color: Colors.black,
-                fontWeight: '600',
-                fontSize: 16,
-              }}
-              allowFontScaling={false}>
+          <View style={styles.emptyCartContainer}>
+            <Image
+              source={require('./images/cartBottle.png')}
+              style={styles.emptyCartImage}
+              resizeMode="contain"
+            />
+            <Text style={styles.emptyCartText} allowFontScaling={false}>
               Your WineHunt Cart is empty
             </Text>
           </View>
         )}
 
         {cartData && cartData.length > 0 && (
-          <View style={styles.summaryContainer}>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel} allowFontScaling={false}>
+          <View style={styles.summaryContainerPro}>
+            <View style={styles.summaryRowPro}>
+              <Text style={styles.summaryLabelPro} allowFontScaling={false}>
                 Sub Total
               </Text>
-              <Text style={styles.summaryValue} allowFontScaling={false}>
-                 £ {subtotal.toFixed(2)}
+              <Text style={styles.summaryValuePro} allowFontScaling={false}>
+                £ {subtotal.toFixed(2)}
               </Text>
             </View>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel} allowFontScaling={false}>
+            <View style={styles.summaryRowPro}>
+              <Text style={styles.summaryLabelPro} allowFontScaling={false}>
                 Delivery
               </Text>
-              <Text style={styles.summaryValue} allowFontScaling={false}>
-                 £ {DELIVERY_FEE}
+              <Text style={styles.summaryValuePro} allowFontScaling={false}>
+                £ {DELIVERY_FEE}
               </Text>
             </View>
-            <View style={styles.summaryRow}>
-              <Text style={styles.totalLabel} allowFontScaling={false}>
+            <View style={styles.summaryRowPro}>
+              <Text style={styles.totalLabelPro} allowFontScaling={false}>
                 Grand Total
               </Text>
-              <Text style={styles.totalValue} allowFontScaling={false}>
-                 £ {grandTotal.toFixed(2)}
+              <Text style={styles.totalValuePro} allowFontScaling={false}>
+                £ {grandTotal.toFixed(2)}
               </Text>
             </View>
             <WineHuntButton
@@ -308,124 +303,195 @@ const styles = StyleSheet.create({
   scrollViewContent: {
     padding: 20,
     paddingBottom: 100,
-    gap: 20,
+    gap: 24,
   },
   cartImage: {
     height: 180,
-    borderRadius: 10,
+    borderRadius: 16,
+    marginBottom: 8,
   },
-  cartItemContainer: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: Colors.gray13,
-    backgroundColor: '#fff',
-    elevation: 2,
-    borderRadius: 10,
+  cartItemCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 20,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    marginBottom: 0,
+    padding: 16,
+    gap: 16,
+    position: 'relative',
   },
-  bottleImage: {
-    height: 75,
-    width: 40,
+  imageWrapper: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: Colors.gray13,
+    height: 80,
+    width: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  cartDetailsContainer: {
-    gap: 10,
+  productImage: {
+    height: 80,
+    width: 60,
+    borderRadius: 12,
+  },
+  cartDetailsContainerPro: {
     flex: 1,
+    gap: 6,
+    justifyContent: 'center',
   },
-  itemName: {
-    fontFamily: Fonts.InterMedium,
+  itemNamePro: {
+    fontFamily: Fonts.InterBold,
     color: Colors.black,
-    fontWeight: '700',
-    fontSize: 14,
+    fontWeight: '800',
+    fontSize: 16,
+    marginBottom: 2,
   },
-  itemDescription: {
+  itemDescriptionPro: {
     fontFamily: Fonts.InterMedium,
     color: Colors.gray7,
-    fontWeight: '600',
-    fontSize: 12,
+    fontWeight: '500',
+    fontSize: 13,
+    marginBottom: 2,
   },
-  priceQuantityContainer: {
+  priceQuantityRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginTop: 4,
   },
-  priceTag: {
-    padding: 5,
-    paddingHorizontal: 15,
-    backgroundColor: Colors.red,
-    alignItems: 'center',
-    borderRadius: 5,
-  },
-  priceText: {
-    fontFamily: Fonts.InterMedium,
-    color: Colors.white,
+  priceTextPro: {
+    fontFamily: Fonts.InterBold,
+    color: Colors.red,
     fontWeight: '700',
-    fontSize: 12,
-  },
-  quantityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  quantityText: {
-    fontFamily: Fonts.InterMedium,
-    color: Colors.black,
-    fontWeight: '600',
     fontSize: 15,
   },
-  couponContainer: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: Colors.gray13,
-    backgroundColor: '#fff',
-    elevation: 2,
-    borderRadius: 10,
+  quantityControlPro: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: Colors.gray13,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    gap: 8,
+  },
+  qtyBtn: {
+    padding: 2,
+    borderRadius: 16,
+  },
+  quantityTextPro: {
+    fontFamily: Fonts.InterBold,
+    color: Colors.black,
+    fontWeight: '700',
+    fontSize: 15,
+    minWidth: 24,
+    textAlign: 'center',
+  },
+  deleteBtn: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.gray13,
+  },
+  couponContainerPro: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+    padding: 12,
     gap: 10,
+    marginTop: 8,
   },
   couponImage: {
-    height: 18,
-    width: 28,
+    height: 22,
+    width: 32,
   },
-  couponInput: {
+  couponInputPro: {
     flex: 1,
-    paddingVertical: Platform.OS === 'ios' ? 5 : 0,
+    paddingVertical: Platform.OS === 'ios' ? 7 : 0,
     color: Colors.black,
+    fontSize: 15,
+    fontFamily: Fonts.InterMedium,
+    backgroundColor: Colors.gray13,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginHorizontal: 4,
   },
-  applyButton: {
-    padding: 10,
+  applyButtonPro: {
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    borderRadius: 8,
   },
-  summaryContainer: {
+  summaryContainerPro: {
+    marginTop: 16,
     padding: 20,
     backgroundColor: '#fff',
-    elevation: 8,
-    gap: 10,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    gap: 14,
   },
-  summaryRow: {
+  summaryRowPro: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: 2,
   },
-  summaryLabel: {
+  summaryLabelPro: {
     fontFamily: Fonts.InterMedium,
     color: Colors.black,
     fontWeight: '600',
     fontSize: 16,
   },
-  summaryValue: {
+  summaryValuePro: {
     fontFamily: Fonts.InterMedium,
     color: Colors.gray14,
     fontWeight: '600',
     fontSize: 16,
   },
-  totalLabel: {
-    fontWeight: '800',
-    fontSize: 17,
+  totalLabelPro: {
+    fontWeight: '900',
+    fontSize: 18,
+    color: Colors.black,
+    fontFamily: Fonts.InterBold,
   },
-  totalValue: {
-    fontWeight: '700',
+  totalValuePro: {
+    fontWeight: '900',
+    fontSize: 18,
+    color: Colors.red,
+    fontFamily: Fonts.InterBold,
+  },
+  emptyCartContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 40,
+    marginBottom: 40,
+  },
+  emptyCartImage: {
+    width: 80,
+    height: 80,
+    marginBottom: 12,
+    opacity: 0.5,
+  },
+  emptyCartText: {
+    fontFamily: Fonts.InterMedium,
+    color: Colors.gray7,
+    fontWeight: '600',
     fontSize: 16,
+    textAlign: 'center',
   },
 });
