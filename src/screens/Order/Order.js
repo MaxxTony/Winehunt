@@ -300,7 +300,10 @@ const Order = () => {
 
           // Refund request handler (placeholder)
           const handleRefundRequest = () => {
-            Alert.alert('Refund Request', 'Your refund request has been sent to the vendor.');
+            Alert.alert(
+              'Refund Request',
+              'Your refund request has been sent to the vendor.',
+            );
           };
 
           return (
@@ -308,9 +311,18 @@ const Order = () => {
               style={[
                 styles.cardContainer,
                 // Add a green border for confirmed orders
-                item.status?.toLowerCase() === 'confirmed' && { borderWidth: 2, borderColor: Colors.green },
-                item.status?.toLowerCase() === 'processing' && { borderWidth: 2, borderColor: Colors.yellow },
-                item.status?.toLowerCase() === 'canceled' && { borderWidth: 2, borderColor: Colors.red },
+                item.status?.toLowerCase() === 'confirmed' && {
+                  borderWidth: 2,
+                  borderColor: Colors.green,
+                },
+                item.status?.toLowerCase() === 'processing' && {
+                  borderWidth: 2,
+                  borderColor: Colors.yellow,
+                },
+                item.status?.toLowerCase() === 'canceled' && {
+                  borderWidth: 2,
+                  borderColor: Colors.red,
+                },
               ]}
               onPress={() => navigation.navigate('OrderDetail', {item: item})}>
               {/* Header with gradient background */}
@@ -335,30 +347,30 @@ const Order = () => {
                   </View>
                 </View>
               </View>
-              <View style={{flexDirection:"row",alignItems:"center"}}>
-
-           
-              <View
-                style={[
-                  styles.statusBadge,
-                  {backgroundColor: getStatusColor(item.status)},
-                  // Make the badge larger and more prominent for confirmed orders
-                  // item.status?.toLowerCase() === 'confirmed' && { borderWidth: 2, borderColor: Colors.green, shadowColor: Colors.green, shadowOpacity: 0.3, shadowRadius: 8 },
-                ]}>
-                <Text style={styles.statusText}>
-                  {getStatusText(item.status)}
-                </Text>
-              </View>
-
-              {/* Refund Button for Confirmed Orders */}
-              {item.status?.toLowerCase() === 'confirmed' && (
-                <View style={styles.refundBoxContainer}>
-                  <Pressable style={styles.refundBox} onPress={handleRefundRequest}>
-                    <Text style={styles.refundBoxText}>Refund</Text>
-                  </Pressable>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    {backgroundColor: getStatusColor(item.status)},
+                    // Make the badge larger and more prominent for confirmed orders
+                    // item.status?.toLowerCase() === 'confirmed' && { borderWidth: 2, borderColor: Colors.green, shadowColor: Colors.green, shadowOpacity: 0.3, shadowRadius: 8 },
+                  ]}>
+                  <Text style={styles.statusText}>
+                    {getStatusText(item.status)}
+                  </Text>
                 </View>
-              )}
-                 </View>
+
+                {/* Refund Button for Confirmed Orders */}
+                {item.status?.toLowerCase() === 'confirmed' && (
+                  <View style={styles.refundBoxContainer}>
+                    <Pressable
+                      style={styles.refundBox}
+                      onPress={handleRefundRequest}>
+                      <Text style={styles.refundBoxText}>Refund</Text>
+                    </Pressable>
+                  </View>
+                )}
+              </View>
 
               {/* Products Section */}
               <View style={styles.productsSection}>
@@ -396,7 +408,7 @@ const Order = () => {
               <View style={styles.totalSection}>
                 <View style={styles.totalRow}>
                   <Text style={styles.totalLabel}>Total Amount</Text>
-                  <Text style={styles.totalAmount}>₹{item?.amount}</Text>
+                  <Text style={styles.totalAmount}> £{item?.amount}</Text>
                 </View>
               </View>
 
@@ -434,14 +446,18 @@ const Order = () => {
                         <Text style={styles.actionButtonText}>Get Invoice</Text>
                       </Pressable>
                     </View>
-                    <Pressable
-                      style={[styles.actionButton, styles.cancelButton]}
-                      onPress={() => {
-                        setShowDeleteModal(true);
-                        setSelectedOrder(item);
-                      }}>
-                      <Text style={styles.cancelButtonText}>Cancel Order</Text>
-                    </Pressable>
+                    {item.status?.toLowerCase() !== 'confirmed' && (
+                      <Pressable
+                        style={[styles.actionButton, styles.cancelButton]}
+                        onPress={() => {
+                          setShowDeleteModal(true);
+                          setSelectedOrder(item);
+                        }}>
+                        <Text style={styles.cancelButtonText}>
+                          Cancel Order
+                        </Text>
+                      </Pressable>
+                    )}
                   </View>
                 )}
             </Pressable>
@@ -456,7 +472,7 @@ const Order = () => {
       />
 
       {cartData?.length > 0 && (
-       <AnimatedCartButton
+        <AnimatedCartButton
           count={cartData.length}
           onPress={() => setIsCartVisible(true)}
           label="View Cart"
@@ -755,7 +771,7 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontWeight: 'bold',
     fontSize: 12,
-    letterSpacing: .5,
-    textTransform:"uppercase"
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
 });
