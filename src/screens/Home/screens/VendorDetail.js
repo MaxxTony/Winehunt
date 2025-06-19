@@ -665,18 +665,7 @@ const VendorDetail = props => {
             Product for you
           </Text>
 
-          {/* Legend for badges */}
-          {/* <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 10, marginBottom: 2, gap: 12}}>
-            <View style={[styles.productBadge, {backgroundColor: Colors.primary}]}> 
-              <Text style={styles.productBadgeText}>Offer</Text>
-            </View>
-            <Text style={{fontSize: 13, color: Colors.gray8}}>Active Offer</Text>
-            <View style={[styles.productBadge, {backgroundColor: Colors.green}]}> 
-              <Text style={styles.productBadgeText}>Milestone</Text>
-            </View>
-            <Text style={{fontSize: 13, color: Colors.gray8}}>Milestone Reward</Text>
-          </View> */}
-
+        
           <FlatList
             data={detail?.products}
             renderItem={({item}) => {

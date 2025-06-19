@@ -75,6 +75,7 @@ const WineDetail = props => {
       price: 100,
     },
   ];
+
   const [size, setSize] = useState(sizeList[0]?.id);
 
   const addonListData = [
@@ -255,87 +256,106 @@ const WineDetail = props => {
     onLike,
     onDisLike,
     setShowModal,
-  }) => (
-    <Pressable
-      style={styles.productCardModern}
-      onPress={() => navigation.replace('WineDetail', {item: item?.id})}>
-      <View style={styles.productImageWrapper}>
-        <Image
-          source={
-            item?.image ? {uri: item?.image} : require('../images/bottle.png')
-          }
-          style={styles.productImageModern}
-          resizeMode="contain"
-        />
-        {/* Heart Icon Overlay */}
-        <Pressable
-          style={styles.heartIconOverlay}
-          onPress={e => {
-            e.stopPropagation();
-            if (!suggestionLikes[item?.id]) {
-              onLike(item?.id, true);
-            } else {
-              onDisLike(item?.id, true);
+    offers = [],
+    milestones = [],
+  }) => {
+    // Determine if this item is an offer or milestone
+    const isOffer = Array.isArray(offers) && offers.some(offer => offer.id === item.id);
+    const isMilestone = Array.isArray(milestones) && milestones.some(prod => prod.id === item.id);
+
+    return (
+      <Pressable
+        style={styles.productCardModern}
+        onPress={() => navigation.replace('WineDetail', {item: item?.id})}>
+        <View style={styles.productImageWrapper}>
+          <Image
+            source={
+              item?.image ? {uri: item?.image} : require('../images/bottle.png')
             }
-          }}
-          hitSlop={10}>
-          <AntDesign
-            size={22}
-            name={suggestionLikes[item?.id] ? 'heart' : 'hearto'}
-            color={suggestionLikes[item?.id] ? Colors.red : Colors.white}
+            style={styles.productImageModern}
+            resizeMode="contain"
           />
-        </Pressable>
-        {/* Rating Overlay */}
-        <View style={styles.ratingOverlay}>
-          <AntDesign name="star" size={16} color={Colors.yellow} />
-          <Text style={styles.ratingTextModern} allowFontScaling={false}>
-            {item?.average_rating || '0.0'}
-          </Text>
-        </View>
-      </View>
-      <View style={styles.productInfoModern}>
-        <Text
-          style={styles.productTitleModern}
-          numberOfLines={1}
-          allowFontScaling={false}>
-          {item?.name} {item?.title ? `(${item?.title})` : ''}
-        </Text>
-        <View style={styles.priceRowModern}>
-          {item?.has_discount && (
-            <Text style={styles.originalPriceModern} allowFontScaling={false}>
-              £ {item?.actual_price}
+          {/* Heart Icon Overlay */}
+          <Pressable
+            style={styles.heartIconOverlay}
+            onPress={e => {
+              e.stopPropagation();
+              if (!suggestionLikes[item?.id]) {
+                onLike(item?.id, true);
+              } else {
+                onDisLike(item?.id, true);
+              }
+            }}
+            hitSlop={10}>
+            <AntDesign
+              size={22}
+              name={suggestionLikes[item?.id] ? 'heart' : 'hearto'}
+              color={suggestionLikes[item?.id] ? Colors.red : Colors.white}
+            />
+          </Pressable>
+          {/* Rating Overlay */}
+          <View style={styles.ratingOverlay}>
+            <AntDesign name="star" size={16} color={Colors.yellow} />
+            <Text style={styles.ratingTextModern} allowFontScaling={false}>
+              {item?.average_rating || '0.0'}
             </Text>
+          </View>
+          {/* Offer and Milestone Badges */}
+          {isOffer && (
+            <View style={[styles.productBadge, {backgroundColor: Colors.primary, top: 10, left: 10}]}> 
+              <Text style={styles.productBadgeText}>Offer</Text>
+            </View>
           )}
-          <Text style={styles.priceTextModern} allowFontScaling={false}>
-            £ {item?.price ?? '0.00'}
-          </Text>
+          {isMilestone && (
+            <View style={[styles.productBadge, {backgroundColor: Colors.green, top: 40, left: 10}]}> 
+              <Text style={styles.productBadgeText}>Milestone</Text>
+            </View>
+          )}
         </View>
-        {item?.is_cart ? (
-          <Pressable
-            style={styles.viewMoreButtonModern}
-            onPress={e => {
-              e.stopPropagation();
-              navigation.navigate('Cart');
-            }}>
-            <Text style={styles.viewMoreTextModern} allowFontScaling={false}>
-              Go To Cart
+        <View style={styles.productInfoModern}>
+          <Text
+            style={styles.productTitleModern}
+            numberOfLines={1}
+            allowFontScaling={false}>
+            {item?.name} {item?.title ? `(${item?.title})` : ''}
+          </Text>
+          <View style={styles.priceRowModern}>
+            {item?.has_discount && (
+              <Text style={styles.originalPriceModern} allowFontScaling={false}>
+                £ {item?.actual_price}
+              </Text>
+            )}
+            <Text style={styles.priceTextModern} allowFontScaling={false}>
+              £ {item?.price ?? '0.00'}
             </Text>
-          </Pressable>
-        ) : (
-          <Pressable
-            style={styles.viewMoreButtonModern}
-            onPress={e => {
-              e.stopPropagation();
-              setShowModal(true);
-            }}>
-            <Text style={styles.viewMoreTextModern} allowFontScaling={false}>
-              Add To Cart
-            </Text>
-          </Pressable>
-        )}
-      </View>
-    </Pressable>
-  );
+          </View>
+          {item?.is_cart ? (
+            <Pressable
+              style={styles.viewMoreButtonModern}
+              onPress={e => {
+                e.stopPropagation();
+                navigation.navigate('Cart');
+              }}>
+              <Text style={styles.viewMoreTextModern} allowFontScaling={false}>
+                Go To Cart
+              </Text>
+            </Pressable>
+          ) : (
+            <Pressable
+              style={styles.viewMoreButtonModern}
+              onPress={e => {
+                e.stopPropagation();
+                setShowModal(true);
+              }}>
+              <Text style={styles.viewMoreTextModern} allowFontScaling={false}>
+                Add To Cart
+              </Text>
+            </Pressable>
+          )}
+        </View>
+      </Pressable>
+    );
+  };
 
   // Tab View Component
   const TabView = ({
@@ -402,7 +422,7 @@ const WineDetail = props => {
     );
   };
 
-  console.log(detail?.suggestions);
+  console.log(detail);
 
   // Description Tab Component
   const DescriptionTab = ({
@@ -434,6 +454,8 @@ const WineDetail = props => {
             onLike={onLike}
             onDisLike={onDisLike}
             setShowModal={setShowModal}
+            offers={detail?.offers}
+            milestones={detail?.discounted_products}
           />
         )}
       />
@@ -1233,5 +1255,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     fontFamily: Fonts.InterSemiBold,
+  },
+  productBadge: {
+    position: 'absolute',
+    zIndex: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  productBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+    fontFamily: Fonts.InterBold,
   },
 });
