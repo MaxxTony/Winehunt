@@ -382,7 +382,7 @@ const Search = () => {
     getHomePageData();
   }, [isFocused]);
 
-  console.log(JSON.stringify(homeData),"home")
+ 
  
 
   // Fit map to markers when markers change
@@ -476,6 +476,7 @@ const Search = () => {
           console.log(filters, 'lolo');
           // TODO: Use filters to update product search
           setFilterModal(false);
+          getProducts()
         }}
       />
       {cartData?.length > 0 && (

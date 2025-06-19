@@ -298,9 +298,20 @@ const Order = () => {
             }
           };
 
+          // Refund request handler (placeholder)
+          const handleRefundRequest = () => {
+            Alert.alert('Refund Request', 'Your refund request has been sent to the vendor.');
+          };
+
           return (
             <Pressable
-              style={styles.cardContainer}
+              style={[
+                styles.cardContainer,
+                // Add a green border for confirmed orders
+                item.status?.toLowerCase() === 'confirmed' && { borderWidth: 2, borderColor: Colors.green },
+                item.status?.toLowerCase() === 'processing' && { borderWidth: 2, borderColor: Colors.yellow },
+                item.status?.toLowerCase() === 'canceled' && { borderWidth: 2, borderColor: Colors.red },
+              ]}
               onPress={() => navigation.navigate('OrderDetail', {item: item})}>
               {/* Header with gradient background */}
               <View style={styles.cardHeader}>
@@ -324,15 +335,30 @@ const Order = () => {
                   </View>
                 </View>
               </View>
+              <View style={{flexDirection:"row",alignItems:"center"}}>
+
+           
               <View
                 style={[
                   styles.statusBadge,
                   {backgroundColor: getStatusColor(item.status)},
+                  // Make the badge larger and more prominent for confirmed orders
+                  // item.status?.toLowerCase() === 'confirmed' && { borderWidth: 2, borderColor: Colors.green, shadowColor: Colors.green, shadowOpacity: 0.3, shadowRadius: 8 },
                 ]}>
                 <Text style={styles.statusText}>
                   {getStatusText(item.status)}
                 </Text>
               </View>
+
+              {/* Refund Button for Confirmed Orders */}
+              {item.status?.toLowerCase() === 'confirmed' && (
+                <View style={styles.refundBoxContainer}>
+                  <Pressable style={styles.refundBox} onPress={handleRefundRequest}>
+                    <Text style={styles.refundBoxText}>Refund</Text>
+                  </Pressable>
+                </View>
+              )}
+                 </View>
 
               {/* Products Section */}
               <View style={styles.productsSection}>
@@ -706,5 +732,30 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 14,
     color: Colors.white,
+  },
+  refundBoxContainer: {
+    alignItems: 'flex-end',
+    marginRight: 10,
+    // marginBottom: 8,
+  },
+  refundBox: {
+    backgroundColor: Colors.blue,
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: Colors.blue,
+    shadowOpacity: 0.2,
+    shadowOffset: {width: 0, height: 2},
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  refundBoxText: {
+    color: Colors.white,
+    fontWeight: 'bold',
+    fontSize: 12,
+    letterSpacing: .5,
+    textTransform:"uppercase"
   },
 });

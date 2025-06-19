@@ -36,6 +36,9 @@ const Cart = () => {
   const {width} = useWindowDimensions();
   const [cartData, setCartData] = useState([]);
   const [couponCode, setCouponCode] = useState('');
+  const [couponError, setCouponError] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponApplied, setCouponApplied] = useState(false);
   const DELIVERY_FEE = 100;
   const dispatch = useDispatch();
   const {userData} = useSelector(state => state.profile);
@@ -49,7 +52,6 @@ const Cart = () => {
   useEffect(() => {
     if (isFocused) getCartData();
   }, [isFocused]);
-
 
   const getCartData = async () => {
     const info = await AsyncStorage.getItem('userDetail');
@@ -127,6 +129,24 @@ const Cart = () => {
     }
   };
 
+  // Simulate promo code validation (replace with real API if available)
+  const validatePromoCode = async code => {
+    setCouponLoading(true);
+    setCouponError('');
+    setCouponApplied(false);
+    // Simulate API delay
+    await new Promise(res => setTimeout(res, 800));
+    // Example: only 'WINE10' is valid
+    if (code.trim().toUpperCase() === 'WINE10') {
+      setCouponApplied(true);
+      setCouponError('');
+    } else {
+      setCouponError('Invalid promo code');
+      setCouponApplied(false);
+    }
+    setCouponLoading(false);
+  };
+
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
       <BackNavigationWithTitle
@@ -169,10 +189,16 @@ const Cart = () => {
                   />
                 </Pressable>
                 <View style={styles.cartDetailsContainerPro}>
-                  <Text style={styles.itemNamePro} numberOfLines={1} allowFontScaling={false}>
+                  <Text
+                    style={styles.itemNamePro}
+                    numberOfLines={1}
+                    allowFontScaling={false}>
                     {item?.product?.name}
                   </Text>
-                  <Text style={styles.itemDescriptionPro} numberOfLines={1} allowFontScaling={false}>
+                  <Text
+                    style={styles.itemDescriptionPro}
+                    numberOfLines={1}
+                    allowFontScaling={false}>
                     {item?.product?.product_desc || item?.product?.title}
                   </Text>
                   <View style={styles.priceQuantityRow}>
@@ -182,10 +208,18 @@ const Cart = () => {
                     <View style={styles.quantityControlPro}>
                       <TouchableOpacity
                         style={styles.qtyBtn}
-                        onPress={() => updateQuantity(item.id, item.quantity + 1)}>
-                        <Entypo name="squared-plus" color={Colors.red} size={22} />
+                        onPress={() =>
+                          updateQuantity(item.id, item.quantity + 1)
+                        }>
+                        <Entypo
+                          name="squared-plus"
+                          color={Colors.red}
+                          size={22}
+                        />
                       </TouchableOpacity>
-                      <Text style={styles.quantityTextPro} allowFontScaling={false}>
+                      <Text
+                        style={styles.quantityTextPro}
+                        allowFontScaling={false}>
                         {item?.quantity}
                       </Text>
                       <TouchableOpacity
@@ -197,7 +231,11 @@ const Cart = () => {
                             updateQuantity(item.id, item.quantity - 1);
                           }
                         }}>
-                        <Entypo name="squared-minus" color={Colors.red} size={22} />
+                        <Entypo
+                          name="squared-minus"
+                          color={Colors.red}
+                          size={22}
+                        />
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -212,30 +250,74 @@ const Cart = () => {
           }}
         />
         {cartData && cartData.length > 0 ? (
-          <View style={styles.couponContainerPro}>
-            <Image
-              source={require('./images/coupon.png')}
-              style={styles.couponImage}
-              resizeMode="contain"
-            />
-            <TextInput
-              value={couponCode}
-              onChangeText={setCouponCode}
-              placeholderTextColor={Colors.gray4}
-              style={styles.couponInputPro}
-              placeholder="Enter Promo Code/ Milestone reward"
-            />
+          <View style={styles.promoCardContainer}>
+            <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
+              <View style={styles.promoIconCircle}>
+                <Entypo name="ticket" size={24} color={Colors.white} />
+              </View>
+              <TextInput
+                value={couponCode}
+                onChangeText={text => {
+                  setCouponCode(text);
+                  setCouponError('');
+                  setCouponApplied(false);
+                }}
+                placeholder="Promo or milestone code"
+                placeholderTextColor={Colors.gray4}
+                style={styles.promoInput}
+                editable={!couponLoading}
+              />
+              {couponApplied && (
+                <TouchableOpacity
+                  onPress={() => {
+                    setCouponCode('');
+                    setCouponApplied(false);
+                    setCouponError('');
+                  }}
+                  style={{marginLeft: 8, padding: 4}}>
+                  <Entypo name="cross" size={20} color={Colors.gray7} />
+                </TouchableOpacity>
+              )}
+            </View>
             <WineHuntButton
-              text="Apply"
+              text={couponLoading ? '...' : couponApplied ? '✓' : 'Apply'}
               extraButtonStyle={[
-                styles.applyButtonPro,
+                styles.promoApplyBtn,
                 {
                   backgroundColor:
-                    couponCode.length > 0 ? Colors.red : Colors.gray,
+                    couponCode.length > 0 && !couponApplied
+                      ? Colors.red
+                      : Colors.gray,
+                  opacity: couponLoading ? 0.7 : 1,
                 },
               ]}
-              disabled={couponCode.length === 0}
+              extraTextStyle={{fontSize: 15, paddingHorizontal: 0}}
+              disabled={
+                couponCode.length === 0 || couponLoading || couponApplied
+              }
+              onPress={() => validatePromoCode(couponCode)}
             />
+            {couponError ? (
+              <View style={styles.promoMsgPillError}>
+                <Entypo
+                  name="circle-with-cross"
+                  size={15}
+                  color={Colors.white}
+                  style={{marginRight: 4}}
+                />
+                <Text style={styles.promoMsgPillText}>{couponError}</Text>
+              </View>
+            ) : couponApplied ? (
+              <View style={styles.promoMsgPillSuccess}>
+                <Entypo
+                  name="check"
+                  size={15}
+                  color={Colors.white}
+                  style={{marginRight: 4}}
+                />
+                <Text style={styles.promoMsgPillText}>Promo code applied!</Text>
+              </View>
+            ) : null}
           </View>
         ) : (
           <View style={styles.emptyCartContainer}>
@@ -399,40 +481,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: Colors.gray13,
   },
-  couponContainerPro: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-    padding: 12,
-    gap: 10,
-    marginTop: 8,
-  },
-  couponImage: {
-    height: 22,
-    width: 32,
-  },
-  couponInputPro: {
-    flex: 1,
-    paddingVertical: Platform.OS === 'ios' ? 7 : 0,
-    color: Colors.black,
-    fontSize: 15,
-    fontFamily: Fonts.InterMedium,
-    backgroundColor: Colors.gray13,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginHorizontal: 4,
-  },
-  applyButtonPro: {
-    paddingVertical: 8,
-    paddingHorizontal: 18,
-    borderRadius: 8,
-  },
   summaryContainerPro: {
     marginTop: 16,
     padding: 20,
@@ -493,5 +541,78 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
     textAlign: 'center',
+  },
+  promoCardContainer: {
+    backgroundColor: Colors.white,
+    borderRadius: 18,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    padding: 16,
+    marginTop: 8,
+    marginBottom: 4,
+    gap: 10,
+  },
+  promoIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.red,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    marginTop: 2,
+  },
+
+  promoInput: {
+    flex: 1,
+    fontSize: 15,
+    color: Colors.black,
+    fontFamily: Fonts.InterMedium,
+    backgroundColor: Colors.gray13,
+    borderBottomWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  promoApplyBtn: {
+    paddingVertical: 7,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginLeft: 4,
+    minWidth: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: 'transparent',
+    elevation: 0,
+  },
+  promoMsgPillError: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.red,
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginTop: 8,
+    alignSelf: 'center',
+    minHeight: 28,
+  },
+  promoMsgPillSuccess: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.green,
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginTop: 8,
+    alignSelf: 'center',
+    minHeight: 28,
+  },
+  promoMsgPillText: {
+    color: Colors.white,
+    fontSize: 14,
+    fontFamily: Fonts.InterMedium,
+    fontWeight: '600',
   },
 });

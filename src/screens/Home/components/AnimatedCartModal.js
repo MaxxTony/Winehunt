@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   cartItemCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.gray10,
+    backgroundColor: Colors.gray13,
     padding: 10,
     borderRadius: 14,
     shadowColor: '#000',
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
   },
   originalPrice: {
     fontSize: 13,
-    color: Colors.gray,
+    color: Colors.gray15,
     textDecorationLine: 'line-through',
     fontFamily: Fonts.InterRegular,
   },

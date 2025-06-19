@@ -6,10 +6,10 @@ import {
   View,
   Switch,
   Platform,
-  TouchableWithoutFeedback,
   SafeAreaView,
   Dimensions,
   Animated,
+  Easing,
 } from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
@@ -23,12 +23,25 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
   // Unified filter state
   const [filters, setFilters] = useState({
     wineTypes: [],
-    priceRange: null,
+    sortBy: null,
     grapesTypes: [],
     popularCountry: [],
     hasMilestoneRewards: false,
     hasOffers: false,
+    averageRating: null,
   });
+
+  // Extract dynamic categories from data
+  const getCategoryByName = name => {
+    return (
+      data?.find(cat => cat.name.toLowerCase().includes(name.toLowerCase()))
+        ?.categories || []
+    );
+  };
+
+  const wineType = getCategoryByName('wine');
+  const grapesType = getCategoryByName('grape');
+  const popularCountry = getCategoryByName('countries');
 
   // Animation for slide up
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
@@ -48,53 +61,15 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
     }
   }, [visible]);
 
-  const wineType = [
-    {id: 1, name: 'Red'},
-    {id: 2, name: 'White'},
-    {id: 3, name: 'Sparking'},
-    {id: 4, name: 'Rose'},
-    {id: 5, name: 'Sweet'},
-    {id: 6, name: 'Port'},
-  ];
-
-  const priceRange = [
-    {id: 1, name: 'Rating'},
-    {id: 2, name: 'Latest'},
+  const sortByList = [
+    {id: 1, name: 'Popular'},
+    {id: 2, name: 'New Arrival'},
     {id: 3, name: 'Low to High (Price)'},
     {id: 4, name: 'High to Low (Price)'},
   ];
 
-  const grapesType = [
-    {id: 1, name: 'Shizar'},
-    {id: 2, name: 'Chardonnay'},
-    {id: 3, name: 'Grenache'},
-    {id: 4, name: 'Cabernet Sauvignon'},
-    {id: 5, name: 'Pinor Noir'},
-  ];
-
-  const popularCountry = [
-    {id: 1, name: 'Britain'},
-    {id: 2, name: 'France'},
-    {id: 3, name: 'Italy'},
-    {id: 4, name: 'Argentina'},
-    {id: 5, name: 'Chile'},
-    {id: 6, name: 'Australia'},
-    {id: 7, name: 'South Africa'},
-    {id: 8, name: 'South Africa'},
-  ];
-
-  // Toggle helpers
-  const toggleSelection = (key, id) => {
-    setFilters(prev => ({
-      ...prev,
-      [key]: prev[key].includes(id)
-        ? prev[key].filter(typeId => typeId !== id)
-        : [...prev[key], id],
-    }));
-  };
-
-  const handlePriceRange = id => {
-    setFilters(prev => ({...prev, priceRange: id}));
+  const handleSortBy = id => {
+    setFilters(prev => ({...prev, sortBy: id}));
   };
 
   const handleSwitch = (key, value) => {
@@ -104,11 +79,12 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
   const resetFilters = () => {
     setFilters({
       wineTypes: [],
-      priceRange: null,
+      sortBy: null,
       grapesTypes: [],
       popularCountry: [],
       hasMilestoneRewards: false,
       hasOffers: false,
+      averageRating: null,
     });
   };
 
@@ -117,17 +93,132 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
     onClose();
   };
 
-  // Pro chip style
-  const renderChip = (selected, onPress, label) => (
+  // Pro chip style (now with image)
+  const renderChip = (selected, onPress, label, image) => (
     <Pressable
       style={[
         styles.chip,
         selected && styles.selectedChip,
         styles.elevatedChip,
+        {flexDirection: 'row', alignItems: 'center'},
       ]}
       onPress={onPress}>
+      {image && (
+        <View style={styles.chipImageWrapper}>
+          <Animated.Image
+            source={{uri: image}}
+            style={styles.chipImage}
+            resizeMode="cover"
+          />
+        </View>
+      )}
       <Text
-        style={[styles.chipText, selected && styles.selectedChipText]}
+        style={[
+          styles.chipText,
+          selected && styles.selectedChipText,
+          {marginLeft: image ? 8 : 0},
+        ]}
+        allowFontScaling={false}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+
+
+
+
+  // Star rating selector with animation and clear button
+  const starScales = [
+    useRef(new Animated.Value(1)).current,
+    useRef(new Animated.Value(1)).current,
+    useRef(new Animated.Value(1)).current,
+    useRef(new Animated.Value(1)).current,
+    useRef(new Animated.Value(1)).current,
+  ];
+
+  const animateStar = idx => {
+    Animated.sequence([
+      Animated.timing(starScales[idx], {
+        toValue: 1.25,
+        duration: 120,
+        useNativeDriver: true,
+        easing: Easing.out(Easing.ease),
+      }),
+      Animated.timing(starScales[idx], {
+        toValue: 1,
+        duration: 120,
+        useNativeDriver: true,
+        easing: Easing.in(Easing.ease),
+      }),
+    ]).start();
+  };
+
+  const handleStarPress = star => {
+    setFilters(prev => ({...prev, averageRating: star}));
+    animateStar(star - 1);
+  };
+
+  const handleClearRating = () =>
+    setFilters(prev => ({...prev, averageRating: null}));
+
+  const renderStarRating = () => (
+    <View style={styles.ratingCard}>
+      <View style={styles.ratingStarsRow}>
+        {[1, 2, 3, 4, 5].map((star, idx) => (
+          <Pressable
+            key={star}
+            onPress={() => handleStarPress(star)}
+            style={styles.starButton}>
+            <Animated.View style={{transform: [{scale: starScales[idx]}]}}>
+              <MaterialCommunityIcons
+                name={
+                  filters.averageRating && filters.averageRating >= star
+                    ? 'star'
+                    : 'star-outline'
+                }
+                size={36}
+                color={
+                  filters.averageRating && filters.averageRating >= star
+                    ? Colors.red
+                    : Colors.gray15
+                }
+                style={styles.starIcon}
+              />
+            </Animated.View>
+          </Pressable>
+        ))}
+        {filters.averageRating && (
+          <Pressable onPress={handleClearRating} style={styles.clearRatingBtn}>
+            <MaterialCommunityIcons
+              name="close-circle"
+              size={24}
+              color={Colors.gray15}
+            />
+          </Pressable>
+        )}
+      </View>
+    </View>
+  );
+
+  // Sort By chip style (reuse price chip style for consistency)
+  const renderSortChip = (selected, onPress, label, icon) => (
+    <Pressable
+      style={[
+        styles.priceChip,
+        selected && styles.selectedPriceChip,
+        styles.elevatedChip,
+      ]}
+      onPress={onPress}>
+      {icon && (
+        <MaterialCommunityIcons
+          name={icon}
+          size={20}
+          color={selected ? Colors.white : Colors.black}
+          style={{marginRight: 6}}
+        />
+      )}
+      <Text
+        style={[styles.priceChipText, selected && styles.selectedPriceChipText]}
         allowFontScaling={false}>
         {label}
       </Text>
@@ -182,42 +273,20 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
                 {wineType.map(item =>
                   renderChip(
                     filters.wineTypes.includes(item.id),
-                    () => toggleSelection('wineTypes', item.id),
+                    () =>
+                      setFilters(prev => ({
+                        ...prev,
+                        wineTypes: prev.wineTypes.includes(item.id)
+                          ? prev.wineTypes.filter(typeId => typeId !== item.id)
+                          : [...prev.wineTypes, item.id],
+                      })),
                     item.name,
+                    item.image,
                   ),
                 )}
               </View>
               <View style={styles.divider} />
-              {/* Price Range */}
-              <Text style={styles.subTitle} allowFontScaling={false}>
-                Price Range
-              </Text>
-            </>
-          }
-          data={priceRange}
-          contentContainerStyle={{paddingBottom: 180}}
-          renderItem={({item}) => {
-            const isSelected = item.id === filters.priceRange;
-            return (
-              <Pressable
-                key={item.id}
-                style={styles.priceRangeItem}
-                onPress={() => handlePriceRange(item.id)}>
-                <MaterialCommunityIcons
-                  name={isSelected ? 'radiobox-marked' : 'radiobox-blank'}
-                  size={26}
-                  color={isSelected ? Colors.red : Colors.gray5}
-                />
-                <Text style={styles.priceRangeText} allowFontScaling={false}>
-                  {item?.name}
-                </Text>
-              </Pressable>
-            );
-          }}
-          keyExtractor={item => item.id.toString()}
-          ListFooterComponent={
-            <>
-              <View style={styles.divider} />
+
               {/* Grapes */}
               <Text style={styles.subTitle} allowFontScaling={false}>
                 Grapes
@@ -226,8 +295,17 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
                 {grapesType.map(item =>
                   renderChip(
                     filters.grapesTypes.includes(item.id),
-                    () => toggleSelection('grapesTypes', item.id),
+                    () =>
+                      setFilters(prev => ({
+                        ...prev,
+                        grapesTypes: prev.grapesTypes.includes(item.id)
+                          ? prev.grapesTypes.filter(
+                              typeId => typeId !== item.id,
+                            )
+                          : [...prev.grapesTypes, item.id],
+                      })),
                     item.name,
+                    item.image,
                   ),
                 )}
               </View>
@@ -240,8 +318,17 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
                 {popularCountry.map(item =>
                   renderChip(
                     filters.popularCountry.includes(item.id),
-                    () => toggleSelection('popularCountry', item.id),
+                    () =>
+                      setFilters(prev => ({
+                        ...prev,
+                        popularCountry: prev.popularCountry.includes(item.id)
+                          ? prev.popularCountry.filter(
+                              typeId => typeId !== item.id,
+                            )
+                          : [...prev.popularCountry, item.id],
+                      })),
                     item.name,
+                    item.image,
                   ),
                 )}
               </View>
@@ -252,7 +339,7 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
                   name="star-circle"
                   size={26}
                   color={
-                    filters.hasMilestoneRewards ? Colors.red : Colors.gray5
+                    filters.hasMilestoneRewards ? Colors.red : Colors.gray14
                   }
                 />
                 <Text style={styles.switchLabel} allowFontScaling={false}>
@@ -270,7 +357,7 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
                       ? Colors.gray5
                       : undefined
                   }
-                  trackColor={{false: Colors.gray12, true: Colors.red + '55'}}
+                  trackColor={{false: Colors.gray14, true: Colors.red + '55'}}
                 />
               </View>
               {/* Offers */}
@@ -278,7 +365,7 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
                 <MaterialCommunityIcons
                   name="tag"
                   size={26}
-                  color={filters.hasOffers ? Colors.red : Colors.gray5}
+                  color={filters.hasOffers ? Colors.red : Colors.gray14}
                 />
                 <Text style={styles.switchLabel} allowFontScaling={false}>
                   Has Offers
@@ -293,11 +380,43 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
                       ? Colors.gray5
                       : undefined
                   }
-                  trackColor={{false: Colors.gray12, true: Colors.red + '55'}}
+                  trackColor={{false: Colors.gray14, true: Colors.red + '55'}}
                 />
               </View>
+              <View style={styles.divider} />
+              <Text style={styles.subTitle} allowFontScaling={false}>
+                Sort By
+              </Text>
+              <View style={styles.priceChipRow}>
+                {sortByList.map(item =>
+                  renderSortChip(
+                    filters.sortBy === item.id,
+                    () => handleSortBy(item.id),
+                    item.name,
+                    item.id === 1
+                      ? 'fire'
+                      : item.id === 2
+                      ? 'new-box'
+                      : item.id === 3
+                      ? 'arrow-down-bold'
+                      : item.id === 4
+                      ? 'arrow-up-bold'
+                      : undefined,
+                  ),
+                )}
+              </View>
+              {/* Average Customer Rating */}
+              <Text style={styles.subTitle} allowFontScaling={false}>
+                Avg. Customer Rating
+              </Text>
+              {renderStarRating()}
             </>
           }
+          data={[]}
+          contentContainerStyle={{paddingBottom: 180}}
+          renderItem={null}
+          keyExtractor={item => item.id.toString()}
+          ListFooterComponent={<></>}
           showsVerticalScrollIndicator={false}
         />
         {/* Sticky Footer */}
@@ -399,6 +518,20 @@ const styles = StyleSheet.create({
     marginRight: 8,
     minHeight: 36,
   },
+  chipImageWrapper: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chipImage: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+  },
   elevatedChip: {
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
@@ -496,5 +629,80 @@ const styles = StyleSheet.create({
   },
   modal: {
     margin: 0,
+  },
+  priceChipRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flexWrap: 'wrap',
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  priceChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderWidth: 1.5,
+    borderColor: Colors.gray5,
+    borderRadius: 18,
+    backgroundColor: Colors.white,
+    marginBottom: 6,
+    marginRight: 8,
+    minHeight: 36,
+  },
+  selectedPriceChip: {
+    backgroundColor: Colors.red,
+    borderColor: Colors.red,
+  },
+  priceChipText: {
+    fontFamily: Fonts.InterMedium,
+    color: Colors.black,
+    fontWeight: '500',
+    fontSize: 15,
+  },
+  selectedPriceChipText: {
+    color: Colors.white,
+  },
+  ratingCard: {
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    paddingVertical: 18,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    marginHorizontal: 8,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  ratingStarsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+    gap: 4,
+  },
+  starButton: {
+    padding: 4,
+  },
+  starIcon: {
+    textShadowColor: 'rgba(0,0,0,0.08)',
+    textShadowOffset: {width: 0, height: 2},
+    textShadowRadius: 4,
+  },
+  clearRatingBtn: {
+    marginLeft: 10,
+    padding: 2,
+  },
+  ratingLabelText: {
+    marginTop: 2,
+    fontFamily: Fonts.InterMedium,
+    color: Colors.red,
+    fontWeight: '500',
+    fontSize: 15,
+    textAlign: 'center',
   },
 });

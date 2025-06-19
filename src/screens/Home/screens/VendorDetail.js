@@ -568,50 +568,20 @@ const VendorDetail = props => {
             </Text>
           </View>
 
+          {/* Modernized Business Hours Section - Creative UI */}
           {detail?.business_hours && detail?.business_hours.length > 0 && (
-            <View style={styles.businessHoursTable}>
-              <View style={styles.tableHeaderRow}>
-                <Text style={styles.tableHeaderText}>Day</Text>
-                <Text style={styles.tableHeaderText}>Hours</Text>
-              </View>
-              {detail?.business_hours?.map((item, index) => {
-                const today = dayjs().format('dddd') === item.weekday;
-                const now = dayjs();
-                const open = dayjs(item.open_time, 'HH:mm');
-                const close = dayjs(item.close_time, 'HH:mm');
-                const isOpenNow =
-                  today && now.isAfter(open) && now.isBefore(close);
-                return (
-                  <View
-                    key={item.id}
-                    style={[
-                      styles.tableRow,
-                      today && styles.hourItemToday,
-                      index === detail.business_hours.length - 1 && {
-                        borderBottomWidth: 0,
-                      },
-                    ]}>
-                    <View style={styles.tableCellDay}>
-                      <Text
-                        style={[
-                          styles.weekdayTextModern,
-                          today && styles.weekdayTextToday,
-                        ]}
-                        allowFontScaling={false}>
-                        {item.weekday}
-                      </Text>
-                    </View>
-                    <View style={styles.tableCellHours}>
-                      <Text
-                        style={styles.openTimeModern}
-                        allowFontScaling={false}>
-                        {formatTime(item.open_time)} -{' '}
-                        {formatTime(item.close_time)}
-                      </Text>
-                    </View>
+            <View style={styles.businessHoursModernCard}>
+              {detail.business_hours.map((item, index) => (
+                <View key={item.id} style={styles.businessHoursModernRow}>
+                  <Ionicons name="time-outline" size={20} color={Colors.primary} style={styles.businessHoursIcon} />
+                  <Text style={styles.businessHoursModernDay}>{item.weekday}</Text>
+                  <View style={styles.businessHoursPill}>
+                    <Text style={styles.businessHoursModernTime}>
+                      {formatTime(item.open_time)} - {formatTime(item.close_time)}
+                    </Text>
                   </View>
-                );
-              })}
+                </View>
+              ))}
             </View>
           )}
 
@@ -639,7 +609,7 @@ const VendorDetail = props => {
                       </Text>
                       <View style={styles.milestoneDiscountBadge}>
                         <Text style={styles.milestoneDiscountText} allowFontScaling={false}>
-                          -{item.discount}%
+                          -{Number(item.discount).toFixed(0)} %
                         </Text>
                       </View>
                     </View>
@@ -1390,92 +1360,53 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray13,
     borderRadius: 8,
   },
-  businessHoursTable: {
+  businessHoursModernCard: {
     backgroundColor: Colors.white,
-    padding: 0,
-    borderRadius: 12,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: Colors.gray14,
-    overflow: 'hidden',
+    borderRadius: 18,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginBottom: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  sectionHeader: {
+  businessHoursModernRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
+    marginVertical: 7,
+    padding: 8,
+    backgroundColor:Colors.gray13,
+    borderRadius:10
   },
-  tableHeaderRow: {
-    flexDirection: 'row',
-    backgroundColor: Colors.gray13,
-    borderBottomWidth: 1,
-    borderColor: Colors.gray14,
+  businessHoursIcon: {
+    marginRight: 10,
   },
-  tableHeaderText: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    fontFamily: Fonts.InterBold,
-    color: Colors.gray8,
-    fontSize: 14,
-    textAlign: 'left',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderColor: Colors.gray14,
-    backgroundColor: 'transparent',
-  },
-  tableCellDay: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderRightWidth: 1,
-    borderColor: Colors.gray14,
-  },
-  tableCellHours: {
-    flex: 1.5,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderRightWidth: 1,
-    borderColor: Colors.gray14,
-  },
-  tableCellStatus: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    alignItems: 'flex-start',
-  },
-  weekdayTextModern: {
+  businessHoursModernDay: {
     fontSize: 15,
-    fontFamily: Fonts.InterSemiBold,
-    color: Colors.gray8,
-  },
-  weekdayTextToday: {
+    fontFamily: Fonts.InterBold,
     color: Colors.primary,
-    fontWeight: 'bold',
+    minWidth: 80,
+    flex:1
   },
-  openTimeModern: {
-    color: Colors.black,
+  businessHoursPill: {
+    backgroundColor: Colors.white,
+    borderRadius: 5,
+    paddingVertical: 4,
+    paddingHorizontal: 14,
+    marginLeft: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  businessHoursModernTime: {
     fontSize: 15,
     fontFamily: Fonts.InterMedium,
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 2,
-    marginLeft: 8,
-  },
-  openBadge: {
-    backgroundColor: Colors.green,
-  },
-  statusText: {
-    color: '#fff',
-    fontSize: 12,
-    fontFamily: Fonts.InterBold,
+    color: Colors.gray8,
+    letterSpacing: 0.1,
   },
   milestoneLabel: {
     fontSize: 18,
