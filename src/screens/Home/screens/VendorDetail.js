@@ -29,6 +29,7 @@ import AnimatedCartModal from '../components/AnimatedCartModal';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import ImageView from 'react-native-image-viewing';
+import AnimatedCartButton from '../../../components/AnimatedCartButton';
 
 dayjs.extend(relativeTime);
 
@@ -115,81 +116,79 @@ const ContactOptions = React.memo(({onContactPress}) => {
   ];
 
   const renderContactOption = ({item}) => (
-    <View style={styles.contactOptionContainer}>
-      <Pressable
-        style={styles.contactOptionIcon}
-        onPress={() => onContactPress(item.name)}>
-        <Image source={item.image} style={styles.contactImage} />
-      </Pressable>
-      <Text style={styles.contactOptionText}>{item.name}</Text>
-    </View>
+    <Pressable
+      style={({pressed}) => [
+        styles.contactOptionIconModern,
+        pressed && styles.contactOptionIconPressed,
+      ]}
+      android_ripple={{color: '#e0e0e0', borderless: true}}
+      onPress={() => onContactPress(item.name)}>
+      <Image source={item.image} style={styles.contactImageModern} />
+      <Text style={styles.contactOptionTextModern}>{item.name}</Text>
+    </Pressable>
   );
 
   return (
-    <FlatList
-      data={contactOptions}
-      horizontal
-      scrollEnabled={false}
-      contentContainerStyle={styles.contactList}
-      renderItem={renderContactOption}
-    />
+    <View style={styles.contactListModern}>
+      {contactOptions.map(option => (
+        <View key={option.id} style={styles.contactOptionContainerModern}>
+          {renderContactOption({item: option})}
+        </View>
+      ))}
+    </View>
   );
 });
 
 const ProductCard = React.memo(({item, onLike, isLiked, onPress}) => (
-  <Pressable style={styles.productContainer} onPress={onPress}>
-    <Image
-      source={
-        item?.product_images[0]?.image
-          ? {uri: item?.product_images[0]?.image}
-          : require('../images/bottle.png')
-      }
-      style={styles.productImage}
-      resizeMode="contain"
-    />
-    <View style={styles.productDetails}>
-      <View style={styles.productHeader}>
-        <Text
-          style={styles.productTitle}
-          numberOfLines={1}
-          allowFontScaling={false}>
-          {item?.name} ({item?.title})
+  <Pressable style={styles.productCardModern} onPress={onPress}>
+    <View style={styles.productImageWrapper}>
+      <Image
+        source={
+          item?.product_images[0]?.image
+            ? {uri: item?.product_images[0]?.image}
+            : require('../images/bottle.png')
+        }
+        style={styles.productImageModern}
+        resizeMode="contain"
+      />
+      {/* Heart Icon Overlay */}
+      <Pressable style={styles.heartIconOverlay} onPress={onLike} hitSlop={10}>
+        <AntDesign
+          size={22}
+          name={isLiked ? 'heart' : 'hearto'}
+          color={isLiked ? Colors.red : Colors.white}
+        />
+      </Pressable>
+      {/* Rating Overlay */}
+      <View style={styles.ratingOverlay}>
+        <AntDesign name="star" size={16} color={Colors.yellow} />
+        <Text style={styles.ratingTextModern} allowFontScaling={false}>
+          {item?.average_rating || '0.0'}
         </Text>
-        <Pressable onPress={onLike}>
-          <AntDesign
-            size={20}
-            name={isLiked ? 'heart' : 'hearto'}
-            color={isLiked ? Colors.red : Colors.black}
-          />
-        </Pressable>
       </View>
-
-      <View style={styles.productFooter}>
-        <Pressable style={styles.viewMoreButton} onPress={onPress}>
-          <Text style={styles.viewMoreText} allowFontScaling={false}>
-            View More
+    </View>
+    <View style={styles.productInfoModern}>
+      <Text
+        style={styles.productTitleModern}
+        numberOfLines={1}
+        allowFontScaling={false}>
+        {item?.name}
+      </Text>
+      <View style={styles.priceRowModern}>
+        {item?.has_discount && (
+          <Text style={styles.originalPriceModern} allowFontScaling={false}>
+            £ {item?.actual_price}
           </Text>
-        </Pressable>
-
-        <View style={styles.bottomRight}>
-          <View style={styles.ratingContainer}>
-            <AntDesign name="star" size={16} color={Colors.yellow} />
-            <Text style={styles.infoText} allowFontScaling={false}>
-              {item?.average_rating || '0.0'}
-            </Text>
-          </View>
-          <View style={styles.priceContainer}>
-            {item?.has_discount && (
-              <Text style={styles.originalPrice} allowFontScaling={false}>
-                £ {item?.actual_price}
-              </Text>
-            )}
-            <Text style={styles.priceText} allowFontScaling={false}>
-              £ {item?.price}
-            </Text>
-          </View>
-        </View>
+        )}
+        <Text style={styles.priceTextModern} allowFontScaling={false}>
+          £ {item?.price}
+        </Text>
       </View>
+      <Pressable style={styles.viewMoreButtonModern} onPress={onPress}>
+        <Text style={styles.viewMoreTextModern} allowFontScaling={false}>
+          View More
+        </Text>
+      </Pressable>
     </View>
   </Pressable>
 ));
@@ -523,39 +522,85 @@ const VendorDetail = props => {
         />
 
         <View style={styles.contentContainer}>
-          <Text style={styles.vendorName} allowFontScaling={false}>
-            {detail?.shop_name}
-          </Text>
+          <View style={styles.vendorInfoSection}>
+            <Text style={styles.vendorName} allowFontScaling={false}>
+              {detail?.shop_name}
+            </Text>
 
-          {detail?.address && (
-            <View style={styles.locationContainer}>
-              <Ionicons
-                name="location-outline"
-                size={15}
-                color={Colors.gray15}
-              />
-              <Text style={styles.locationText} allowFontScaling={false}>
-                {detail?.address}
-              </Text>
+            {detail?.address && (
+              <View style={styles.locationContainer}>
+                <Ionicons
+                  name="location-outline"
+                  size={20}
+                  color={Colors.gray15}
+                />
+                <Text style={styles.locationText} allowFontScaling={false}>
+                  {detail?.address}
+                </Text>
+              </View>
+            )}
+
+            {detail?.description && (
+              <View style={styles.descriptionContainer}>
+                <Text style={styles.description} allowFontScaling={false}>
+                  {detail?.description}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle} allowFontScaling={false}>
+              Business Hours
+            </Text>
+          </View>
+
+          {detail?.business_hours && detail?.business_hours.length > 0 && (
+            <View style={styles.businessHoursTable}>
+              <View style={styles.tableHeaderRow}>
+                <Text style={styles.tableHeaderText}>Day</Text>
+                <Text style={styles.tableHeaderText}>Hours</Text>
+              </View>
+              {detail?.business_hours?.map((item, index) => {
+                const today = dayjs().format('dddd') === item.weekday;
+                const now = dayjs();
+                const open = dayjs(item.open_time, 'HH:mm');
+                const close = dayjs(item.close_time, 'HH:mm');
+                const isOpenNow =
+                  today && now.isAfter(open) && now.isBefore(close);
+                return (
+                  <View
+                    key={item.id}
+                    style={[
+                      styles.tableRow,
+                      today && styles.hourItemToday,
+                      index === detail.business_hours.length - 1 && {
+                        borderBottomWidth: 0,
+                      },
+                    ]}>
+                    <View style={styles.tableCellDay}>
+                      <Text
+                        style={[
+                          styles.weekdayTextModern,
+                          today && styles.weekdayTextToday,
+                        ]}
+                        allowFontScaling={false}>
+                        {item.weekday}
+                      </Text>
+                    </View>
+                    <View style={styles.tableCellHours}>
+                      <Text
+                        style={styles.openTimeModern}
+                        allowFontScaling={false}>
+                        {formatTime(item.open_time)} -{' '}
+                        {formatTime(item.close_time)}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
             </View>
           )}
-
-          <Text style={styles.description} allowFontScaling={false}>
-            {detail?.description}
-          </Text>
-
-          {detail?.business_hours?.map(item => (
-            <Text
-              key={item.id}
-              style={styles.openStatus}
-              allowFontScaling={false}>
-              Open {'  '}
-              <Text style={styles.openTime} allowFontScaling={false}>
-                {item.weekday} {formatTime(item.open_time)} to{' '}
-                {formatTime(item.close_time)}
-              </Text>
-            </Text>
-          ))}
 
           <ContactOptions onContactPress={handleContactPress} />
 
@@ -701,13 +746,11 @@ const VendorDetail = props => {
       </ScrollView>
 
       {cartData?.length > 0 && (
-        <Pressable
-          style={styles.cartButton}
-          onPress={() => setIsCartVisible(true)}>
-          <Text style={styles.cartButtonText}>
-            View Cart ({cartData.length} items)
-          </Text>
-        </Pressable>
+        <AnimatedCartButton
+          count={cartData.length}
+          onPress={() => setIsCartVisible(true)}
+          label="View Cart"
+        />
       )}
 
       {cartData?.length > 0 && (
@@ -884,60 +927,85 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   vendorName: {
-    fontSize: 18,
+    fontSize: 22,
     fontFamily: Fonts.PhilosopherBold,
     color: Colors.black,
+    marginBottom: 4,
   },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 5,
+    gap: 8,
+    paddingVertical: 4,
   },
   locationText: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: Fonts.InterRegular,
     color: Colors.gray15,
     flex: 1,
-    flexWrap: 'wrap',
+    lineHeight: 20,
   },
   description: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: Fonts.InterRegular,
     color: Colors.black,
+    lineHeight: 22,
   },
   openStatus: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: Fonts.InterBold,
     color: Colors.green,
     fontWeight: '600',
+    backgroundColor: Colors.green + '20',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
   },
   openTime: {
-    color: Colors.gray4,
-    fontSize: 12,
-    fontWeight: '400',
+    color: Colors.gray8,
+    fontSize: 13,
+    fontWeight: '500',
+    fontFamily: Fonts.InterMedium,
   },
-  contactList: {
-    gap: 20,
-  },
-  contactOptionContainer: {
+  contactListModern: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 5,
+    marginVertical: 18,
+    gap: 0,
   },
-  contactOptionIcon: {
-    padding: 10,
-    borderWidth: 1,
+  contactOptionContainerModern: {
     alignItems: 'center',
-    borderRadius: 100,
-    borderColor: Colors.gray4,
+    flex: 1,
   },
-  contactImage: {
-    height: 20,
-    width: 20,
+  contactOptionIconModern: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#FFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+    alignSelf: 'center',
+    transitionDuration: '150ms',
   },
-  contactOptionText: {
-    fontSize: 14,
-    fontFamily: Fonts.InterRegular,
-    color: Colors.black,
+  contactOptionIconPressed: {
+    backgroundColor: '#e0e0e0',
+    transform: [{scale: 0.96}],
+  },
+  contactImageModern: {
+    height: 28,
+    width: 28,
+    resizeMode: 'contain',
+    marginBottom: 4,
+  },
+  contactOptionTextModern: {
+    fontSize: 13,
+    fontFamily: Fonts.InterMedium,
+    color: Colors.gray8,
+    textAlign: 'center',
+    marginTop: 2,
+    letterSpacing: 0.1,
   },
   separator: {
     height: 1,
@@ -949,78 +1017,103 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.PhilosopherBold,
     color: Colors.black,
   },
-  productContainer: {
-    padding: 12,
-    marginVertical: 6,
-    marginHorizontal: 5,
+  productCardModern: {
     backgroundColor: Colors.white,
-    elevation: 4,
-    borderRadius: 10,
-    flexDirection: 'row',
-    gap: 12,
+    borderRadius: 16,
+    marginVertical: 10,
+    marginHorizontal: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    overflow: 'hidden',
+    alignItems: 'center',
+    paddingBottom: 12,
+  },
+  productImageWrapper: {
+    width: '100%',
+    height: 200,
+    backgroundColor: Colors.gray13,
+    position: 'relative',
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  productImage: {
-    height: 90,
-    width: 50,
-    borderRadius: 6,
+  productImageModern: {
+    width: '100%',
+    height: '100%',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
-  productDetails: {
-    flex: 1,
-    justifyContent: 'space-between',
-    gap: 12,
+  heartIconOverlay: {
+    position: 'absolute',
+    top: 10,
+    right: 12,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    borderRadius: 16,
+    padding: 4,
+    zIndex: 2,
   },
-  productHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  productTitle: {
-    fontSize: 14,
-    color: Colors.black,
-    fontWeight: '700',
-    flex: 1,
-    marginRight: 10,
-  },
-  productFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  viewMoreButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    backgroundColor: Colors.red,
+  ratingOverlay: {
+    position: 'absolute',
+    top: 10,
+    left: 12,
+    backgroundColor: 'rgba(255,255,255,0.85)',
     borderRadius: 12,
-  },
-  viewMoreText: {
-    fontSize: 12,
-    color: Colors.white,
-    fontWeight: '600',
-  },
-  bottomRight: {
-    alignItems: 'flex-end',
-    gap: 4,
-  },
-  ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    zIndex: 2,
   },
-  priceContainer: {
-    alignItems: 'flex-end',
-    gap: 2,
+  ratingTextModern: {
+    fontSize: 13,
+    color: Colors.black,
+    fontWeight: '600',
+    marginLeft: 3,
   },
-  originalPrice: {
-    fontSize: 12,
-    fontWeight: '400',
+  productInfoModern: {
+    width: '92%',
+    alignSelf: 'center',
+    marginTop: 12,
+    alignItems: 'flex-start',
+  },
+  productTitleModern: {
+    fontSize: 16,
+    fontFamily: Fonts.InterBold,
+    color: Colors.black,
+    marginBottom: 4,
+  },
+  priceRowModern: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  originalPriceModern: {
+    fontSize: 13,
     color: Colors.gray15,
     textDecorationLine: 'line-through',
+    marginRight: 8,
   },
-  priceText: {
-    fontSize: 13,
-    fontWeight: '700',
+  priceTextModern: {
+    fontSize: 15,
     color: Colors.green,
+    fontWeight: 'bold',
+  },
+  viewMoreButtonModern: {
+    marginTop: 2,
+    backgroundColor: Colors.primary,
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 18,
+    alignSelf: 'flex-start',
+  },
+  viewMoreTextModern: {
+    color: Colors.white,
+    fontSize: 13,
+    fontWeight: '600',
+    letterSpacing: 0.2,
   },
   offersContainer: {
     gap: 10,
@@ -1165,25 +1258,161 @@ const styles = StyleSheet.create({
     color: '#888',
     textAlign: 'center',
   },
-  cartButton: {
+  cartButtonModern: {
     position: 'absolute',
     bottom: 20,
     alignSelf: 'center',
-    width: '60%',
-    paddingVertical: 12,
-    backgroundColor: Colors.blue,
-    borderRadius: 25,
+    flexDirection: 'row',
+    borderRadius: 30,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    backgroundColor: Colors.primary,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+    minWidth: 180,
+    left: 30,
+    right: 30,
+  },
+  cartButtonContentModern: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  cartButtonTextModern: {
+    color: '#fff',
+    fontSize: 17,
+    fontWeight: 'bold',
+    letterSpacing: 0.2,
+    fontFamily: Fonts.InterBold,
+  },
+  cartBadgeModern: {
+    backgroundColor: Colors.red,
+    borderRadius: 10,
+    minWidth: 22,
+    height: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 10,
+    paddingHorizontal: 6,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 5,
+    shadowRadius: 2,
+    elevation: 3,
   },
-  cartButtonText: {
-    color: Colors.white,
-    textAlign: 'center',
-    fontSize: 16,
+  cartBadgeTextModern: {
+    color: '#fff',
+    fontSize: 13,
     fontWeight: 'bold',
+    fontFamily: Fonts.InterBold,
+  },
+  vendorInfoSection: {
+    backgroundColor: Colors.white,
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    gap: 12,
+  },
+  descriptionContainer: {
+    padding: 12,
+    backgroundColor: Colors.gray13,
+    borderRadius: 8,
+  },
+  businessHoursTable: {
+    backgroundColor: Colors.white,
+    padding: 0,
+    borderRadius: 12,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: Colors.gray14,
+    overflow: 'hidden',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  tableHeaderRow: {
+    flexDirection: 'row',
+    backgroundColor: Colors.gray13,
+    borderBottomWidth: 1,
+    borderColor: Colors.gray14,
+  },
+  tableHeaderText: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    fontFamily: Fonts.InterBold,
+    color: Colors.gray8,
+    fontSize: 14,
+    textAlign: 'left',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderColor: Colors.gray14,
+    backgroundColor: 'transparent',
+  },
+  tableCellDay: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRightWidth: 1,
+    borderColor: Colors.gray14,
+  },
+  tableCellHours: {
+    flex: 1.5,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRightWidth: 1,
+    borderColor: Colors.gray14,
+  },
+  tableCellStatus: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    alignItems: 'flex-start',
+  },
+  weekdayTextModern: {
+    fontSize: 15,
+    fontFamily: Fonts.InterSemiBold,
+    color: Colors.gray8,
+  },
+  weekdayTextToday: {
+    color: Colors.primary,
+    fontWeight: 'bold',
+  },
+  openTimeModern: {
+    color: Colors.black,
+    fontSize: 15,
+    fontFamily: Fonts.InterMedium,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+    marginLeft: 8,
+  },
+  openBadge: {
+    backgroundColor: Colors.green,
+  },
+  statusText: {
+    color: '#fff',
+    fontSize: 12,
+    fontFamily: Fonts.InterBold,
   },
 });
 

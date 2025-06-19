@@ -32,6 +32,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchProfile} from '../../redux/slices/profileSlice';
 import AnimatedCartModal from './components/AnimatedCartModal';
+import AnimatedCartButton from '../../components/AnimatedCartButton';
 
 const Home = () => {
   const inset = useSafeAreaInsets();
@@ -507,32 +508,11 @@ const Home = () => {
       </ScrollView>
 
       {cartData?.length > 0 && (
-        <Pressable
-          style={{
-            position: 'absolute',
-            bottom: 20,
-            alignSelf: 'center',
-            width: '60%',
-            paddingVertical: 12,
-            backgroundColor: Colors.blue,
-            borderRadius: 25,
-            shadowColor: '#000',
-            shadowOffset: {width: 0, height: 2},
-            shadowOpacity: 0.2,
-            shadowRadius: 3,
-            elevation: 5,
-          }}
-          onPress={() => setIsCartVisible(true)}>
-          <Text
-            style={{
-              color: Colors.white,
-              textAlign: 'center',
-              fontSize: 16,
-              fontWeight: 'bold',
-            }}>
-            View Cart ({cartData.length} items)
-          </Text>
-        </Pressable>
+       <AnimatedCartButton
+          count={cartData.length}
+          onPress={() => setIsCartVisible(true)}
+          label="View Cart"
+        />
       )}
 
       {cartData?.length > 0 && (

@@ -33,6 +33,7 @@ import axios from 'axios';
 import {showWarning} from '../../helper/Toastify';
 import Geolocation from '@react-native-community/geolocation';
 import AnimatedCartModal from '../Home/components/AnimatedCartModal';
+import AnimatedCartButton from '../../components/AnimatedCartButton';
 
 const Search = () => {
   const inset = useSafeAreaInsets();
@@ -186,7 +187,7 @@ const Search = () => {
     }
   }, [allMarkers]);
 
-   const handleRemoveItem = async itemId => {
+  const handleRemoveItem = async itemId => {
     const info = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(info)?.token;
     const url = Constants.baseUrl8 + Constants.deleteCart;
@@ -341,33 +342,12 @@ const Search = () => {
         snapPoints2={snapPoints2}
       />
 
-       {cartData?.length > 0 && (
-        <Pressable
-          style={{
-            position: 'absolute',
-            bottom: 20,
-            alignSelf: 'center',
-            width: '60%',
-            paddingVertical: 12,
-            backgroundColor: Colors.blue,
-            borderRadius: 25,
-            shadowColor: '#000',
-            shadowOffset: {width: 0, height: 2},
-            shadowOpacity: 0.2,
-            shadowRadius: 3,
-            elevation: 5,
-          }}
-          onPress={() => setIsCartVisible(true)}>
-          <Text
-            style={{
-              color: Colors.white,
-              textAlign: 'center',
-              fontSize: 16,
-              fontWeight: 'bold',
-            }}>
-            View Cart ({cartData.length} items)
-          </Text>
-        </Pressable>
+      {cartData?.length > 0 && (
+        <AnimatedCartButton
+          count={cartData.length}
+          onPress={() => setIsCartVisible(true)}
+          label="View Cart"
+        />
       )}
 
       {cartData?.length > 0 && (

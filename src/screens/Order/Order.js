@@ -22,6 +22,7 @@ import {showError, showSucess, showWarning} from '../../helper/Toastify';
 import CancelOrderModal from '../../Modal/CancelOrderModal';
 import RNFS from 'react-native-fs';
 import AnimatedCartModal from '../Home/components/AnimatedCartModal';
+import AnimatedCartButton from '../../components/AnimatedCartButton';
 
 const Order = () => {
   const navigation = useNavigation();
@@ -59,7 +60,24 @@ const Order = () => {
 
       if (res?.status === 200) {
         const ordersData = res?.data?.response?.data || [];
-        setOrders(ordersData);
+
+        // Filter orders based on type
+        let filteredOrders = [];
+        if (type === 'Current Order') {
+          // Show orders that are NOT canceled
+          filteredOrders = ordersData.filter(
+            order =>
+              order?.status !== 'Canceled' && order?.status !== 'canceled',
+          );
+        } else if (type === 'Order History') {
+          // Show only canceled orders
+          filteredOrders = ordersData.filter(
+            order =>
+              order?.status === 'Canceled' || order?.status === 'canceled',
+          );
+        }
+
+        setOrders(filteredOrders);
       }
     } catch (error) {
       if (error.response) {
@@ -227,7 +245,7 @@ const Order = () => {
       </View>
 
       <FlatList
-        contentContainerStyle={{padding: 20, gap: 10}}
+        contentContainerStyle={{paddingVertical: 20}}
         data={orders}
         onRefresh={getOrders}
         showsVerticalScrollIndicator={false}
@@ -248,198 +266,157 @@ const Order = () => {
           ) : null
         }
         renderItem={({item}) => {
+          const getStatusColor = status => {
+            switch (status?.toLowerCase()) {
+              case 'canceled':
+              case 'cancelled':
+                return Colors.red;
+              case 'rejected':
+                return Colors.red;
+              case 'confirmed':
+                return Colors.green;
+              case 'delivered':
+                return Colors.blue;
+              default:
+                return Colors.yellow;
+            }
+          };
+
+          const getStatusText = status => {
+            switch (status?.toLowerCase()) {
+              case 'canceled':
+              case 'cancelled':
+                return 'Canceled';
+              case 'rejected':
+                return 'Rejected';
+              case 'confirmed':
+                return 'Confirmed';
+              case 'delivered':
+                return 'Delivered';
+              default:
+                return status || 'Processing';
+            }
+          };
+
           return (
             <Pressable
               style={styles.cardContainer}
               onPress={() => navigation.navigate('OrderDetail', {item: item})}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}>
-                <Text
-                  style={{
-                    fontWeight: 'bold',
-                    color: Colors.black,
-                    marginBottom: 10,
-                    fontSize: 13,
-                  }}>
-                  Order No: {item.order_number}
-                </Text>
-                {item?.status === 'Rejected' ||
-                item?.status === 'Canceled' ||
-                item?.status === 'Confirmed' ? (
-                  <Text
-                    style={{
-                      padding: 5,
-                      backgroundColor: Colors.red2,
-                      borderRadius: 40,
-                      paddingHorizontal: 20,
-                      fontSize: 14,
-                      color: Colors.white,
-                      fontWeight: '600',
-                    }}>
-                    {item?.status}
-                  </Text>
-                ) : type === 'Order History' ? (
-                  <Text
-                    style={{
-                      padding: 8,
-                      backgroundColor: Colors.blue,
-                      borderRadius: 40,
-                      paddingHorizontal: 20,
-                      fontSize: 14,
-                      color: Colors.white,
-                      fontWeight: '600',
-                    }}>
-                    {item?.status}
-                  </Text>
-                ) : (
-                  <Text
-                    style={{
-                      padding: 8,
-                      backgroundColor: Colors.green2,
-                      borderRadius: 40,
-                      paddingHorizontal: 20,
-                      fontSize: 14,
-                      color: Colors.white,
-                      fontWeight: '600',
-                    }}
-                    onPress={() => {
-                      setShowDeleteModal(true);
-                      setSelectedOrder(item);
-                    }}>
-                    Cancel Order
-                  </Text>
-                )}
+              {/* Header with gradient background */}
+              <View style={styles.cardHeader}>
+                <View style={styles.headerGradient}>
+                  <View style={styles.orderInfo}>
+                    <Text style={styles.orderNumber}>
+                      Order #{item.order_number}
+                    </Text>
+                    <Text style={styles.orderDate}>
+                      {item.created_at
+                        ? new Date(item.created_at).toLocaleDateString(
+                            'en-US',
+                            {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                            },
+                          )
+                        : 'Date not available'}
+                    </Text>
+                  </View>
+                </View>
               </View>
-              {item &&
-                item?.order_items &&
-                item?.order_items.map((orderItem, index) => {
+              <View
+                style={[
+                  styles.statusBadge,
+                  {backgroundColor: getStatusColor(item.status)},
+                ]}>
+                <Text style={styles.statusText}>
+                  {getStatusText(item.status)}
+                </Text>
+              </View>
+
+              {/* Products Section */}
+              <View style={styles.productsSection}>
+                <Text style={styles.sectionTitle}>Order Items</Text>
+                {item?.order_items?.map((orderItem, index) => {
                   const imageUri = orderItem?.product?.images?.[0]?.image;
                   return (
-                    <View key={index} style={styles.topSection}>
-                      <Image
-                        source={{uri: imageUri}}
-                        style={styles.productImage}
-                        resizeMode="contain"
-                      />
-                      <View style={styles.middleSection}>
-                        <Text style={styles.productName} numberOfLines={1}>
+                    <View key={index} style={styles.productItem}>
+                      <View style={styles.productImageContainer}>
+                        <Image
+                          source={{uri: imageUri}}
+                          style={styles.productImage}
+                          resizeMode="cover"
+                        />
+                        <View style={styles.quantityBadge}>
+                          <Text style={styles.quantityText}>
+                            {orderItem.quantity}
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={styles.productDetails}>
+                        <Text style={styles.productName} numberOfLines={2}>
                           {orderItem.product_name}
                         </Text>
-                        {/* <Text style={styles.productSize}>
-                          Size: {orderItem.size}
-                        </Text> */}
-                        <Text style={styles.productSize}>
-                          Qty: {orderItem.quantity}
+                        <Text style={styles.productPrice}>
+                          £{orderItem.price}
                         </Text>
-                      </View>
-                      <View style={styles.rightSection}>
-                        <Text style={styles.priceText}>£{orderItem.price}</Text>
                       </View>
                     </View>
                   );
                 })}
-              <View
-                style={{
-                  height: 1,
-                  width: '100%',
-                  backgroundColor: Colors.gray11,
-                }}
-              />
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginVertical: 10,
-                }}>
-                {item?.status === 'Rejected' ||
-                  (item?.status === 'Canceled' && (
-                    <Text
-                      style={{
-                        fontWeight: 'bold',
-                        fontSize: 16,
-                        color: Colors.black,
-                      }}>
-                      Refund Status:{' '}
-                      <Text style={{color: Colors.red2}}>
-                        {item?.refund_status}
-                      </Text>
-                    </Text>
-                  ))}
+              </View>
 
-                {/* Right: Total and Amount */}
-                <View style={{flexDirection: 'row', gap: 8}}>
-                  <Text
-                    style={{
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                      color: Colors.black,
-                    }}>
-                    Total:
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                      color: Colors.black,
-                    }}>
-                    ₹{item?.amount}
-                  </Text>
+              {/* Total Section */}
+              <View style={styles.totalSection}>
+                <View style={styles.totalRow}>
+                  <Text style={styles.totalLabel}>Total Amount</Text>
+                  <Text style={styles.totalAmount}>₹{item?.amount}</Text>
                 </View>
               </View>
+
+              {/* Refund Status for Canceled/Rejected Orders */}
+              {(item?.status === 'Rejected' || item?.status === 'Canceled') && (
+                <View style={styles.refundSection}>
+                  <View style={styles.refundBadge}>
+                    <Text style={styles.refundLabel}>
+                      Refund Status:
+                      <Text style={styles.refundStatus}>
+                        {' '}
+                        {item?.refund_status || 'Pending'}
+                      </Text>
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              {/* Action Buttons for Active Orders */}
               {item?.status !== 'Rejected' &&
-                type !== 'Order History' &&
-                item?.status !== 'Canceled' && (
-                  <>
-                    <View
-                      style={{
-                        height: 1,
-                        width: '100%',
-                        backgroundColor: Colors.gray11,
-                      }}
-                    />
-                    <View
-                      style={{
-                        padding: 10,
-                        flexDirection: 'row',
-                        gap: 10,
-                        justifyContent: 'center',
-                      }}>
-                      <Text
-                        style={{
-                          fontWeight: 'bold',
-                          fontSize: 16,
-                          color: Colors.red,
-                          textDecorationLine: 'underline',
-                        }}
+                item?.status !== 'Canceled' &&
+                type === 'Current Order' && (
+                  <View style={styles.actionButtonsContainer}>
+                    <View style={styles.actionButtons}>
+                      <Pressable
+                        style={[styles.actionButton, styles.trackButton]}
                         onPress={() =>
                           navigation.navigate('TrackOrder', {item: item})
                         }>
-                        Track Order
-                      </Text>
-                      <View
-                        style={{
-                          height: 20,
-                          width: 2,
-                          backgroundColor: Colors.gray4,
-                        }}
-                      />
-                      <Text
-                        style={{
-                          fontWeight: 'bold',
-                          fontSize: 16,
-                          color: Colors.red,
-                          textDecorationLine: 'underline',
-                        }}
+                        <Text style={styles.actionButtonText}>Track Order</Text>
+                      </Pressable>
+                      <Pressable
+                        style={[styles.actionButton, styles.invoiceButton]}
                         onPress={() => getInvoice(item)}>
-                        Get Invoice
-                      </Text>
+                        <Text style={styles.actionButtonText}>Get Invoice</Text>
+                      </Pressable>
                     </View>
-                  </>
+                    <Pressable
+                      style={[styles.actionButton, styles.cancelButton]}
+                      onPress={() => {
+                        setShowDeleteModal(true);
+                        setSelectedOrder(item);
+                      }}>
+                      <Text style={styles.cancelButtonText}>Cancel Order</Text>
+                    </Pressable>
+                  </View>
                 )}
             </Pressable>
           );
@@ -453,32 +430,11 @@ const Order = () => {
       />
 
       {cartData?.length > 0 && (
-        <Pressable
-          style={{
-            position: 'absolute',
-            bottom: 20,
-            alignSelf: 'center',
-            width: '60%',
-            paddingVertical: 12,
-            backgroundColor: Colors.blue,
-            borderRadius: 25,
-            shadowColor: '#000',
-            shadowOffset: {width: 0, height: 2},
-            shadowOpacity: 0.2,
-            shadowRadius: 3,
-            elevation: 5,
-          }}
-          onPress={() => setIsCartVisible(true)}>
-          <Text
-            style={{
-              color: Colors.white,
-              textAlign: 'center',
-              fontSize: 16,
-              fontWeight: 'bold',
-            }}>
-            View Cart ({cartData.length} items)
-          </Text>
-        </Pressable>
+       <AnimatedCartButton
+          count={cartData.length}
+          onPress={() => setIsCartVisible(true)}
+          label="View Cart"
+        />
       )}
 
       {cartData?.length > 0 && (
@@ -500,15 +456,16 @@ export default Order;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.gray6,
   },
   backNavigationExtraStyle: {
     borderBottomWidth: 0,
   },
   switchContainer: {
     padding: 20,
-    borderBottomWidth: 2,
-    borderColor: Colors.gray2,
+    borderBottomWidth: 1,
+    borderColor: Colors.gray5,
+    backgroundColor: Colors.white,
   },
   multiSwitchRoot: {
     borderRadius: 50,
@@ -519,7 +476,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray6,
     borderRadius: 50,
     borderWidth: 2,
-    borderColor: '#E6EBF1',
+    borderColor: Colors.gray5,
   },
   activeState: {
     backgroundColor: Colors.blue,
@@ -540,63 +497,214 @@ const styles = StyleSheet.create({
 
   cardContainer: {
     backgroundColor: Colors.white,
-    borderRadius: 15,
-    padding: 15,
-    elevation: 3,
+    borderRadius: 16,
+    marginHorizontal: 20,
+    marginVertical: 8,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowOffset: {width: 0, height: 6},
+    shadowRadius: 12,
+    borderWidth: 0,
+    overflow: 'hidden',
+  },
+  cardHeader: {
+    backgroundColor: Colors.gray6,
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray5,
+  },
+  headerGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  orderInfo: {
+    flexDirection: 'column',
+  },
+  orderNumber: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: Colors.primary,
+    marginBottom: 4,
+  },
+  orderDate: {
+    fontSize: 13,
+    color: Colors.gray4,
+    fontWeight: '500',
+  },
+  statusBadge: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 25,
+    minWidth: 90,
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowOffset: {width: 0, height: 2},
     shadowRadius: 4,
+    elevation: 3,
+    margin: 10,
+    alignSelf: 'flex-end',
   },
-  topSection: {
+  statusText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: Colors.white,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  productsSection: {
+    padding: 16,
+    paddingVertical: 0,
+    backgroundColor: Colors.white,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: Colors.primary,
+    marginBottom: 12,
+  },
+  productItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 15,
-    marginBottom: 10,
+    marginBottom: 12,
+    padding: 12,
+    backgroundColor: Colors.gray6,
+    borderRadius: 12,
+  },
+  productImageContainer: {
+    position: 'relative',
+    marginRight: 12,
   },
   productImage: {
-    width: 60,
-    height: 90,
-    borderRadius: 8,
-    backgroundColor: '#f2f2f2',
+    width: 80,
+    height: 100,
+    borderRadius: 10,
+    backgroundColor: Colors.gray5,
   },
-  middleSection: {
+  quantityBadge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: Colors.blue,
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: {width: 0, height: 2},
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  quantityText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: Colors.white,
+  },
+  productDetails: {
     flex: 1,
     justifyContent: 'center',
-    gap: 4,
   },
   productName: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
-    color: Colors.black,
+    color: Colors.primary,
+    marginBottom: 6,
+    lineHeight: 20,
   },
-  productSize: {
-    fontSize: 13,
-    color: '#555',
+  productPrice: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: Colors.red,
   },
-  rightSection: {
-    alignItems: 'flex-end',
-    gap: 5,
+  totalSection: {
+    padding: 16,
+    backgroundColor: Colors.gray6,
+    borderTopWidth: 1,
+    borderTopColor: Colors.gray5,
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  totalLabel: {
+    fontWeight: '600',
+    fontSize: 16,
+    color: Colors.primary,
+  },
+  totalAmount: {
+    fontWeight: 'bold',
+    fontSize: 20,
+    color: Colors.blue,
+  },
+  refundSection: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    backgroundColor: Colors.gray6,
+  },
+  refundBadge: {
+    padding: 10,
+    paddingHorizontal: 16,
+    borderRadius: 25,
+    backgroundColor: Colors.lightPink,
+    borderWidth: 1,
+    borderColor: Colors.red,
+    alignItems: 'center',
+  },
+  refundLabel: {
+    fontWeight: '600',
+    fontSize: 14,
+    color: Colors.red,
+  },
+  refundStatus: {
+    color: Colors.red,
+    fontWeight: 'bold',
+  },
+  actionButtonsContainer: {
+    padding: 16,
+    backgroundColor: Colors.white,
+    borderTopWidth: 1,
+    borderTopColor: Colors.gray5,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 12,
+  },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: {width: 0, height: 2},
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  actionButtonText: {
+    fontWeight: '600',
+    fontSize: 14,
+    color: Colors.white,
+  },
+  trackButton: {
+    backgroundColor: Colors.blue,
+  },
+  invoiceButton: {
+    backgroundColor: Colors.green,
   },
   cancelButton: {
-    backgroundColor: Colors.blue,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    backgroundColor: Colors.red,
+    width: '100%',
   },
   cancelButtonText: {
+    fontWeight: '600',
+    fontSize: 14,
     color: Colors.white,
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  refundText: {
-    color: Colors.blue,
-    fontSize: 12,
-    textDecorationLine: 'underline',
-  },
-  priceText: {
-    color: '#A62222',
-    fontWeight: '700',
-    fontSize: 16,
   },
 });
