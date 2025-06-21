@@ -174,7 +174,7 @@ const Payment = props => {
           </View>
           <View style={styles.orderItemsContainer}>
             {cartData?.map((item, index) => {
-              console.log(item,"vishal")
+             
               const product = item.product;
               const actualPrice = product.actual_price || product.price;
               const discountedPrice = product.price;
