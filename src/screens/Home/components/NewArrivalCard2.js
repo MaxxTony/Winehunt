@@ -6,54 +6,162 @@ import {
   StyleSheet,
   Text,
   View,
+  Animated,
+  Dimensions,
 } from 'react-native';
-import React from 'react';
+import React, {useRef, useEffect, useState} from 'react';
 import {Colors, Fonts} from '../../../constant/Styles';
 
-const NewArrivalCard2 = ({onPress, item}) => {
-  console.log(item);
+const {width} = Dimensions.get('window');
+
+const NewArrivalCard2 = ({onPress, item, onWishlistPress}) => {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const [isWishlisted, setIsWishlisted] = useState(item?.is_wishlist || false);
+
+  useEffect(() => {
+    // Entrance animation
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleWishlistPress = () => {
+    setIsWishlisted(!isWishlisted);
+    if (onWishlistPress) {
+      onWishlistPress(item?.id, !isWishlisted);
+    }
+  };
+
+  const calculateDiscountPercentage = () => {
+    if (item?.has_discount && item?.actual_price && item?.price) {
+      return Math.round(((item.actual_price - item.price) / item.actual_price) * 100);
+    }
+    return 0;
+  };
+
   return (
-    <View style={styles.cardContainer}>
-      <Image
-        source={require('../images/curve.png')}
-        style={styles.backgroundImage}
-      />
-      <View style={styles.contentRow}>
-        <Image
-          source={
-            item?.product_images[0]?.image
-              ? {uri: item?.product_images[0]?.image}
-              : require('../images/curve.png')
-          }
-          style={styles.bottleImage}
-        />
+    <Animated.View
+      style={[
+        styles.cardContainer,
+        {
+          opacity: fadeAnim,
+          transform: [
+            {translateY: slideAnim},
+            {scale: scaleAnim},
+          ],
+        },
+      ]}>
+      {/* Background gradient effect */}
+      <View style={styles.backgroundGradient} />
+      
+      {/* Discount badge */}
+      {item?.has_discount && (
+        <View style={styles.discountBadge}>
+          <Text style={styles.discountText}>
+            -{calculateDiscountPercentage()}%
+          </Text>
+        </View>
+      )}
+
+   
+
+      <View style={styles.contentContainer}>
+        {/* Wine bottle image */}
+        <View style={styles.imageContainer}>
+          <Image
+            source={
+              item?.product_images?.[0]?.image
+                ? {uri: item.product_images[0].image}
+                : require('../images/bottle.png')
+            }
+            style={styles.bottleImage}
+            resizeMode="contain"
+          />
+          {/* Image overlay for better text readability */}
+          <View style={styles.imageOverlay} />
+        </View>
+
+        {/* Content section */}
         <View style={styles.textContainer}>
-          <Text style={styles.title} numberOfLines={1} allowFontScaling={false}>
-            {item?.name}
+          {/* Wine name and type */}
+          <View style={styles.titleSection}>
+            <Text style={styles.wineName} numberOfLines={1} allowFontScaling={false}>
+              {item?.name || 'Wine Name'}
+            </Text>
+           
+          </View>
+
+          {/* Shop name */}
+          <Text style={styles.shopName} numberOfLines={1} allowFontScaling={false}>
+            {item?.user?.shop_name || 'Wine Shop'}
           </Text>
-          <Text style={styles.subtitle} allowFontScaling={false}>
-            ({item?.user?.shop_name ? item?.user?.shop_name : 'Restaurant'})
+
+          {/* Description */}
+          <Text style={styles.description} numberOfLines={2} allowFontScaling={false}>
+            {item?.product_desc || 'Delicious wine description'}
           </Text>
-          <Text
-            style={styles.description}
-            numberOfLines={1}
-            allowFontScaling={false}>
-            {item?.name}{' '}
-          </Text>
-          <Text style={styles.highlightedText} allowFontScaling={false}>
-            ({item?.title})
-          </Text>
-          <Text style={styles.price} allowFontScaling={false}>
-             £  {item?.price}
-          </Text>
-          <Pressable style={styles.button} onPress={onPress}>
+
+          {/* Price section */}
+          <View style={styles.priceSection}>
+            <View style={styles.priceContainer}>
+              <Text style={styles.currentPrice} allowFontScaling={false}>
+                £{item?.price?.toFixed(2) || '0.00'}
+              </Text>
+              {item?.has_discount && (
+                <Text style={styles.originalPrice} allowFontScaling={false}>
+                  £{item?.actual_price?.toFixed(2) || '0.00'}
+                </Text>
+              )}
+            </View>
+            
+            {/* Offer badge */}
+            {item?.has_offer && (
+              <View style={styles.offerBadge}>
+                <Text style={styles.offerText}>
+                  {item?.offer_discount}% OFF
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Action button */}
+          <Pressable
+            style={styles.viewMoreButton}
+            onPress={onPress}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}>
             <Text style={styles.buttonText} allowFontScaling={false}>
-              View More
+              View Details
             </Text>
           </Pressable>
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 
@@ -61,84 +169,191 @@ export default NewArrivalCard2;
 
 const styles = StyleSheet.create({
   cardContainer: {
-    padding: Platform.OS == 'android' ? 10 : 15,
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    marginHorizontal: 8,
+    marginVertical: 6,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 4,
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    backgroundColor: Colors.white,
-    elevation: 2,
-    borderRadius: 10,
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: '#EFEFEF',
-    gap: 10,
-    minHeight: 130,
-    flex: 0.5,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    overflow: 'hidden',
+    minHeight: 180,
+    position: 'relative',
   },
-  backgroundImage: {
-    height: 80,
-    width: 50,
+  backgroundGradient: {
     position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: Colors.lightPink,
+    opacity: 0.1,
   },
-  contentRow: {
-    flexDirection: 'row',
+  discountBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    backgroundColor: Colors.red,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    zIndex: 10,
+  },
+  discountText: {
+    color: Colors.white,
+    fontSize: 10,
+    fontFamily: Fonts.InterBold,
+    fontWeight: '700',
+  },
+  wishlistButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    zIndex: 10,
+  },
+  heartIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.white,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  heartIconActive: {
+    backgroundColor: Colors.red,
+  },
+  heartText: {
+    fontSize: 16,
+    color: Colors.gray8,
+  },
+  heartTextActive: {
+    color: Colors.white,
+  },
+  contentContainer: {
+    flexDirection: 'row',
+    padding: 16,
+    gap: 16,
+  },
+  imageContainer: {
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   bottleImage: {
-    width: 30,
-    height: 120,
+    width: 60,
+    height: 140,
+    borderRadius: 8,
+  },
+  imageOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 40,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderRadius: 8,
   },
   textContainer: {
-    gap: 5,
+    flex: 1,
+    gap: 8,
   },
-  title: {
-    fontSize: 10,
+  titleSection: {
+    gap: 2,
+  },
+  wineName: {
+    fontSize: 16,
     color: Colors.black,
-    fontFamily: Fonts.InterRegular,
-    fontWeight: '600',
-    width: 100,
+    fontFamily: Fonts.InterBold,
+    fontWeight: '700',
+    lineHeight: 20,
   },
-  subtitle: {
+  wineType: {
+    fontSize: 12,
+    color: Colors.red,
+    fontFamily: Fonts.InterMedium,
+    fontWeight: '600',
+  },
+  shopName: {
     fontSize: 11,
     color: Colors.gray8,
     fontFamily: Fonts.InterRegular,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   description: {
-    fontSize: 10,
-    color: Colors.black,
+    fontSize: 11,
+    color: Colors.gray7,
     fontFamily: Fonts.InterRegular,
-    fontWeight: '600',
-    width: 100,
+    lineHeight: 16,
+    flex: 1,
   },
-  highlightedText: {
-    color: Colors.red,
-    fontSize: 10,
+  priceSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    gap:10
   },
-  price: {
-    fontSize: 14,
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  currentPrice: {
+    fontSize: 18,
     color: Colors.black,
     fontFamily: Fonts.InterBold,
-    fontWeight: '600',
+    fontWeight: '700',
   },
-  button: {
-    padding: 5,
+  originalPrice: {
+    fontSize: 14,
+    color: Colors.gray8,
+    fontFamily: Fonts.InterRegular,
+    textDecorationLine: 'line-through',
+  },
+  offerBadge: {
+    backgroundColor: Colors.lightGreen,
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  offerText: {
+    fontSize: 9,
+    color: Colors.green,
+    fontFamily: Fonts.InterBold,
+    fontWeight: '700',
+  },
+  viewMoreButton: {
     backgroundColor: Colors.red,
-    alignItems: 'center',
     borderRadius: 20,
-    borderBottomLeftRadius: 0,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     alignSelf: 'flex-start',
-    paddingHorizontal: 15,
+    marginTop: 4,
+    shadowColor: Colors.red,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
   buttonText: {
-    fontSize: 11,
+    fontSize: 12,
     color: Colors.white,
-    fontFamily: Fonts.InterRegular,
-    fontWeight: '500',
+    fontFamily: Fonts.InterBold,
+    fontWeight: '600',
   },
 });

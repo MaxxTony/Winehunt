@@ -19,9 +19,7 @@ const NewArrival = props => {
       />
       <FlatList
         data={data}
-        numColumns={2}
         showsVerticalScrollIndicator={false}
-        columnWrapperStyle={{columnGap: 10}}
         contentContainerStyle={{
           padding: 20,
           gap: 10,

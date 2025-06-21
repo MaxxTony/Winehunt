@@ -77,10 +77,10 @@ const WineList = props => {
       ) : (
         <FlatList
           data={wineList}
-          numColumns={2}
+      
           keyExtractor={item => item?.id?.toString()}
           showsVerticalScrollIndicator={false}
-          columnWrapperStyle={{columnGap: 10}}
+       
           contentContainerStyle={{
             padding: 20,
             gap: 10,

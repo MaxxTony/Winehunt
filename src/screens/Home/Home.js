@@ -3,14 +3,16 @@ import {
   Dimensions,
   FlatList,
   Image,
+  ImageBackground,
   Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   View,
+  BackHandler,
 } from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState, useMemo, useRef} from 'react';
 import {Colors, Fonts} from '../../constant/Styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Carousel from 'react-native-reanimated-carousel';
@@ -25,7 +27,7 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import Constants from '../../helper/Constant';
-import {showWarning} from '../../helper/Toastify';
+import {showWarning, showSuccess} from '../../helper/Toastify';
 import axios from 'axios';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -33,48 +35,82 @@ import {useDispatch, useSelector} from 'react-redux';
 import {fetchProfile} from '../../redux/slices/profileSlice';
 import AnimatedCartModal from './components/AnimatedCartModal';
 import AnimatedCartButton from '../../components/AnimatedCartButton';
+const API_TIMEOUT = 10000;
+
 
 const Home = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
   const isFocused = useIsFocused();
-
+  const scrollViewRef = useRef(null);
   const width = Dimensions.get('window').width;
   const [type, setType] = useState('Wine types');
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [homeData, setHomeData] = useState([]);
+  const [homeData, setHomeData] = useState({});
   const dispatch = useDispatch();
   const {userData} = useSelector(state => state.profile);
   const [cartData, setCartData] = useState([]);
   const [isCartVisible, setIsCartVisible] = useState(false);
   const [offers, setOffers] = useState([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState(null);
+
+ 
+  const userFullName = useMemo(() => {
+    if (!userData) return '';
+    return `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+  }, [userData]);
+
+  const userAddress = useMemo(() => {
+    if (!userData?.address) return 'Default Address';
+    return userData.address.length > 25 
+      ? `${userData.address.slice(0, 25)}...` 
+      : userData.address;
+  }, [userData?.address]);
+
+  const quizProgress = useMemo(() => {
+    const milestone = userData?.milestone || 0;
+    return Math.min((milestone / 40) * 100, 100);
+  }, [userData?.milestone]);
+
+  const milestoneProgress = useMemo(() => {
+    const milestone = userData?.milestone || 0;
+    return Math.min((milestone / 10) * 100, 100);
+  }, [userData?.milestone]);
+
+  
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (isCartVisible) {
+        setIsCartVisible(false);
+        return true;
+      }
+      return false;
+    });
+
+    return () => backHandler.remove();
+  }, [isCartVisible]);
 
   useEffect(() => {
     if (isFocused) {
-      getCartData();
-      getHomePageData();
-      getOffers();
+      loadInitialData();
     }
   }, [isFocused]);
 
-  const getCartData = async () => {
-    const info = await AsyncStorage.getItem('userDetail');
-    const token = JSON.parse(info)?.token;
-    const url = Constants.baseUrl8 + Constants.getCart;
+  const loadInitialData = useCallback(async () => {
     try {
-      const res = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      setCartData(res?.data?.cart);
+      setError(null);
+      await Promise.all([
+        getCartData(),
+        getHomePageData(),
+        getOffers(),
+      ]);
     } catch (error) {
-      showWarning(error.response?.data?.message || 'Error fetching cart');
+      console.error('Initial data loading error:', error);
+      setError(error);
     }
-  };
-
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -89,31 +125,70 @@ const Home = () => {
     setCategories(selectedCategory?.categories || []);
   }, [type, homeData]);
 
+  const getCartData = async () => {
+    try {
+      const info = await AsyncStorage.getItem('userDetail');
+      const token = JSON.parse(info)?.token;
+      
+      if (!token) {
+        console.warn('No token found for cart request');
+        return;
+      }
+
+      const url = Constants.baseUrl8 + Constants.getCart;
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        timeout: API_TIMEOUT,
+      });
+
+      if (response?.data?.cart) {
+        setCartData(response.data.cart);
+      }
+    } catch (error) {
+      console.error('Cart fetch error:', error);
+      if (error.response?.status !== 401) {
+        showWarning(error.response?.data?.message || 'Error fetching cart');
+      }
+    }
+  };
+
   const getHomePageData = async () => {
     const data = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(data)?.token;
+    
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
     const url = Constants.baseUrl2 + Constants.home;
     setLoading(true);
+    setError(null);
+    
     try {
       const res = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        timeout: API_TIMEOUT,
       });
       if (res?.status == 200) {
         setHomeData(res?.data);
-        const firstType = res?.data?.categories?.[0]?.name || '';
+        const firstType = res?.data?.categories?.[0]?.name || 'Wine types';
         setType(firstType);
       }
     } catch (error) {
+      console.error('Home data fetch error:', error);
+      setError(error);
       if (error.response) {
-        console.log('Server Error:', error.response.data);
-        showWarning(error.response.data?.message);
+        showWarning(error.response.data?.message || 'Error loading home data');
       } else if (error.request) {
-        console.log('No Response:', error.request);
+        showWarning('Network error. Please check your connection.');
       } else {
-        console.log('Request Error:', error.message);
+        showWarning('An unexpected error occurred');
       }
     } finally {
       setLoading(false);
@@ -121,45 +196,116 @@ const Home = () => {
   };
 
   const handleRemoveItem = async itemId => {
-    const info = await AsyncStorage.getItem('userDetail');
-    const token = JSON.parse(info)?.token;
-    const url = Constants.baseUrl8 + Constants.deleteCart;
-    const data = {
-      id: itemId,
-    };
     try {
+      const info = await AsyncStorage.getItem('userDetail');
+      const token = JSON.parse(info)?.token;
+      
+      if (!token) {
+        showWarning('Authentication required');
+        return;
+      }
+
+      const url = Constants.baseUrl8 + Constants.deleteCart;
+      const data = {
+        id: itemId,
+      };
       const res = await axios.post(url, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        timeout: API_TIMEOUT,
       });
       if (res?.data?.status == 200) {
-        // setCartData(prev => prev.filter(item => item.id !== itemId));
+        showSuccess('Item removed from cart');
         getCartData();
       }
     } catch (error) {
-      console.log(error);
+      console.error('Remove cart item error:', error);
       showWarning(error.response?.data?.message || 'Error updating cart');
     }
   };
 
   const getOffers = async () => {
-    const info = await AsyncStorage.getItem('userDetail');
-    const token = JSON.parse(info)?.token;
-    const url = Constants.baseUrl10 + Constants.latestOffers;
     try {
+      const info = await AsyncStorage.getItem('userDetail');
+      const token = JSON.parse(info)?.token;
+      
+      if (!token) return;
+
+      const url = Constants.baseUrl10 + Constants.latestOffers;
       const res = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        timeout: API_TIMEOUT,
       });
       setOffers(res?.data?.data || []);
     } catch (error) {
-      showWarning(error.response?.data?.message || 'Error fetching offers');
+      console.error('Offers fetch error:', error);
+      if (error.response?.status !== 401) {
+        showWarning(error.response?.data?.message || 'Error fetching offers');
+      }
     }
   };
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await loadInitialData();
+    } catch (error) {
+      console.error('Refresh error:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [loadInitialData]);
+
+  const handleConvertQuizPoints = useCallback(async () => {
+    if ((userData?.milestone || 0) < 40) {
+      showWarning('You need 40 quiz points to convert to milestone');
+      return;
+    }
+
+    Alert.alert(
+      'Convert Quiz Points',
+      'Are you sure you want to convert 40 quiz points to 1 milestone?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Convert', 
+          onPress: () => {
+            // TODO: Implement conversion API call
+            showSuccess('Quiz points converted successfully!');
+          }
+        }
+      ]
+    );
+  }, [userData?.milestone]);
+
+  const handleRewardSelection = useCallback((rewardType) => {
+    Alert.alert(
+      'Reward Selected',
+      `You've selected: ${rewardType}`,
+      [
+        { text: 'OK', onPress: () => navigation.navigate('ScanCode') }
+      ]
+    );
+  }, [navigation]);
+
+
+  if (error && !loading) {
+    return (
+      <View style={[styles.container, styles.centerContent, {paddingTop: inset.top}]}>
+        <Text style={styles.errorText}>Something went wrong</Text>
+        <Pressable style={styles.retryButton} onPress={loadInitialData}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
@@ -176,7 +322,7 @@ const Home = () => {
         </Pressable>
         <View style={styles.userInfo}>
           <Text style={styles.userName} allowFontScaling={false}>
-            {userData?.first_name} {userData?.last_name}
+            {userFullName || 'Guest User'}
           </Text>
           <View style={styles.userLocationContainer}>
             <Image
@@ -188,27 +334,20 @@ const Home = () => {
               style={styles.userLocationText}
               numberOfLines={1}
               allowFontScaling={false}>
-              {userData?.address
-                ? userData.address.length > 20
-                  ? userData.address.slice(0, 25).concat('...')
-                  : userData.address
-                : 'Default Address'}
+              {userAddress}
             </Text>
           </View>
         </View>
         <View style={styles.actionIcons}>
           <Pressable onPress={() => navigation.navigate('ScanCode')}>
-            {userData?.milestone == 40 ? (
-              <Image
-                source={require('./images/scanner.png')}
-                style={styles.icon}
-              />
-            ) : (
-              <Image
-                source={require('./images/scanner2.png')}
-                style={styles.icon}
-              />
-            )}
+            <Image
+              source={
+                userData?.milestone >= 40
+                  ? require('./images/scanner.png')
+                  : require('./images/scanner2.png')
+              }
+              style={styles.icon}
+            />
           </Pressable>
           <Pressable onPress={() => navigation.navigate('Notifications')}>
             <Image
@@ -219,12 +358,13 @@ const Home = () => {
         </View>
       </View>
       <ScrollView
+        ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
-            refreshing={loading}
-            onRefresh={() => getHomePageData()}
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
             colors={['#ff6347']}
             tintColor={Colors.red}
           />
@@ -247,31 +387,57 @@ const Home = () => {
                 data={offers}
                 scrollAnimationDuration={1000}
                 pagingEnabled={true}
-                renderItem={({item}) => (
-                  <Pressable
-                    style={{position: 'relative'}}
-                    onPress={() =>
-                      navigation.navigate('WineDetail', {
-                        item: item?.product_id,
-                      })
-                    }>
-                    <Image
-                      source={{uri: item.image}}
-                      style={styles.carouselImage}
-                    />
-                    <Text
-                      style={{
-                        color: '#fff',
-                        fontSize: 20,
-                        position: 'absolute',
-                        right: 10,
-                        bottom: 20,
-                        fontWeight: 'bold',
-                      }}>
-                      {item?.offer_desc}
-                    </Text>
-                  </Pressable>
-                )}
+                renderItem={({item}) => {
+                  const toDate = new Date(item.to_date);
+                  const formattedToDate = !isNaN(toDate)
+                    ? `${toDate.getDate().toString().padStart(2, '0')}/${(
+                        toDate.getMonth() + 1
+                      )
+                        .toString()
+                        .padStart(2, '0')}/${toDate.getFullYear()}`
+                    : 'N/A';
+                  return (
+                    <Pressable
+                      style={{flex: 1}}
+                      onPress={() =>
+                        navigation.navigate('WineDetail', {
+                          item: item?.product_id,
+                        })
+                      }>
+                      <ImageBackground
+                        source={{uri: item.image}}
+                        style={styles.carouselImageBackground}
+                        imageStyle={{borderRadius: 10}}>
+                        <View style={styles.carouselOverlay}>
+                          <View>
+                            {item.discount_value && (
+                              <View style={styles.discountBadge}>
+                                <Text style={styles.discountText}>
+                                  {item.discount_type === 'percentage'
+                                    ? `${item.discount_value}% OFF`
+                                    : `£${item.discount_value} OFF`}
+                                </Text>
+                              </View>
+                            )}
+                          </View>
+                          <View>
+                            {item.name ? (
+                              <Text style={styles.offerName}>{item.name}</Text>
+                            ) : null}
+                            <Text style={styles.offerDesc} numberOfLines={2}>
+                              {item.offer_desc}
+                            </Text>
+                            <View style={styles.offerFooter}>
+                              <Text style={styles.offerValidity}>
+                                Valid until: {formattedToDate}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                      </ImageBackground>
+                    </Pressable>
+                  );
+                }}
               />
             )}
           </View>
@@ -283,7 +449,6 @@ const Home = () => {
               Play Quiz
             </Text>
 
-            {/* Show Quiz Points Progress */}
             <Text style={styles.milestoneText} allowFontScaling={false}>
               Quiz Points: {userData?.milestone || 0} / 40
             </Text>
@@ -292,26 +457,16 @@ const Home = () => {
               <View
                 style={[
                   styles.progressBar,
-                  {width: `${((userData?.milestone || 0) / 40) * 100}%`},
+                  {width: `${quizProgress}%`},
                 ]}
               />
             </View>
 
-            <View
-              style={{
-                flexDirection: 'row',
-                gap: 10,
-                marginTop: 10,
-                justifyContent: 'space-between',
-              }}>
-              {/* Convert Quiz Points to Milestone */}
+            <View style={styles.quizButtonsContainer}>
               {(userData?.milestone || 0) >= 40 && (
                 <Pressable
                   style={styles.convertButton}
-                  onPress={() => {
-                    // Trigger conversion logic here
-                    // e.g. update milestone and reduce quiz_points
-                  }}>
+                  onPress={handleConvertQuizPoints}>
                   <Text
                     style={styles.convertButtonText}
                     allowFontScaling={false}>
@@ -320,7 +475,6 @@ const Home = () => {
                 </Pressable>
               )}
 
-              {/* Start Quiz Button */}
               <Pressable
                 style={styles.button}
                 onPress={() => navigation.navigate('Quiz')}>
@@ -341,19 +495,18 @@ const Home = () => {
               Milestone Point Score
             </Text>
             <Text style={styles.milestoneText} allowFontScaling={false}>
-              Milestone: 0 / 10 Points
+              Milestone: {userData?.milestone || 0} / 10 Points
             </Text>
             <View style={styles.progressBarContainer}>
               <View
                 style={[
                   styles.progressBar,
-                  {width: `${(0 / 10) * 100}%`}, // milestone max is 10 in this card
+                  {width: `${milestoneProgress}%`},
                 ]}
               />
             </View>
 
-            {/* 🎁 Reward Options when milestone >= 10 */}
-            {0 >= 10 && (
+            {(userData?.milestone || 0) >= 10 && (
               <View style={styles.rewardContainer}>
                 <Text style={styles.rewardTitle} allowFontScaling={false}>
                   🎉 Choose Your Reward:
@@ -361,7 +514,7 @@ const Home = () => {
 
                 <Pressable
                   style={styles.rewardOption}
-                  onPress={() => navigation.navigate('ScanCode')}>
+                  onPress={() => handleRewardSelection('20% Discount on Wine Products')}>
                   <Text style={styles.rewardText} allowFontScaling={false}>
                     📦 20% Discount on Wine Products
                   </Text>
@@ -369,7 +522,7 @@ const Home = () => {
 
                 <Pressable
                   style={styles.rewardOption}
-                  onPress={() => navigation.navigate('ScanCode')}>
+                  onPress={() => handleRewardSelection('£10 Voucher (Min Order £50)')}>
                   <Text style={styles.rewardText} allowFontScaling={false}>
                     🎫 £10 Voucher (Min Order £50)
                   </Text>
@@ -415,6 +568,7 @@ const Home = () => {
                   </Text>
                 </Pressable>
               )}
+              keyExtractor={(item, index) => `category-${item?.id || index}`}
             />
           </View>
           {homeData?.vendors?.length > 0 && (
@@ -440,6 +594,7 @@ const Home = () => {
                     }}
                   />
                 )}
+                keyExtractor={(item, index) => `vendor-${item?.id || index}`}
               />
             </>
           )}
@@ -452,7 +607,6 @@ const Home = () => {
                   navigation.navigate('FeatureWine', {data: homeData?.product})
                 }
               />
-
               <FlatList
                 data={homeData?.product}
                 horizontal
@@ -469,6 +623,7 @@ const Home = () => {
                     }
                   />
                 )}
+                keyExtractor={(item, index) => `featured-${item?.id || index}`}
               />
             </>
           )}
@@ -477,7 +632,7 @@ const Home = () => {
             <>
               <HeadingWithLink
                 title="New Arrival"
-                onPress={() =>
+                onPress={() => 
                   navigation.navigate('NewArrival', {
                     data: homeData?.newArrivals,
                   })
@@ -500,6 +655,7 @@ const Home = () => {
                     }
                   />
                 )}
+                keyExtractor={(item, index) => `newarrival-${item?.id || index}`}
               />
             </>
           )}
@@ -524,6 +680,8 @@ const Home = () => {
           onRemoveItem={handleRemoveItem}
         />
       )}
+
+   
     </View>
   );
 };
@@ -534,6 +692,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.white,
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     padding: 20,
@@ -586,12 +748,55 @@ const styles = StyleSheet.create({
     paddingBottom: 70,
   },
   carouselContainer: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
-  carouselImage: {
-    height: '100%',
-    width: Dimensions.get('window').width - 40,
+  carouselImageBackground: {
+    flex: 1,
     borderRadius: 10,
+    overflow: 'hidden',
+  },
+  carouselOverlay: {
+    flex: 1,
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    padding: 15,
+  },
+  offerName: {
+    color: Colors.white,
+    fontSize: 20,
+    fontWeight: 'bold',
+    fontFamily: Fonts.InterRegular,
+    marginBottom: 4,
+  },
+  offerDesc: {
+    color: Colors.white,
+    fontSize: 14,
+    fontFamily: Fonts.InterRegular,
+    marginBottom: 10,
+  },
+  offerValidity: {
+    color: '#f0f0f0',
+    fontSize: 12,
+    fontFamily: Fonts.InterRegular,
+    fontStyle: 'italic',
+  },
+  discountBadge: {
+    backgroundColor: Colors.red,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 5,
+    alignSelf: 'flex-start',
+  },
+  discountText: {
+    color: Colors.white,
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  offerFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   contentContainer: {
     paddingHorizontal: 20,
@@ -637,7 +842,7 @@ const styles = StyleSheet.create({
   listItemImage: {
     height: 60,
     width: 60,
-    borderRadius:100
+    borderRadius: 100,
   },
   listItemText: {
     fontSize: 14,
@@ -649,7 +854,6 @@ const styles = StyleSheet.create({
     gap: 10,
     marginVertical: 15,
   },
-
   card: {
     backgroundColor: Colors.red2,
     padding: 20,
@@ -699,7 +903,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#FFD700', // Gold color for progress
+    backgroundColor: '#FFD700',
   },
   convertButton: {
     backgroundColor: '#fff',
@@ -707,12 +911,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
-
   convertButtonText: {
     color: '#000',
     fontWeight: 'bold',
   },
-
+  quizButtonsContainer: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 10,
+    justifyContent: 'space-between',
+  },
   rewardContainer: {
     marginTop: 16,
     backgroundColor: '#fff',
@@ -720,13 +928,11 @@ const styles = StyleSheet.create({
     padding: 12,
     alignItems: 'center',
   },
-
   rewardTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 8,
   },
-
   rewardOption: {
     backgroundColor: '#f0f0f0',
     paddingVertical: 10,
@@ -735,9 +941,26 @@ const styles = StyleSheet.create({
     marginVertical: 6,
     width: '100%',
   },
-
   rewardText: {
     textAlign: 'center',
     color: '#333',
   },
+  errorText: {
+    fontSize: 18,
+    color: Colors.red,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: Colors.red,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  
 });
