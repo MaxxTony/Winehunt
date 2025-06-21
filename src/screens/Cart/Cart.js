@@ -39,7 +39,6 @@ const Cart = () => {
   const [couponError, setCouponError] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponApplied, setCouponApplied] = useState(false);
-  const DELIVERY_FEE = 100;
   const dispatch = useDispatch();
   const {userData} = useSelector(state => state.profile);
 
@@ -104,7 +103,7 @@ const Cart = () => {
   };
 
   const subtotal = calculateSubtotal();
-  const grandTotal = subtotal + DELIVERY_FEE;
+  const grandTotal = subtotal;
 
   const deleteCart = async productId => {
     const info = await AsyncStorage.getItem('userDetail');
@@ -342,22 +341,7 @@ const Cart = () => {
                 £ {subtotal.toFixed(2)}
               </Text>
             </View>
-            <View style={styles.summaryRowPro}>
-              <Text style={styles.summaryLabelPro} allowFontScaling={false}>
-                Delivery
-              </Text>
-              <Text style={styles.summaryValuePro} allowFontScaling={false}>
-                £ {DELIVERY_FEE}
-              </Text>
-            </View>
-            <View style={styles.summaryRowPro}>
-              <Text style={styles.totalLabelPro} allowFontScaling={false}>
-                Grand Total
-              </Text>
-              <Text style={styles.totalValuePro} allowFontScaling={false}>
-                £ {grandTotal.toFixed(2)}
-              </Text>
-            </View>
+
             <WineHuntButton
               text="Next"
               onPress={() =>
@@ -396,7 +380,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.08,
@@ -406,6 +390,7 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 16,
     position: 'relative',
+    marginHorizontal: 5,
   },
   imageWrapper: {
     borderRadius: 12,
@@ -506,8 +491,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   summaryValuePro: {
-    fontFamily: Fonts.InterMedium,
-    color: Colors.gray14,
+    fontFamily: Fonts.InterBold,
+    color: Colors.black,
     fontWeight: '600',
     fontSize: 16,
   },

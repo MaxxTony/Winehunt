@@ -10,7 +10,7 @@ const ThankYou = props => {
   const navigation = useNavigation();
   const info = props?.route?.params?.info;
 
-  console.log(info)
+  console.log(info,"jjjj")
 
   return (
     <View style={[styles.container, {paddingTop: insets.top}]}>

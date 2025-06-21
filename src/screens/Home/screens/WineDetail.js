@@ -57,6 +57,8 @@ const WineDetail = props => {
   const {userData} = useSelector(state => state.profile);
   const [suggestionLikes, setSuggestionLikes] = useState({});
 
+ 
+
   // Add back the missing constants and state
   const sizeList = [
     {
@@ -260,8 +262,10 @@ const WineDetail = props => {
     milestones = [],
   }) => {
     // Determine if this item is an offer or milestone
-    const isOffer = Array.isArray(offers) && offers.some(offer => offer.id === item.id);
-    const isMilestone = Array.isArray(milestones) && milestones.some(prod => prod.id === item.id);
+    const isOffer =
+      Array.isArray(offers) && offers.some(offer => offer.id === item.id);
+    const isMilestone =
+      Array.isArray(milestones) && milestones.some(prod => prod.id === item.id);
 
     return (
       <Pressable
@@ -302,12 +306,20 @@ const WineDetail = props => {
           </View>
           {/* Offer and Milestone Badges */}
           {isOffer && (
-            <View style={[styles.productBadge, {backgroundColor: Colors.primary, top: 10, left: 10}]}> 
+            <View
+              style={[
+                styles.productBadge,
+                {backgroundColor: Colors.primary, top: 10, left: 10},
+              ]}>
               <Text style={styles.productBadgeText}>Offer</Text>
             </View>
           )}
           {isMilestone && (
-            <View style={[styles.productBadge, {backgroundColor: Colors.green, top: 40, left: 10}]}> 
+            <View
+              style={[
+                styles.productBadge,
+                {backgroundColor: Colors.green, top: 40, left: 10},
+              ]}>
               <Text style={styles.productBadgeText}>Milestone</Text>
             </View>
           )}
@@ -421,7 +433,6 @@ const WineDetail = props => {
       </View>
     );
   };
-
 
   // Description Tab Component
   const DescriptionTab = ({
@@ -561,7 +572,6 @@ const WineDetail = props => {
     }, [dispatch]),
   );
 
-
   const getProductDetail = async () => {
     const data = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(data)?.token;
@@ -647,7 +657,6 @@ const WineDetail = props => {
   const onDisLike = async (id, isSuggestion = false) => {
     const info = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(info)?.token;
-
     const url = Constants.baseUrl7 + Constants.removeToWishList;
     setLoading(true);
     const body = {
@@ -690,13 +699,13 @@ const WineDetail = props => {
     const token = JSON.parse(info)?.token;
 
     const url = Constants.baseUrl8 + Constants.addToCart;
-
+    
     const body = {
       product_id: detail?.id,
       quantity: quantity,
-      price_id: 1,
     };
-
+    
+    console.log(body);
     try {
       const res = await axios.post(url, body, {
         headers: {
@@ -759,7 +768,11 @@ const WineDetail = props => {
           contentContainerStyle={styles.scrollContainer}>
           <View style={styles.semiCircleContainer}>
             <Image
-              source={detail?.user?.background ? {uri:detail?.user?.background} :require('../images/bg.png')}
+              source={
+                detail?.user?.background
+                  ? {uri: detail?.user?.background}
+                  : require('../images/bg.png')
+              }
               style={styles.semiCircleImage}
             />
           </View>

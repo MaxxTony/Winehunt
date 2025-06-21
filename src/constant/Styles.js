@@ -24,6 +24,9 @@ export const Colors = {
   lightPink: '#F4E4E6',
   green: '#48B065',
   green2: '#5FC27B',
+  lightGreen: '#E8F5E8',
+  lightBlue: '#E3F2FD',
+  lightYellow: '#FFF8E1',
 };
 
 export const Fonts = {

@@ -24,17 +24,42 @@ import {fetchProfile} from '../../../redux/slices/profileSlice';
 
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 
-const AnimatedCartItem = ({item, onRemove, onChangeQty, index, setIsCartVisible}) => {
+const calculatePricing = (product, quantity = 1) => {
+  const actualPrice = parseFloat(product.actual_price);
+  const currentPrice = parseFloat(product.price);
+  const discount = parseFloat(product.discount || 0);
+  const offerDiscount = parseFloat(product.offer_discount || 0);
+
+  let finalPrice = currentPrice;
+
+  return {
+    originalPrice: actualPrice * quantity,
+    currentPrice: currentPrice * quantity,
+    finalPrice: finalPrice * quantity,
+    hasDiscount: product.has_discount || false,
+    hasOffer: product.has_offer || false,
+    discountAmount: discount,
+    offerDiscountAmount: offerDiscount,
+    discountPercentage:
+      actualPrice > 0 ? ((actualPrice - finalPrice) / actualPrice) * 100 : 0,
+  };
+};
+
+const AnimatedCartItem = ({item, onRemove, index, setIsCartVisible}) => {
   const dispatch = useDispatch();
   const {userData} = useSelector(state => state.profile);
+  const [quantity, setQuantity] = useState(item.quantity);
 
   useFocusEffect(
     useCallback(() => {
       dispatch(fetchProfile());
     }, [dispatch]),
   );
+
   const navigation = useNavigation();
   const anim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
   useEffect(() => {
     Animated.timing(anim, {
       toValue: 1,
@@ -43,6 +68,28 @@ const AnimatedCartItem = ({item, onRemove, onChangeQty, index, setIsCartVisible}
       easing: Easing.out(Easing.ease),
     }).start();
   }, []);
+
+  const pricing = calculatePricing(item.product, quantity);
+
+  const handleRemove = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.8,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      onRemove(item.id);
+    });
+  };
+
+  
+
   return (
     <Animated.View
       style={{
@@ -54,6 +101,7 @@ const AnimatedCartItem = ({item, onRemove, onChangeQty, index, setIsCartVisible}
               outputRange: [40, 0],
             }),
           },
+          {scale: scaleAnim},
         ],
         marginBottom: 15,
       }}>
@@ -80,45 +128,59 @@ const AnimatedCartItem = ({item, onRemove, onChangeQty, index, setIsCartVisible}
         />
         <View style={{flex: 1, marginLeft: 12}}>
           <Text style={styles.cartItemTitle}>{item.product.name}</Text>
-          <Text style={styles.qtyText}>Quantity: {item.quantity}</Text>
+          <Text style={styles.qtyText}>Quantity: {quantity}</Text>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
+              marginTop: 4,
+            }}>
+            {/* Offer badge */}
+            {pricing.hasOffer && (
+              <View style={styles.offerBadge}>
+                <Text style={styles.offerText}>
+                  {parseFloat(item.product.offer_discount).toFixed(0)}% OFF
+                </Text>
+              </View>
+            )}
+            {/* MileStone badge */}
+            {pricing.hasDiscount && (
+              <View style={styles.milestoneBadge}>
+                <Text style={styles.milestoneText}>
+                  {parseFloat(item.product.discount).toFixed(0)}% OFF
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
+
         <View style={{alignItems: 'flex-end'}}>
-          {item.product.discount && parseFloat(item.product.discount) > 0 ? (
-            <>
-              <Text style={styles.discountedPrice}>
-                {new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: 'USD',
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(
-                  item.quantity *
-                    (parseFloat(item.product.price) -
-                      parseFloat(item.product.discount)),
-                )}
-              </Text>
+          {/* Pricing */}
+          <View style={styles.pricingContainer}>
+            <Text style={styles.finalPrice}>
+              {new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }).format(pricing.finalPrice)}
+            </Text>
+
+            {pricing.hasDiscount && (
               <Text style={styles.originalPrice}>
                 {new Intl.NumberFormat('en-US', {
                   style: 'currency',
                   currency: 'USD',
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
-                }).format(item.quantity * parseFloat(item.product.price))}
+                }).format(pricing.originalPrice)}
               </Text>
-            </>
-          ) : (
-            <Text style={styles.discountedPrice}>
-              {new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              }).format(item.quantity * parseFloat(item.product.price))}
-            </Text>
-          )}
-          <TouchableOpacity
-            onPress={() => onRemove(item.id)}
-            style={styles.deleteBtn}>
+            )}
+          </View>
+
+          <TouchableOpacity onPress={handleRemove} style={styles.deleteBtn}>
             <Icon name="delete" size={22} color={Colors.red} />
           </TouchableOpacity>
         </View>
@@ -134,10 +196,11 @@ const AnimatedCartModal = ({
   navigation,
   onRemoveItem,
   setIsCartVisible,
-  onChangeQty = () => {},
 }) => {
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const [internalCart, setInternalCart] = useState(cartData);
+
+
 
   useEffect(() => {
     setInternalCart(cartData);
@@ -161,32 +224,15 @@ const AnimatedCartModal = ({
     }
   }, [visible]);
 
-  // Calculate total
+  // Calculate total with correct pricing
   const total = internalCart.reduce((sum, item) => {
-    const price = parseFloat(item.product.price);
-    const discount = parseFloat(item.product.discount || 0);
-    return sum + item.quantity * (price - discount);
+    const pricing = calculatePricing(item.product, item.quantity);
+    return sum + pricing.finalPrice;
   }, 0);
-
-  // Handle quantity change
-  const handleChangeQty = (item, newQty) => {
-    if (newQty < 1) return;
-    const updated = internalCart.map(ci =>
-      ci.id === item.id ? {...ci, quantity: newQty} : ci,
-    );
-    setInternalCart(updated);
-    onChangeQty(item, newQty);
-  };
 
   // Handle remove
   const handleRemove = id => {
-    Animated.timing(slideAnim, {
-      toValue: 10,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => {
-      onRemoveItem(id);
-    });
+    onRemoveItem(id);
   };
 
   return (
@@ -194,7 +240,14 @@ const AnimatedCartModal = ({
       <Pressable style={styles.overlay} onPress={onClose} />
       <Animated.View
         style={[styles.modalContainer, {transform: [{translateY: slideAnim}]}]}>
-        <Text style={styles.title}>Your Cart</Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Your Cart</Text>
+          <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <Icon name="close" size={24} color={Colors.black} />
+          </TouchableOpacity>
+        </View>
+
         {internalCart.length > 0 ? (
           <>
             <FlatList
@@ -205,13 +258,14 @@ const AnimatedCartModal = ({
                   item={item}
                   index={index}
                   onRemove={handleRemove}
-                  onChangeQty={handleChangeQty}
                   setIsCartVisible={setIsCartVisible}
                 />
               )}
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{paddingBottom: 120}}
+              contentContainerStyle={{paddingBottom: 140}}
             />
+
+            {/* Footer */}
             <View style={styles.footer}>
               <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Total</Text>
@@ -224,9 +278,9 @@ const AnimatedCartModal = ({
                   }).format(total)}
                 </Text>
               </View>
+
               <View style={{height: 10}} />
               <CustomCheckoutButton
-                count={internalCart.length}
                 label="Proceed to Checkout"
                 onPress={() => {
                   setIsCartVisible(false);
@@ -244,6 +298,9 @@ const AnimatedCartModal = ({
               style={{width: 120, height: 120, alignSelf: 'center'}}
             />
             <Text style={styles.emptyText}>Your cart is empty.</Text>
+            <Text style={styles.emptySubText}>
+              Add some wines to get started!
+            </Text>
           </View>
         )}
       </Animated.View>
@@ -252,14 +309,8 @@ const AnimatedCartModal = ({
 };
 
 // Custom animated checkout button (replaces AnimatedCartButton)
-const CustomCheckoutButton = ({
-  count = 0,
-  onPress,
-  label = 'Proceed to Checkout',
-}) => {
+const CustomCheckoutButton = ({onPress, label = 'Proceed to Checkout'}) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  const badgeScale = useRef(new Animated.Value(1)).current;
-  const prevCount = useRef(count);
 
   // Animate button press
   const handlePressIn = () => {
@@ -278,27 +329,6 @@ const CustomCheckoutButton = ({
       bounciness: 8,
     }).start();
   };
-
-  // Animate badge when count changes
-  useEffect(() => {
-    if (prevCount.current !== count) {
-      Animated.sequence([
-        Animated.spring(badgeScale, {
-          toValue: 1.3,
-          useNativeDriver: true,
-          speed: 30,
-          bounciness: 10,
-        }),
-        Animated.spring(badgeScale, {
-          toValue: 1,
-          useNativeDriver: true,
-          speed: 20,
-          bounciness: 8,
-        }),
-      ]).start();
-      prevCount.current = count;
-    }
-  }, [count, badgeScale]);
 
   return (
     <Animated.View
@@ -349,27 +379,37 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 10,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 15,
     fontFamily: Fonts.InterBold,
+    color: Colors.black,
+  },
+  closeBtn: {
+    padding: 5,
   },
   cartItemCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.gray13,
-    padding: 10,
-    borderRadius: 14,
+    padding: 15,
+    borderRadius: 16,
     shadowColor: '#000',
     shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 6,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: Colors.gray6,
   },
   cartItemImage: {
-    width: 60,
-    height: 60,
+    width: 70,
+    height: 70,
     borderRadius: 12,
     backgroundColor: Colors.white,
     borderWidth: 1,
@@ -378,20 +418,75 @@ const styles = StyleSheet.create({
   cartItemTitle: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 2,
+    marginBottom: 4,
     fontFamily: Fonts.InterBold,
     color: Colors.black,
   },
   qtyText: {
-    fontSize: 15,
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.gray15,
+    fontFamily: Fonts.InterMedium,
+  },
+  offerBadge: {
+    backgroundColor: Colors.red, 
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  offerText: {
+    color: Colors.white,
+    fontSize: 10,
     fontWeight: 'bold',
-    color: Colors.blue,
-    minWidth: 24,
+    fontFamily: Fonts.InterBold,
+    textTransform: 'uppercase',
+  },
+  milestoneBadge: {
+    backgroundColor: Colors.blue,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  milestoneText: {
+    color: Colors.white,
+    fontSize: 11,
+    fontWeight: 'bold',
     fontFamily: Fonts.InterBold,
   },
-  discountedPrice: {
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: Colors.gray6,
+  },
+  quantityBtn: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.gray13,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quantityText: {
+    fontSize: 14,
     fontWeight: 'bold',
-    fontSize: 15,
+    marginHorizontal: 12,
+    fontFamily: Fonts.InterBold,
+    color: Colors.black,
+  },
+  pricingContainer: {
+    alignItems: 'flex-end',
+  },
+  finalPrice: {
+    fontWeight: 'bold',
+    fontSize: 16,
     color: Colors.red,
     marginBottom: 2,
     fontFamily: Fonts.InterBold,
@@ -402,9 +497,16 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
     fontFamily: Fonts.InterRegular,
   },
+  discountPercentage: {
+    fontSize: 11,
+    color: Colors.green,
+    fontWeight: 'bold',
+    fontFamily: Fonts.InterBold,
+  },
   deleteBtn: {
     marginTop: 8,
     alignSelf: 'flex-end',
+    padding: 4,
   },
   footer: {
     position: 'absolute',
@@ -417,12 +519,32 @@ const styles = StyleSheet.create({
     zIndex: 10,
     paddingBottom: 10,
   },
+  savingsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.green + '20',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+  savingsText: {
+    fontSize: 14,
+    color: Colors.green,
+    fontWeight: 'bold',
+    marginLeft: 6,
+    fontFamily: Fonts.InterBold,
+  },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
     paddingHorizontal: 10,
+    backgroundColor: Colors.gray13,
+    paddingVertical: 12,
+    borderRadius: 12,
   },
   totalLabel: {
     fontSize: 17,
@@ -443,9 +565,16 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    fontSize: 16,
-    color: Colors.gray,
+    fontSize: 18,
+    color: Colors.black,
     marginTop: 18,
+    fontFamily: Fonts.InterBold,
+  },
+  emptySubText: {
+    textAlign: 'center',
+    fontSize: 14,
+    color: Colors.gray,
+    marginTop: 8,
     fontFamily: Fonts.InterRegular,
   },
   animatedWrapper: {
@@ -456,7 +585,7 @@ const styles = StyleSheet.create({
   gradientButton: {
     flexDirection: 'row',
     borderRadius: 30,
-    paddingVertical: 14,
+    paddingVertical: 16,
     paddingHorizontal: 32,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 4},
@@ -476,6 +605,21 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: 'bold',
     letterSpacing: 0.2,
+    fontFamily: Fonts.InterBold,
+  },
+  cartBadge: {
+    backgroundColor: Colors.white,
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+  badgeText: {
+    color: Colors.red,
+    fontSize: 12,
+    fontWeight: 'bold',
     fontFamily: Fonts.InterBold,
   },
 });
