@@ -299,6 +299,7 @@ const SkeletonLoader = () => {
 const VendorDetail = props => {
   const navigation = useNavigation();
   const data = props?.route?.params?.item;
+  console.log(data,"vendor k liye data")
   const isFocused = useIsFocused();
   const userCoords = props?.route?.params?.userCoordinates;
   const inset = useSafeAreaInsets();
@@ -343,7 +344,7 @@ const VendorDetail = props => {
       const res = await axios.post(
         Constants.baseUrl5 + Constants.vendorDetail,
         {
-          vendor_id: data?.product?.user_id ? data?.product?.user_id : data?.id,
+          vendor_id: data?.user_id || data?.id,
         },
         {
           headers: {
@@ -352,7 +353,6 @@ const VendorDetail = props => {
           },
         },
       );
-
       if (res?.status === 200) {
         const vendorData = res?.data?.data;
         setDetail(vendorData);

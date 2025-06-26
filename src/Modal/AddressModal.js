@@ -1,5 +1,6 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
+  ActivityIndicator,
   Image,
   Keyboard,
   KeyboardAvoidingView,
@@ -9,6 +10,9 @@ import {
   Text,
   TextInput,
   View,
+  Pressable,
+  TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import Modal from 'react-native-modal';
 import {Colors, Fonts} from '../constant/Styles';
@@ -16,158 +20,286 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import WineHuntButton from '../common/WineHuntButton';
 import {Dropdown} from 'react-native-element-dropdown';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import 'react-native-get-random-values';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
-const AddressModal = ({
-  showAddAddressModal,
-  setShowAddAddressModal,
-  onPress,
-  country,
-  setCountry,
-  city,
-  setCity,
-  state,
-  setState,
-  setFlat,
-  flat,
-  setArea,
-  area,
-  setPincode,
-  pincode,
+const countries = [
+  {id: 'ENG', name: 'England'},
+  {id: 'SCT', name: 'Scotland'},
+  {id: 'WLS', name: 'Wales'},
+  {id: 'NIR', name: 'Northern Ireland'},
+  {id: 'IRL', name: 'Ireland'},
+];
+
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+
+const AddressFormModal = ({
+  visible,
+  onClose,
+  onSubmit,
+  initialValues = {},
+  mode = 'add',
+  loading = false,
+  error = '',
 }) => {
   const inset = useSafeAreaInsets();
+  const [form, setForm] = useState({
+    country: '',
+    city: '',
+    flat: '',
+    area: '',
+    pincode: '',
+    ...initialValues,
+  });
+  const [formError, setFormError] = useState('');
+  const [focus, setFocus] = useState({});
 
-  const countries = [
-    {id: 1, name: 'United States'},
-    {id: 2, name: 'Canada'},
-    {id: 3, name: 'Germany'},
-    {id: 4, name: 'India'},
-    {id: 5, name: 'Australia'},
-    {id: 6, name: 'Japan'},
-    {id: 7, name: 'United Kingdom'},
-    {id: 8, name: 'France'},
-    {id: 9, name: 'Italy'},
-    {id: 10, name: 'Brazil'},
-  ];
+  useEffect(() => {
+    setForm({
+      country: initialValues.country || '',
+      city: initialValues.city || '',
+      flat: initialValues.flat || '',
+      area: initialValues.area || '',
+      pincode: initialValues.pincode || '',
+    });
+    setFormError('');
+  }, [initialValues, visible]);
+
+  const validate = () => {
+    if (!form.country) return 'Please select the country';
+    if (!form.city) return 'Please enter the city';
+    if (!form.flat) return 'Please enter the flat number';
+    if (!form.area) return 'Please enter the area';
+    if (!form.pincode) return 'Please enter the pincode';
+    return '';
+  };
+
+  const handleSave = () => {
+    const err = validate();
+    if (err) {
+      setFormError(err);
+      return;
+    }
+    setFormError('');
+    onSubmit(form);
+  };
 
   return (
     <Modal
       animationIn="fadeInUp"
-      animationInTiming={500}
+      animationInTiming={400}
       backdropOpacity={0.5}
-      animationOutTiming={500}
+      animationOutTiming={400}
       animationOut="fadeOutDown"
-      isVisible={showAddAddressModal}
+      isVisible={visible}
       style={styles.modal}
-      onBackdropPress={() => {
-        setShowAddAddressModal(false);
-      }}>
+      onBackdropPress={onClose}
+      onBackButtonPress={onClose}
+      useNativeDriver
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.keyboardAvoidingView}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          bounces={false}>
-          <View style={[styles.modalContent, {paddingBottom: inset.bottom}]}>
+        style={styles.keyboardAvoidingView}
+        
+      >
+        <View style={[styles.card, {paddingBottom: inset.bottom + 16}]}> 
+          {/* Header */}
+          <View style={styles.header}>
             <View style={styles.dragIndicator} />
             <Text style={styles.title} allowFontScaling={false}>
-              Add Address
+              {mode === 'edit' ? 'Update Address' : 'Add Address'}
             </Text>
-            <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              itemTextStyle={styles.itemTextStyle}
-              data={countries}
-              maxHeight={250}
-              dropdownPosition={'auto'}
-              labelField="name"
-              valueField="id"
-              placeholder="Country"
-              value={country}
-              onChange={item => setCountry(item?.id)}
-            />
-            <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              itemTextStyle={styles.itemTextStyle}
-              data={countries}
-              maxHeight={250}
-              dropdownPosition={'auto'}
-              labelField="name"
-              valueField="id"
-              placeholder="State"
-              value={state}
-              onChange={item => setState(item?.id)}
-            />
-            <TextInput
-              value={city}
-              onChangeText={setCity}
-              style={styles.input}
-              placeholder="City"
-              placeholderTextColor={Colors.gray10}
-            />
-            <TextInput
-              value={flat}
-              onChangeText={setFlat}
-              style={styles.input}
-              placeholder="Flat/Block"
-              placeholderTextColor={Colors.gray10}
-            />
-            <TextInput
-              value={area}
-              onChangeText={setArea}
-              style={styles.input}
-              placeholder="Apartment/Street/Area"
-              placeholderTextColor={Colors.gray10}
-            />
-            <TextInput
-              value={pincode}
-              onChangeText={setPincode}
-              style={styles.input}
-              placeholder="ZIP Code"
-              placeholderTextColor={Colors.gray10}
-            />
-            {/* <View style={styles.currentLocationContainer}>
-              <FontAwesome6
-                name="location-crosshairs"
-                size={20}
-                color={Colors.black}
-              />
-              <Text style={styles.currentLocationText}>
-                Use My Current Location
-              </Text>
-            </View> */}
-            <WineHuntButton text="Save" onPress={onPress} />
+            <TouchableOpacity style={styles.closeBtn} onPress={onClose} hitSlop={{top:10,left:10,right:10,bottom:10}}>
+              <FontAwesome6 name="xmark" size={22} color={Colors.gray20} />
+            </TouchableOpacity>
           </View>
-        </ScrollView>
+
+          {/* Body */}
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={[styles.body, { flexGrow: 1 }]}
+            bounces={false}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="always"
+          >
+            {/* Google Places Autocomplete */}
+            <Text style={styles.label}>Search Address</Text>
+            <GooglePlacesAutocomplete
+              placeholder="Search for address"
+              onPress={(data, details = null) => {
+                console.log('data:', JSON.stringify(data));
+                console.log('details:', JSON.stringify(details));
+                if (!details) return;
+                const addressComponents = details.address_components || [];
+                const getComponent = (type) =>
+                  addressComponents.find(c => c.types.includes(type))?.long_name || '';
+                setForm(f => ({
+                  ...f,
+                  country: getComponent('country'),
+                  city: getComponent('locality') || getComponent('postal_town'),
+                  area: getComponent('route'),
+                  pincode: getComponent('postal_code'),
+                }));
+              }}
+              query={{
+                key: 'AIzaSyAvhOv_MIWS7k1W7Fm9UZR-9TGXQCVS91Q',
+                language: 'en',
+                components: 'country:gb|country:ie',
+              }}
+              fetchDetails={true}
+              styles={{
+                container: { marginBottom: 14 },
+                textInputContainer: styles.googleInput,
+                textInput: styles.googleTextInput,
+                listView: {
+                  borderWidth: 1,
+                  borderColor: '#ddd',
+                  borderRadius: 8,
+                  maxHeight: 100,
+                  backgroundColor: '#fff',
+                },
+              }}
+              enablePoweredByContainer={false}
+              debounce={300}
+            />
+
+            {/* Manual Country Field */}
+            <Text style={styles.label}>Country</Text>
+            <View style={[styles.inputWrapper, focus.country && styles.inputWrapperActive]}> 
+              <FontAwesome6 name="globe" size={18} color={Colors.gray20} style={styles.inputIcon} />
+              <TextInput
+                value={form.country}
+                onChangeText={v => setForm(f => ({...f, country: v}))}
+                style={styles.input}
+                placeholder="Enter country"
+                placeholderTextColor={Colors.gray10}
+                onFocus={() => setFocus(f => ({...f, country: true}))}
+                onBlur={() => setFocus(f => ({...f, country: false}))}
+              />
+            </View>
+            {/* Manual City Field */}
+            <Text style={styles.label}>City</Text>
+            <View style={[styles.inputWrapper, focus.city && styles.inputWrapperActive]}> 
+              <FontAwesome6 name="city" size={18} color={Colors.gray20} style={styles.inputIcon} />
+              <TextInput
+                value={form.city}
+                onChangeText={v => setForm(f => ({...f, city: v}))}
+                style={styles.input}
+                placeholder="Enter city"
+                placeholderTextColor={Colors.gray10}
+                onFocus={() => setFocus(f => ({...f, city: true}))}
+                onBlur={() => setFocus(f => ({...f, city: false}))}
+              />
+            </View>
+            {/* Manual Area/Street Field */}
+            <Text style={styles.label}>Area/Street</Text>
+            <View style={[styles.inputWrapper, focus.area && styles.inputWrapperActive]}> 
+              <FontAwesome6 name="road" size={18} color={Colors.gray20} style={styles.inputIcon} />
+              <TextInput
+                value={form.area}
+                onChangeText={v => setForm(f => ({...f, area: v}))}
+                style={styles.input}
+                placeholder="Enter area or street"
+                placeholderTextColor={Colors.gray10}
+                onFocus={() => setFocus(f => ({...f, area: true}))}
+                onBlur={() => setFocus(f => ({...f, area: false}))}
+              />
+            </View>
+            {/* Manual ZIP Code Field */}
+            <Text style={styles.label}>ZIP Code</Text>
+            <View style={[styles.inputWrapper, focus.pincode && styles.inputWrapperActive]}> 
+              <FontAwesome6 name="location-dot" size={18} color={Colors.gray20} style={styles.inputIcon} />
+              <TextInput
+                value={form.pincode}
+                onChangeText={v => setForm(f => ({...f, pincode: v}))}
+                style={styles.input}
+                placeholder="Enter ZIP code"
+                placeholderTextColor={Colors.gray10}
+                keyboardType="number-pad"
+                onFocus={() => setFocus(f => ({...f, pincode: true}))}
+                onBlur={() => setFocus(f => ({...f, pincode: false}))}
+              />
+            </View>
+
+            {/* Flat/Block */}
+            <Text style={styles.label}>Flat/Block</Text>
+            <View style={[styles.inputWrapper, focus.flat && styles.inputWrapperActive]}> 
+              <FontAwesome6 name="building" size={18} color={Colors.gray15} style={styles.inputIcon} />
+              <TextInput
+                value={form.flat}
+                onChangeText={v => setForm(f => ({...f, flat: v}))}
+                style={styles.input}
+                placeholder="Enter flat or block"
+                placeholderTextColor={Colors.gray10}
+                onFocus={() => setFocus(f => ({...f, flat: true}))}
+                onBlur={() => setFocus(f => ({...f, flat: false}))}
+              />
+            </View>
+          </ScrollView>
+
+          {(formError || error) && (
+            <Text style={styles.errorText} allowFontScaling={false}>
+              {formError || error}
+            </Text>
+          )}
+
+          {/* Footer */}
+          <View style={styles.footer}>
+            <WineHuntButton
+              text="Cancel"
+              onPress={onClose}
+              extraButtonStyle={styles.cancelBtn}
+              textStyle={{color: Colors.black}}
+            />
+            <WineHuntButton
+              text={mode === 'edit' ? 'Update' : 'Save'}
+              onPress={handleSave}
+              extraButtonStyle={[styles.saveBtn, {opacity: loading ? 0.7 : 1}]}
+              disabled={loading}
+            />
+          </View>
+          {loading && (
+            <View style={styles.loadingOverlay}>
+              <ActivityIndicator size="large" color={Colors.red} />
+            </View>
+          )}
+        </View>
       </KeyboardAvoidingView>
     </Modal>
   );
 };
 
-export default AddressModal;
+export default AddressFormModal;
 
 const styles = StyleSheet.create({
   modal: {
     margin: 0,
+    justifyContent: 'flex-end',
   },
   keyboardAvoidingView: {
     flex: 1,
+    justifyContent: 'flex-end',
   },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  modalContent: {
-    padding: 20,
+  card: {
     backgroundColor: Colors.white,
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    gap: 20,
-    minHeight: 500,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 22,
+    paddingTop: 10,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: -2},
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 12,
+    minHeight: 520,
+    position: 'relative',
+    // height: SCREEN_HEIGHT * 0.8,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 10,
+    position: 'relative',
+    paddingTop: 8,
   },
   dragIndicator: {
     height: 5,
@@ -175,24 +307,70 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray10,
     borderRadius: 10,
     alignSelf: 'center',
+    marginBottom: 10,
+  },
+  closeBtn: {
+    position: 'absolute',
+    right: 0,
+    top: 8,
+    padding: 4,
+    zIndex: 2,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     color: Colors.black,
+    fontFamily: Fonts.InterBold,
+    fontWeight: '700',
+    marginBottom: 2,
+    letterSpacing: 0.2,
+  },
+  body: {
+    flexGrow: 1,
+    paddingBottom: 10,
+  },
+  label: {
+    fontSize: 13,
+    color: Colors.gray20,
     fontFamily: Fonts.InterMedium,
-    fontWeight: '600',
+    marginBottom: 4,
+    marginTop: 10,
+    marginLeft: 2,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.gray2,
+    borderRadius: 10,
+    backgroundColor: Colors.gray1,
+    marginBottom: 2,
+    paddingHorizontal: 10,
+    paddingVertical: Platform.OS === 'ios' ? 8 : 2,
+  },
+  inputWrapperActive: {
+    borderColor: Colors.red,
+    backgroundColor: '#fff',
+    shadowColor: Colors.red,
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+  },
+  inputIcon: {
+    marginRight: 8,
+    opacity: 0.7,
   },
   dropdown: {
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 8,
-    backgroundColor: Colors.white,
-    borderColor: Colors.gray2,
+    flex: 1,
+    borderWidth: 0,
+    backgroundColor: 'transparent',
+    paddingLeft: 0,
+    paddingRight: 0,
+    minHeight: 36,
   },
   placeholderStyle: {
     ...Fonts.InterRegular,
     fontSize: 15,
-    color: Colors.black,
+    color: Colors.gray10,
   },
   selectedTextStyle: {
     ...Fonts.InterRegular,
@@ -202,26 +380,74 @@ const styles = StyleSheet.create({
   itemTextStyle: {
     ...Fonts.InterBold,
     color: Colors.black,
-    fontSize: 12,
+    fontSize: 13,
   },
   input: {
-    borderWidth: 1,
-    paddingVertical: Platform.OS === 'ios' ? 10 : 5,
-    paddingHorizontal: 10,
-    borderColor: Colors.gray2,
-    borderRadius: 8,
+    flex: 1,
+    fontSize: 15,
+    color: '#000',
+    fontFamily: Fonts.InterRegular,
+    paddingVertical: Platform.OS === 'ios' ? 8 : 2,
+    paddingHorizontal: 0,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
   },
-  currentLocationContainer: {
+  errorText: {
+    color: Colors.red,
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 2,
+    fontFamily: Fonts.InterMedium,
+  },
+  footer: {
+    flexDirection: 'row',
+    gap: 14,
+    marginTop: 10,
+    marginBottom: 2,
+  },
+  cancelBtn: {
+    flex: 1,
+    backgroundColor: Colors.gray15,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.gray2,
+    marginRight: 0,
+  },
+  saveBtn: {
+    flex: 1,
+    borderRadius: 10,
+    backgroundColor: Colors.red,
+    marginLeft: 0,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    zIndex: 10,
+  },
+  googleInput: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    justifyContent: 'center',
-    alignSelf: 'center',
+    borderWidth: 1,
+    borderColor: Colors.gray2,
+    borderRadius: 10,
+    backgroundColor: Colors.gray1,
+    marginBottom: 2,
+    paddingHorizontal: 10,
+    paddingVertical: Platform.OS === 'ios' ? 8 : 2,
   },
-  currentLocationText: {
-    fontSize: 14,
-    color: Colors.black,
-    fontFamily: Fonts.InterMedium,
-    fontWeight: '600',
+  googleTextInput: {
+    flex: 1,
+    fontSize: 15,
+    color: '#000',
+    fontFamily: Fonts.InterRegular,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    paddingVertical: Platform.OS === 'ios' ? 8 : 2,
+    paddingHorizontal: 0,
   },
 });

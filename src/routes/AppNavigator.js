@@ -29,8 +29,6 @@ import Checkout from '../screens/Order/Checkout';
 import ThankYou from '../screens/Order/ThankYou';
 import TrackOrder from '../screens/Order/TrackOrder';
 import ScanWineCode from '../screens/ScanCode/ScanWineCode';
-import EditAddress from '../screens/Profile/EditAddress';
-import AddAddres from '../screens/Profile/AddAddres';
 import Quiz from '../screens/Profile/Quiz';
 import Quizquestion from '../screens/Profile/Quizquestion';
 import Subscription from '../screens/Profile/Subscription';
@@ -97,8 +95,6 @@ const AppNavigator = () => {
       <Stack.Screen name="Checkout" component={Checkout} />
       <Stack.Screen name="ThankYou" component={ThankYou} />
       <Stack.Screen name="TrackOrder" component={TrackOrder} />
-      <Stack.Screen name="EditAddress" component={EditAddress} />
-      <Stack.Screen name="AddAddres" component={AddAddres} />
       <Stack.Screen name="Quiz" component={Quiz} />
       <Stack.Screen name="Quizquestion" component={Quizquestion} />
       <Stack.Screen name="Subscription" component={Subscription} />

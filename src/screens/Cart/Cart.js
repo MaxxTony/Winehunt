@@ -169,13 +169,10 @@ const Cart = () => {
                 <Pressable
                   style={styles.imageWrapper}
                   onPress={() => {
-                    navigation.navigate('VendorDetail', {
-                      item: item,
-                      userCoordinates: {
-                        latitude: userData?.latitude,
-                        longitude: userData?.longitude,
-                      },
-                    });
+                     navigation.navigate('WineDetail', {
+                            item: item?.product?.id,
+                          });
+                   
                   }}>
                   <Image
                     source={

@@ -43,12 +43,13 @@ const NearVendorCards = ({item, navigation, userCoordinates}) => {
   return (
     <Pressable
       style={styles.cardContainer}
-      onPress={() =>
+      onPress={() => {
+        
         navigation.navigate('VendorDetail', {
           item: item,
           userCoordinates: userCoords,
-        })
-      }>
+        });
+      }}>
       {/* Background Image */}
       <View style={styles.imageContainer}>
         <Image

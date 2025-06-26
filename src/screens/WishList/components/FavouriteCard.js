@@ -15,6 +15,7 @@ const FavouriteCard = ({item, type, onPress}) => {
         <Pressable
           style={styles.cardContainer}
           onPress={() => {
+           
             navigation.navigate('VendorDetail', {
               item: item?.vendor,
               userCoordinates: {
@@ -31,38 +32,74 @@ const FavouriteCard = ({item, type, onPress}) => {
             }
             style={styles.vendorImage}
           />
-          <View style={styles.textContainer}>
-            <Text style={styles.vendorName} allowFontScaling={false}>
+          <View style={styles.vendorInfoContainer}>
+            <Text
+              style={styles.vendorName}
+              allowFontScaling={false}
+              numberOfLines={1}>
               {item?.vendor?.shop_name}
             </Text>
-            <Text style={styles.vendorDescription} allowFontScaling={false}>
-              Best Rated this Month
-            </Text>
-            <View style={styles.ratingRow}>
-              <Text style={styles.ratingText} allowFontScaling={false}>
+            {item?.vendor?.description ? (
+              <Text
+                style={styles.vendorDescription}
+                allowFontScaling={false}
+                numberOfLines={1}>
+                {item?.vendor?.description}
+              </Text>
+            ) : null}
+            {item?.vendor?.address ? (
+              <View style={styles.vendorRow}>
+                <Feather
+                  name="map-pin"
+                  size={13}
+                  color={Colors.gray7}
+                  style={{marginRight: 3}}
+                />
+                <Text
+                  style={styles.vendorAddress}
+                  allowFontScaling={false}
+                  numberOfLines={1}>
+                  {item?.vendor?.address}
+                </Text>
+              </View>
+            ) : null}
+            {item?.vendor?.phone ? (
+              <View style={styles.vendorRow}>
+                <Feather
+                  name="phone"
+                  size={13}
+                  color={Colors.gray7}
+                  style={{marginRight: 3}}
+                />
+                <Text
+                  style={styles.vendorPhone}
+                  allowFontScaling={false}
+                  numberOfLines={1}>
+                  {item?.vendor?.country_code} {item?.vendor?.phone}
+                </Text>
+              </View>
+            ) : null}
+            <View style={styles.vendorRow}>
+              <AntDesign
+                name="star"
+                size={14}
+                color={Colors.yellow}
+                style={{marginRight: 3}}
+              />
+              <Text style={styles.vendorReviewText} allowFontScaling={false}>
                 {item?.vendor?.total_reviews} Review
+                {item?.vendor?.total_reviews === 1 ? '' : 's'}
               </Text>
             </View>
           </View>
-          <View
-            style={{
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              flexDirection: 'column',
-            }}>
-            <Pressable onPress={onPress}>
+          <View style={styles.vendorActionsContainer}>
+            <Pressable onPress={onPress} hitSlop={10}>
               <Image
                 source={require('../images/delete.png')}
                 style={styles.deleteIcon}
                 resizeMode="contain"
               />
             </Pressable>
-            {/* <View style={styles.distanceRow}>
-              <Feather name="navigation" size={15} color={Colors.black} />
-              <Text style={styles.distanceText} allowFontScaling={false}>
-                2.5 Km
-              </Text>
-            </View> */}
           </View>
         </Pressable>
       ) : (
@@ -78,16 +115,38 @@ const FavouriteCard = ({item, type, onPress}) => {
                 : require('../images/bottle4.png')
             }
             style={styles.bottleImage}
-            // resizeMode="contain"
           />
 
           <View style={styles.cardDetailsContainer}>
             <Text style={styles.cardTitle} allowFontScaling={false}>
-              {item?.product?.name} ({item?.product?.title})
+              {item?.product?.name}
+              {item?.product?.title ? ` (${item?.product?.title})` : ''}
             </Text>
-            <Text style={styles.cardPrice} allowFontScaling={false}>
-              £ {item?.product?.price}
-            </Text>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+              {item?.product?.discount &&
+              Number(item?.product?.discount) > 0 ? (
+                <>
+                  <Text
+                    style={styles.cardOriginalPrice}
+                    allowFontScaling={false}>
+                    £ {parseFloat(item?.product?.price).toFixed(2)}
+                  </Text>
+                  <Text
+                    style={styles.cardDiscountPrice}
+                    allowFontScaling={false}>
+                    £{' '}
+                    {(
+                      parseFloat(item?.product?.price) -
+                      parseFloat(item?.product?.discount)
+                    ).toFixed(2)}
+                  </Text>
+                </>
+              ) : (
+                <Text style={styles.cardPrice} allowFontScaling={false}>
+                  £ {item?.price !== null ? item?.price : item?.product?.price}
+                </Text>
+              )}
+            </View>
           </View>
 
           <View style={styles.cardActionsContainer}>
@@ -104,6 +163,13 @@ const FavouriteCard = ({item, type, onPress}) => {
                 {item?.product?.average_rating}
               </Text>
             </View>
+            <Text style={styles.reviewText} allowFontScaling={false}>
+              {item?.product?.total_reviews > 0
+                ? `${item?.product?.total_reviews} Review${
+                    item?.product?.total_reviews === 1 ? '' : 's'
+                  }`
+                : 'No reviews yet'}
+            </Text>
           </View>
         </Pressable>
       )}
@@ -115,21 +181,23 @@ export default FavouriteCard;
 
 const styles = StyleSheet.create({
   cardContainer: {
-    padding: 10,
+    padding: 12,
     borderWidth: 1,
     borderColor: Colors.gray2,
-    borderRadius: 8,
+    borderRadius: 10,
     flexDirection: 'row',
-    gap: 10,
+    gap: 12,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.18,
     shadowRadius: 3.84,
     backgroundColor: '#fff',
-    elevation: 5,
+    elevation: 3,
+    alignItems: 'center',
+    marginBottom: 8,
   },
   bottleImage: {
     height: 80,
@@ -169,6 +237,7 @@ const styles = StyleSheet.create({
   deleteIcon: {
     height: 18,
     width: 18,
+    marginBottom: 10,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -184,43 +253,75 @@ const styles = StyleSheet.create({
     height: 65,
     width: 65,
     borderRadius: 100,
+    backgroundColor: Colors.gray2,
   },
-  textContainer: {
-    gap: 5,
+  vendorInfoContainer: {
     flex: 1,
+    gap: 3,
+    justifyContent: 'center',
   },
   vendorName: {
     color: Colors.black,
     fontFamily: Fonts.InterMedium,
     fontWeight: '600',
     fontSize: 16,
+    marginBottom: 1,
   },
   vendorDescription: {
     color: Colors.gray7,
     fontFamily: Fonts.InterRegular,
     fontWeight: '400',
     fontSize: 12,
+    marginBottom: 1,
   },
-  ratingRow: {
+  vendorRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    marginBottom: 1,
   },
-  ratingText: {
+  vendorAddress: {
+    color: Colors.gray7,
+    fontFamily: Fonts.InterRegular,
+    fontWeight: '400',
+    fontSize: 11,
+    flex: 1,
+  },
+  vendorPhone: {
+    color: Colors.gray7,
+    fontFamily: Fonts.InterRegular,
+    fontWeight: '400',
+    fontSize: 11,
+  },
+  vendorReviewText: {
     color: Colors.gray7,
     fontFamily: Fonts.InterRegular,
     fontWeight: '400',
     fontSize: 12,
   },
-  distanceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
+  vendorActionsContainer: {
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    flexDirection: 'column',
+    height: 65,
   },
-  distanceText: {
-    color: Colors.black,
+  cardOriginalPrice: {
+    fontFamily: Fonts.InterMedium,
+    color: Colors.gray7,
+    fontWeight: '500',
+    fontSize: 13,
+    textDecorationLine: 'line-through',
+    marginRight: 4,
+  },
+  cardDiscountPrice: {
+    fontFamily: Fonts.InterMedium,
+    color: Colors.red || '#E53935',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  reviewText: {
     fontSize: 12,
+    color: Colors.gray7,
     fontFamily: Fonts.InterRegular,
-    fontWeight: '400',
+    marginTop: 2,
   },
 });

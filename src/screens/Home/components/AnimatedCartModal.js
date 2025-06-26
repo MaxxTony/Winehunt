@@ -109,12 +109,10 @@ const AnimatedCartItem = ({item, onRemove, index, setIsCartVisible}) => {
         style={styles.cartItemCard}
         onPress={() => {
           setIsCartVisible(false);
-          navigation.navigate('VendorDetail', {
-            item: item,
-            userCoordinates: {
-              latitude: userData?.latitude,
-              longitude: userData?.longitude,
-            },
+         
+          navigation.navigate('WineDetail', {
+            item: item?.product?.id,
+            
           });
         }}>
         <Image

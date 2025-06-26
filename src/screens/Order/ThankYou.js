@@ -30,8 +30,17 @@ const ThankYou = props => {
   const successScale = useRef(new Animated.Value(0)).current;
   const cardSlideAnim = useRef(new Animated.Value(100)).current;
   const buttonScale = useRef(new Animated.Value(1)).current;
+  const confettiAnim = useRef(new Animated.Value(0)).current;
+  const backgroundAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    // Background animation
+    Animated.timing(backgroundAnim, {
+      toValue: 1,
+      duration: 2000,
+      useNativeDriver: true,
+    }).start();
+
     // Staggered entrance animations
     const animations = [
       Animated.parallel([
@@ -67,6 +76,15 @@ const ThankYou = props => {
     ];
 
     Animated.stagger(200, animations).start();
+
+    // Confetti animation after success
+    setTimeout(() => {
+      Animated.timing(confettiAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }).start();
+    }, 1000);
   }, []);
 
   const handleButtonPress = () => {
@@ -110,8 +128,96 @@ const ThankYou = props => {
     }
   };
 
+  // Custom Success Animation Component
+  const SuccessAnimation = () => (
+    <View style={styles.successContainer}>
+      <Animated.View
+        style={[
+          styles.successCircle,
+          {
+            transform: [{scale: successScale}],
+          },
+        ]}>
+        <LinearGradient
+          colors={[Colors.green, Colors.green2]}
+          style={styles.successGradient}>
+          <Icon name="check" size={40} color={Colors.white} />
+        </LinearGradient>
+      </Animated.View>
+      
+      {/* Animated rings */}
+      <Animated.View
+        style={[
+          styles.ring1,
+          {
+            opacity: confettiAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 0.3],
+            }),
+            transform: [
+              {
+                scale: confettiAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.8, 1.2],
+                }),
+              },
+            ],
+          },
+        ]}
+      />
+      <Animated.View
+        style={[
+          styles.ring2,
+          {
+            opacity: confettiAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 0.2],
+            }),
+            transform: [
+              {
+                scale: confettiAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.6, 1.4],
+                }),
+              },
+            ],
+          },
+        ]}
+      />
+    </View>
+  );
+
+  // Background Pattern Component
+  const BackgroundPattern = () => (
+    <Animated.View
+      style={[
+        styles.backgroundPattern,
+        {
+          opacity: backgroundAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 0.05],
+          }),
+        },
+      ]}>
+      {[...Array(20)].map((_, index) => (
+        <View
+          key={index}
+          style={[
+            styles.patternDot,
+            {
+              left: Math.random() * width,
+              top: Math.random() * height,
+              backgroundColor: Colors.red,
+            },
+          ]}
+        />
+      ))}
+    </Animated.View>
+  );
+
   return (
     <View style={[styles.container, {paddingTop: insets.top}]}>
+      <BackgroundPattern />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
@@ -125,17 +231,7 @@ const ThankYou = props => {
             },
           ]}>
           {/* Success Animation */}
-          <Animated.View
-            style={[
-              styles.successContainer,
-              {
-                transform: [{scale: successScale}],
-              },
-            ]}>
-            <View style={styles.successCircle}>
-              <Icon name="check" size={40} color={Colors.white} />
-            </View>
-          </Animated.View>
+          <SuccessAnimation />
 
           {/* Thank You Text */}
           <Animated.View
@@ -325,7 +421,16 @@ const ThankYou = props => {
             </Pressable>
           </Animated.View>
 
-          
+          <Pressable
+            style={styles.trackButton}
+            onPress={() => navigation.navigate('TrackOrder', {orderId: info?.id})}>
+            <View style={styles.trackButtonContent}>
+              <Icon name="local-shipping" size={20} color={Colors.blue} />
+              <Text style={styles.trackButtonText} allowFontScaling={false}>
+                Track Order
+              </Text>
+            </View>
+          </Pressable>
         </Animated.View>
       </ScrollView>
     </View>
@@ -339,10 +444,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
+  backgroundPattern: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 0,
+  },
+  patternDot: {
+    position: 'absolute',
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+  },
   scrollContent: {
     flexGrow: 1,
     padding: 20,
     paddingBottom: 40,
+    zIndex: 1,
   },
   headerSection: {
     alignItems: 'center',
@@ -350,19 +470,44 @@ const styles = StyleSheet.create({
   },
   successContainer: {
     marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   successCircle: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: Colors.green,
-    alignItems: 'center',
-    justifyContent: 'center',
     shadowColor: Colors.green,
     shadowOffset: {width: 0, height: 8},
     shadowOpacity: 0.3,
     shadowRadius: 16,
     elevation: 8,
+    zIndex: 3,
+  },
+  successGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ring1: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 2,
+    borderColor: Colors.green,
+    zIndex: 2,
+  },
+  ring2: {
+    position: 'absolute',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    borderWidth: 1,
+    borderColor: Colors.green2,
+    zIndex: 1,
   },
   textContainer: {
     alignItems: 'center',

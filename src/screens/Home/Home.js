@@ -37,7 +37,6 @@ import AnimatedCartModal from './components/AnimatedCartModal';
 import AnimatedCartButton from '../../components/AnimatedCartButton';
 const API_TIMEOUT = 10000;
 
-
 const Home = () => {
   const inset = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -56,7 +55,6 @@ const Home = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
- 
   const userFullName = useMemo(() => {
     if (!userData) return '';
     return `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
@@ -64,8 +62,8 @@ const Home = () => {
 
   const userAddress = useMemo(() => {
     if (!userData?.address) return 'Default Address';
-    return userData.address.length > 25 
-      ? `${userData.address.slice(0, 25)}...` 
+    return userData.address.length > 25
+      ? `${userData.address.slice(0, 25)}...`
       : userData.address;
   }, [userData?.address]);
 
@@ -79,15 +77,17 @@ const Home = () => {
     return Math.min((milestone / 10) * 100, 100);
   }, [userData?.milestone]);
 
-  
   useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (isCartVisible) {
-        setIsCartVisible(false);
-        return true;
-      }
-      return false;
-    });
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        if (isCartVisible) {
+          setIsCartVisible(false);
+          return true;
+        }
+        return false;
+      },
+    );
 
     return () => backHandler.remove();
   }, [isCartVisible]);
@@ -101,11 +101,7 @@ const Home = () => {
   const loadInitialData = useCallback(async () => {
     try {
       setError(null);
-      await Promise.all([
-        getCartData(),
-        getHomePageData(),
-        getOffers(),
-      ]);
+      await Promise.all([getCartData(), getHomePageData(), getOffers()]);
     } catch (error) {
       console.error('Initial data loading error:', error);
       setError(error);
@@ -129,7 +125,7 @@ const Home = () => {
     try {
       const info = await AsyncStorage.getItem('userDetail');
       const token = JSON.parse(info)?.token;
-      
+
       if (!token) {
         console.warn('No token found for cart request');
         return;
@@ -158,7 +154,7 @@ const Home = () => {
   const getHomePageData = async () => {
     const data = await AsyncStorage.getItem('userDetail');
     const token = JSON.parse(data)?.token;
-    
+
     if (!token) {
       throw new Error('Authentication required');
     }
@@ -166,7 +162,7 @@ const Home = () => {
     const url = Constants.baseUrl2 + Constants.home;
     setLoading(true);
     setError(null);
-    
+
     try {
       const res = await axios.get(url, {
         headers: {
@@ -195,42 +191,37 @@ const Home = () => {
     }
   };
 
-  const handleRemoveItem = async itemId => {
-    try {
-      const info = await AsyncStorage.getItem('userDetail');
-      const token = JSON.parse(info)?.token;
-      
-      if (!token) {
-        showWarning('Authentication required');
-        return;
+  const handleRemoveItem = useCallback(
+    async itemId => {
+      try {
+        const info = await AsyncStorage.getItem('userDetail');
+        const token = JSON.parse(info)?.token;
+        const res = await axios.post(
+          Constants.baseUrl8 + Constants.deleteCart,
+          {id: itemId},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+        if (res?.data?.status === 200) {
+          getCartData();
+        }
+      } catch (error) {
+        showWarning(error.response?.data?.message || 'Error updating cart');
       }
+    },
+    [getCartData],
+  );
 
-      const url = Constants.baseUrl8 + Constants.deleteCart;
-      const data = {
-        id: itemId,
-      };
-      const res = await axios.post(url, data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: API_TIMEOUT,
-      });
-      if (res?.data?.status == 200) {
-        showSuccess('Item removed from cart');
-        getCartData();
-      }
-    } catch (error) {
-      console.error('Remove cart item error:', error);
-      showWarning(error.response?.data?.message || 'Error updating cart');
-    }
-  };
 
   const getOffers = async () => {
     try {
       const info = await AsyncStorage.getItem('userDetail');
       const token = JSON.parse(info)?.token;
-      
+
       if (!token) return;
 
       const url = Constants.baseUrl10 + Constants.latestOffers;
@@ -271,32 +262,35 @@ const Home = () => {
       'Convert Quiz Points',
       'Are you sure you want to convert 40 quiz points to 1 milestone?',
       [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Convert', 
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Convert',
           onPress: () => {
             // TODO: Implement conversion API call
             showSuccess('Quiz points converted successfully!');
-          }
-        }
-      ]
+          },
+        },
+      ],
     );
   }, [userData?.milestone]);
 
-  const handleRewardSelection = useCallback((rewardType) => {
-    Alert.alert(
-      'Reward Selected',
-      `You've selected: ${rewardType}`,
-      [
-        { text: 'OK', onPress: () => navigation.navigate('ScanCode') }
-      ]
-    );
-  }, [navigation]);
-
+  const handleRewardSelection = useCallback(
+    rewardType => {
+      Alert.alert('Reward Selected', `You've selected: ${rewardType}`, [
+        {text: 'OK', onPress: () => navigation.navigate('ScanCode')},
+      ]);
+    },
+    [navigation],
+  );
 
   if (error && !loading) {
     return (
-      <View style={[styles.container, styles.centerContent, {paddingTop: inset.top}]}>
+      <View
+        style={[
+          styles.container,
+          styles.centerContent,
+          {paddingTop: inset.top},
+        ]}>
         <Text style={styles.errorText}>Something went wrong</Text>
         <Pressable style={styles.retryButton} onPress={loadInitialData}>
           <Text style={styles.retryButtonText}>Retry</Text>
@@ -304,8 +298,6 @@ const Home = () => {
       </View>
     );
   }
-
-
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
@@ -399,11 +391,23 @@ const Home = () => {
                   return (
                     <Pressable
                       style={{flex: 1}}
-                      onPress={() =>
-                        navigation.navigate('WineDetail', {
-                          item: item?.product_id,
-                        })
-                      }>
+                      onPress={() => {
+                       
+                        if (item?.product_id !== null) {
+                          navigation.navigate('WineDetail', {
+                            item: item?.product_id,
+                          });
+                        } else {
+                         
+                          navigation.navigate('VendorDetail', {
+                            item: item,
+                            userCoordinates: {
+                              latitude: userData?.latitude,
+                              longitude: userData?.longitude,
+                            },
+                          });
+                        }
+                      }}>
                       <ImageBackground
                         source={{uri: item.image}}
                         style={styles.carouselImageBackground}
@@ -454,12 +458,7 @@ const Home = () => {
             </Text>
 
             <View style={styles.progressBarContainer}>
-              <View
-                style={[
-                  styles.progressBar,
-                  {width: `${quizProgress}%`},
-                ]}
-              />
+              <View style={[styles.progressBar, {width: `${quizProgress}%`}]} />
             </View>
 
             <View style={styles.quizButtonsContainer}>
@@ -499,10 +498,7 @@ const Home = () => {
             </Text>
             <View style={styles.progressBarContainer}>
               <View
-                style={[
-                  styles.progressBar,
-                  {width: `${milestoneProgress}%`},
-                ]}
+                style={[styles.progressBar, {width: `${milestoneProgress}%`}]}
               />
             </View>
 
@@ -514,7 +510,9 @@ const Home = () => {
 
                 <Pressable
                   style={styles.rewardOption}
-                  onPress={() => handleRewardSelection('20% Discount on Wine Products')}>
+                  onPress={() =>
+                    handleRewardSelection('20% Discount on Wine Products')
+                  }>
                   <Text style={styles.rewardText} allowFontScaling={false}>
                     📦 20% Discount on Wine Products
                   </Text>
@@ -522,7 +520,9 @@ const Home = () => {
 
                 <Pressable
                   style={styles.rewardOption}
-                  onPress={() => handleRewardSelection('£10 Voucher (Min Order £50)')}>
+                  onPress={() =>
+                    handleRewardSelection('£10 Voucher (Min Order £50)')
+                  }>
                   <Text style={styles.rewardText} allowFontScaling={false}>
                     🎫 £10 Voucher (Min Order £50)
                   </Text>
@@ -632,7 +632,7 @@ const Home = () => {
             <>
               <HeadingWithLink
                 title="New Arrival"
-                onPress={() => 
+                onPress={() =>
                   navigation.navigate('NewArrival', {
                     data: homeData?.newArrivals,
                   })
@@ -655,7 +655,9 @@ const Home = () => {
                     }
                   />
                 )}
-                keyExtractor={(item, index) => `newarrival-${item?.id || index}`}
+                keyExtractor={(item, index) =>
+                  `newarrival-${item?.id || index}`
+                }
               />
             </>
           )}
@@ -663,7 +665,7 @@ const Home = () => {
       </ScrollView>
 
       {cartData?.length > 0 && (
-       <AnimatedCartButton
+        <AnimatedCartButton
           count={cartData.length}
           onPress={() => setIsCartVisible(true)}
           label="View Cart"
@@ -680,8 +682,6 @@ const Home = () => {
           onRemoveItem={handleRemoveItem}
         />
       )}
-
-   
     </View>
   );
 };
@@ -962,5 +962,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  
 });
