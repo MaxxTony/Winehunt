@@ -2229,6 +2229,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-clipboard/clipboard@npm:^1.16.2":
+  version: 1.16.2
+  resolution: "@react-native-clipboard/clipboard@npm:1.16.2"
+  peerDependencies:
+    react: ">= 16.9.0"
+    react-native: ">= 0.61.5"
+    react-native-macos: ">= 0.61.0"
+    react-native-windows: ">= 0.61.0"
+  peerDependenciesMeta:
+    react-native-macos:
+      optional: true
+    react-native-windows:
+      optional: true
+  checksum: 4b5b2d9cdd3f1540af6cd8d1596a2e4acc85cb6bcad5778dd1b1eeb78265e326aec1f624efc8e1113cf36293902a84c5c6afa155a1e1434916c79eef6d09da3d
+  languageName: node
+  linkType: hard
+
 "@react-native-community/cli-clean@npm:11.3.10":
   version: 11.3.10
   resolution: "@react-native-community/cli-clean@npm:11.3.10"
@@ -2416,6 +2433,15 @@ __metadata:
   bin:
     react-native: build/bin.js
   checksum: 3cbe80cb5199afb1139927688655bd296bdb19d008a6d3693eb3f7f5d7954da910f2d7f8aaad8d34de8146380c27986c9d9bdd6c5419a832713717ef610d6316
+  languageName: node
+  linkType: hard
+
+"@react-native-community/datetimepicker@npm:^7.6.2":
+  version: 7.7.0
+  resolution: "@react-native-community/datetimepicker@npm:7.7.0"
+  dependencies:
+    invariant: ^2.2.4
+  checksum: c4bb18fea0a34124fe8ccc5f85f7d2a71224eeda716a4e38f4876c2e237bc82a9addd5f1889dc6037fdc8a9f3bd249d6dcf7c746f116f83d20fa323c8dbbbf33
   languageName: node
   linkType: hard
 
@@ -3205,6 +3231,8 @@ __metadata:
     "@gorhom/bottom-sheet": ^4.6.0
     "@invertase/react-native-apple-authentication": ^2.3.0
     "@react-native-async-storage/async-storage": ^2.1.0
+    "@react-native-clipboard/clipboard": ^1.16.2
+    "@react-native-community/datetimepicker": ^7.6.2
     "@react-native-community/geolocation": ^3.2.1
     "@react-native-firebase/app": ^18.7.3
     "@react-native-firebase/auth": ^18.7.3
@@ -3243,6 +3271,7 @@ __metadata:
     react-native-background-remover: ^0.3.2
     react-native-confirmation-code-field: ^7.4.0
     react-native-country-picker-modal: ^2.0.0
+    react-native-document-picker: ^9.3.1
     react-native-element-dropdown: ^2.12.4
     react-native-fbsdk-next: ^13.4.1
     react-native-fs: ^2.20.0
@@ -9479,6 +9508,22 @@ __metadata:
     react-native: "*"
     react-native-web: "*"
   checksum: e808169b45c5e8021462a6914f7c3fb28e84ae8d58097ed7b3418fee41efa2bc44012abc09ff3f3bd6ee14427b9efe1b0f8d8b3a19cc01325b2f2cd0137d5d00
+  languageName: node
+  linkType: hard
+
+"react-native-document-picker@npm:^9.3.1":
+  version: 9.3.1
+  resolution: "react-native-document-picker@npm:9.3.1"
+  dependencies:
+    invariant: ^2.2.4
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-windows: "*"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: 5979e4b93f15e0568ae70b70cc2304cd727f20939a58412d483517942df6d3cf3821319b3b7934bcaa2866ed1918ef9e8de9933ce6953209340abe3455403e0d
   languageName: node
   linkType: hard
 

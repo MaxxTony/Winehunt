@@ -51,6 +51,8 @@ const Constants = {
   orderStatus: 'update-order-status',
   latestOffers: 'latest-vendor-offers',
   createReview:"create-review",
+  reedemPoints:"redeem-points-manual"
+
 };
 
 export default Constants;
