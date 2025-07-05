@@ -55,6 +55,8 @@ const Home = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
+ 
+
   const userFullName = useMemo(() => {
     if (!userData) return '';
     return `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
@@ -266,8 +268,7 @@ const Home = () => {
         {
           text: 'Convert',
           onPress: () => {
-            // TODO: Implement conversion API call
-            showSuccess('Quiz points converted successfully!');
+            console.log("lp")
           },
         },
       ],
@@ -282,6 +283,7 @@ const Home = () => {
     },
     [navigation],
   );
+
 
   if (error && !loading) {
     return (
@@ -298,6 +300,7 @@ const Home = () => {
       </View>
     );
   }
+
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
@@ -375,7 +378,7 @@ const Home = () => {
                 loop
                 width={width - 40}
                 height={width / 2}
-                autoPlay={true}
+                // autoPlay={true}
                 data={offers}
                 scrollAnimationDuration={1000}
                 pagingEnabled={true}
@@ -392,6 +395,7 @@ const Home = () => {
                     <Pressable
                       style={{flex: 1}}
                       onPress={() => {
+                      
                        
                         if (item?.product_id !== null) {
                           navigation.navigate('WineDetail', {

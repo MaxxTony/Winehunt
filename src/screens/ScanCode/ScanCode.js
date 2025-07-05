@@ -62,14 +62,14 @@ const ScanCode = () => {
           onRedeemPress={() => setShowRedeemModal(true)}
           inset={inset}
         />
-        <View>
+        {/* <View>
           <WineHuntButton
             text="Vendor Self Acceptance"
             extraButtonStyle={styles.redeemButton}
             extraTextStyle={styles.redeemButtonText}
             onPress={() => setShowVendorSelfModal(true)}
           />
-        </View>
+        </View> */}
       </ScrollView>
       <RedeemModal
         visible={showRedeemModal}
