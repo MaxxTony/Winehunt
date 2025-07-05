@@ -3,7 +3,6 @@ import {
   Dimensions,
   FlatList,
   Image,
-  ImageBackground,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -15,7 +14,6 @@ import {
 import React, {useCallback, useEffect, useState, useMemo, useRef} from 'react';
 import {Colors, Fonts} from '../../constant/Styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import Carousel from 'react-native-reanimated-carousel';
 import {MultiSwitch} from 'react-native-multiswitch-selector';
 import HeadingWithLink from '../../components/HeadingWithLink';
 import NearVendorCards from './components/NearVendorCards';
@@ -35,6 +33,10 @@ import {useDispatch, useSelector} from 'react-redux';
 import {fetchProfile} from '../../redux/slices/profileSlice';
 import AnimatedCartModal from './components/AnimatedCartModal';
 import AnimatedCartButton from '../../components/AnimatedCartButton';
+import OffersCarousel from './components/OffersCarousel';
+import HomeHeader from './components/HomeHeader';
+import QuizMilestoneCard from './components/QuizMilestoneCard';
+import CategorySection from './components/CategorySection';
 const API_TIMEOUT = 10000;
 
 const Home = () => {
@@ -55,8 +57,6 @@ const Home = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
- 
-
   const userFullName = useMemo(() => {
     if (!userData) return '';
     return `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
@@ -70,14 +70,14 @@ const Home = () => {
   }, [userData?.address]);
 
   const quizProgress = useMemo(() => {
-    const milestone = userData?.milestone || 0;
-    return Math.min((milestone / 40) * 100, 100);
+    const quizPoints = userData?.milestone || 0;
+    return Math.min((quizPoints / 40) * 100, 100);
   }, [userData?.milestone]);
 
   const milestoneProgress = useMemo(() => {
-    const milestone = userData?.milestone || 0;
-    return Math.min((milestone / 10) * 100, 100);
-  }, [userData?.milestone]);
+    const milestonePoints = userData?.milestonePoints || 0;
+    return Math.min((milestonePoints / 10) * 100, 100);
+  }, [userData?.milestonePoints]);
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
@@ -95,10 +95,8 @@ const Home = () => {
   }, [isCartVisible]);
 
   useEffect(() => {
-    if (isFocused) {
-      loadInitialData();
-    }
-  }, [isFocused]);
+    loadInitialData();
+  }, []);
 
   const loadInitialData = useCallback(async () => {
     try {
@@ -218,7 +216,6 @@ const Home = () => {
     [getCartData],
   );
 
-
   const getOffers = async () => {
     try {
       const info = await AsyncStorage.getItem('userDetail');
@@ -246,44 +243,13 @@ const Home = () => {
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      await loadInitialData();
+      await Promise.all([loadInitialData()]);
     } catch (error) {
       console.error('Refresh error:', error);
     } finally {
       setIsRefreshing(false);
     }
   }, [loadInitialData]);
-
-  const handleConvertQuizPoints = useCallback(async () => {
-    if ((userData?.milestone || 0) < 40) {
-      showWarning('You need 40 quiz points to convert to milestone');
-      return;
-    }
-
-    Alert.alert(
-      'Convert Quiz Points',
-      'Are you sure you want to convert 40 quiz points to 1 milestone?',
-      [
-        {text: 'Cancel', style: 'cancel'},
-        {
-          text: 'Convert',
-          onPress: () => {
-            console.log("lp")
-          },
-        },
-      ],
-    );
-  }, [userData?.milestone]);
-
-  const handleRewardSelection = useCallback(
-    rewardType => {
-      Alert.alert('Reward Selected', `You've selected: ${rewardType}`, [
-        {text: 'OK', onPress: () => navigation.navigate('ScanCode')},
-      ]);
-    },
-    [navigation],
-  );
-
 
   if (error && !loading) {
     return (
@@ -304,54 +270,12 @@ const Home = () => {
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
-      <View style={styles.header}>
-        <Pressable onPress={() => navigation.navigate('Profile')}>
-          <Image
-            source={
-              userData && userData?.image !== null
-                ? {uri: userData?.image}
-                : require('./images/profile.png')
-            }
-            style={styles.profileImage}
-          />
-        </Pressable>
-        <View style={styles.userInfo}>
-          <Text style={styles.userName} allowFontScaling={false}>
-            {userFullName || 'Guest User'}
-          </Text>
-          <View style={styles.userLocationContainer}>
-            <Image
-              source={require('./images/location.png')}
-              style={styles.locationIcon}
-              resizeMode="contain"
-            />
-            <Text
-              style={styles.userLocationText}
-              numberOfLines={1}
-              allowFontScaling={false}>
-              {userAddress}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.actionIcons}>
-          <Pressable onPress={() => navigation.navigate('ScanCode')}>
-            <Image
-              source={
-                userData?.milestone >= 40
-                  ? require('./images/scanner.png')
-                  : require('./images/scanner2.png')
-              }
-              style={styles.icon}
-            />
-          </Pressable>
-          <Pressable onPress={() => navigation.navigate('Notifications')}>
-            <Image
-              source={require('./images/notification.png')}
-              style={styles.icon}
-            />
-          </Pressable>
-        </View>
-      </View>
+      <HomeHeader
+        userData={userData}
+        userFullName={userFullName}
+        userAddress={userAddress}
+        navigation={navigation}
+      />
       <ScrollView
         ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
@@ -364,217 +288,27 @@ const Home = () => {
             tintColor={Colors.red}
           />
         }>
-        {offers?.length > 0 && (
-          <View style={styles.carouselContainer}>
-            {loading ? (
-              <SkeletonPlaceholder borderRadius={10}>
-                <SkeletonPlaceholder.Item
-                  width={Dimensions.get('window').width - 40}
-                  height={220}
-                />
-              </SkeletonPlaceholder>
-            ) : (
-              <Carousel
-                loop
-                width={width - 40}
-                height={width / 2}
-                // autoPlay={true}
-                data={offers}
-                scrollAnimationDuration={1000}
-                pagingEnabled={true}
-                renderItem={({item}) => {
-                  const toDate = new Date(item.to_date);
-                  const formattedToDate = !isNaN(toDate)
-                    ? `${toDate.getDate().toString().padStart(2, '0')}/${(
-                        toDate.getMonth() + 1
-                      )
-                        .toString()
-                        .padStart(2, '0')}/${toDate.getFullYear()}`
-                    : 'N/A';
-                  return (
-                    <Pressable
-                      style={{flex: 1}}
-                      onPress={() => {
-                      
-                       
-                        if (item?.product_id !== null) {
-                          navigation.navigate('WineDetail', {
-                            item: item?.product_id,
-                          });
-                        } else {
-                         
-                          navigation.navigate('VendorDetail', {
-                            item: item,
-                            userCoordinates: {
-                              latitude: userData?.latitude,
-                              longitude: userData?.longitude,
-                            },
-                          });
-                        }
-                      }}>
-                      <ImageBackground
-                        source={{uri: item.image}}
-                        style={styles.carouselImageBackground}
-                        imageStyle={{borderRadius: 10}}>
-                        <View style={styles.carouselOverlay}>
-                          <View>
-                            {item.discount_value && (
-                              <View style={styles.discountBadge}>
-                                <Text style={styles.discountText}>
-                                  {item.discount_type === 'percentage'
-                                    ? `${item.discount_value}% OFF`
-                                    : `£${item.discount_value} OFF`}
-                                </Text>
-                              </View>
-                            )}
-                          </View>
-                          <View>
-                            {item.name ? (
-                              <Text style={styles.offerName}>{item.name}</Text>
-                            ) : null}
-                            <Text style={styles.offerDesc} numberOfLines={2}>
-                              {item.offer_desc}
-                            </Text>
-                            <View style={styles.offerFooter}>
-                              <Text style={styles.offerValidity}>
-                                Valid until: {formattedToDate}
-                              </Text>
-                            </View>
-                          </View>
-                        </View>
-                      </ImageBackground>
-                    </Pressable>
-                  );
-                }}
-              />
-            )}
-          </View>
-        )}
+        <OffersCarousel
+          offers={offers}
+          loading={loading}
+          navigation={navigation}
+          userData={userData}
+        />
 
-        <View style={styles.card}>
-          <View style={styles.quizInfo}>
-            <Text style={styles.title} allowFontScaling={false}>
-              Play Quiz
-            </Text>
-
-            <Text style={styles.milestoneText} allowFontScaling={false}>
-              Quiz Points: {userData?.milestone || 0} / 40
-            </Text>
-
-            <View style={styles.progressBarContainer}>
-              <View style={[styles.progressBar, {width: `${quizProgress}%`}]} />
-            </View>
-
-            <View style={styles.quizButtonsContainer}>
-              {(userData?.milestone || 0) >= 40 && (
-                <Pressable
-                  style={styles.convertButton}
-                  onPress={handleConvertQuizPoints}>
-                  <Text
-                    style={styles.convertButtonText}
-                    allowFontScaling={false}>
-                    Convert 40 Quiz Points to 1 Milestone
-                  </Text>
-                </Pressable>
-              )}
-
-              <Pressable
-                style={styles.button}
-                onPress={() => navigation.navigate('Quiz')}>
-                <Text style={styles.buttonText} allowFontScaling={false}>
-                  Start
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-
-        <View
-          style={[styles.card, {marginTop: 0, backgroundColor: Colors.blue}]}>
-          <View style={styles.quizInfo}>
-            <Text
-              style={[styles.title, {textAlign: 'center'}]}
-              allowFontScaling={false}>
-              Milestone Point Score
-            </Text>
-            <Text style={styles.milestoneText} allowFontScaling={false}>
-              Milestone: {userData?.milestone || 0} / 10 Points
-            </Text>
-            <View style={styles.progressBarContainer}>
-              <View
-                style={[styles.progressBar, {width: `${milestoneProgress}%`}]}
-              />
-            </View>
-
-            {(userData?.milestone || 0) >= 10 && (
-              <View style={styles.rewardContainer}>
-                <Text style={styles.rewardTitle} allowFontScaling={false}>
-                  🎉 Choose Your Reward:
-                </Text>
-
-                <Pressable
-                  style={styles.rewardOption}
-                  onPress={() =>
-                    handleRewardSelection('20% Discount on Wine Products')
-                  }>
-                  <Text style={styles.rewardText} allowFontScaling={false}>
-                    📦 20% Discount on Wine Products
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  style={styles.rewardOption}
-                  onPress={() =>
-                    handleRewardSelection('£10 Voucher (Min Order £50)')
-                  }>
-                  <Text style={styles.rewardText} allowFontScaling={false}>
-                    🎫 £10 Voucher (Min Order £50)
-                  </Text>
-                </Pressable>
-              </View>
-            )}
-          </View>
-        </View>
+        <QuizMilestoneCard
+          userData={userData}
+          navigation={navigation}
+          quizProgress={quizProgress}
+          milestoneProgress={milestoneProgress}
+        />
 
         <View style={styles.contentContainer}>
-          <MultiSwitch
-            allStates={['Wine types', 'Popular countries', 'Popular grapes']}
-            currentState={type}
-            changeState={setType}
-            mode="white"
-            styleRoot={styles.multiSwitchRoot}
-            styleAllStatesContainer={styles.multiSwitchContainer}
-            styleActiveState={styles.activeState}
-            styleActiveStateText={styles.activeStateText}
-            styleInactiveStateText={styles.inactiveStateText}
+          <CategorySection
+            categories={categories}
+            type={type}
+            setType={setType}
+            navigation={navigation}
           />
-          <View style={styles.listContainer}>
-            <FlatList
-              data={categories}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalList}
-              renderItem={({index, item}) => (
-                <Pressable
-                  style={styles.listItem}
-                  key={index}
-                  onPress={() =>
-                    navigation.navigate('WineList', {
-                      item: item,
-                    })
-                  }>
-                  <Image
-                    source={{uri: item.image}}
-                    style={styles.listItemImage}
-                  />
-                  <Text style={styles.listItemText} allowFontScaling={false}>
-                    {item?.name}
-                  </Text>
-                </Pressable>
-              )}
-              keyExtractor={(item, index) => `category-${item?.id || index}`}
-            />
-          </View>
           {homeData?.vendors?.length > 0 && (
             <>
               <HeadingWithLink
@@ -701,159 +435,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
-    padding: 20,
-    paddingVertical: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderColor: Colors.gray5,
-  },
-  profileImage: {
-    height: 40,
-    width: 40,
-    borderRadius: 50,
-  },
-  userInfo: {
-    flex: 1,
-    marginHorizontal: 10,
-  },
-  userName: {
-    fontSize: 16,
-    color: Colors.black,
-    fontFamily: Fonts.InterRegular,
-    fontWeight: '500',
-  },
-  userLocationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-  },
-  locationIcon: {
-    height: 15,
-    width: 15,
-  },
-  userLocationText: {
-    fontSize: 14,
-    color: Colors.black,
-    fontFamily: Fonts.InterRegular,
-    fontWeight: '500',
-  },
-  actionIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  icon: {
-    height: 40,
-    width: 40,
-  },
   scrollContent: {
     paddingBottom: 70,
-  },
-  carouselContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  carouselImageBackground: {
-    flex: 1,
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  carouselOverlay: {
-    flex: 1,
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    padding: 15,
-  },
-  offerName: {
-    color: Colors.white,
-    fontSize: 20,
-    fontWeight: 'bold',
-    fontFamily: Fonts.InterRegular,
-    marginBottom: 4,
-  },
-  offerDesc: {
-    color: Colors.white,
-    fontSize: 14,
-    fontFamily: Fonts.InterRegular,
-    marginBottom: 10,
-  },
-  offerValidity: {
-    color: '#f0f0f0',
-    fontSize: 12,
-    fontFamily: Fonts.InterRegular,
-    fontStyle: 'italic',
-  },
-  discountBadge: {
-    backgroundColor: Colors.red,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 5,
-    alignSelf: 'flex-start',
-  },
-  discountText: {
-    color: Colors.white,
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  offerFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
   contentContainer: {
     paddingHorizontal: 20,
   },
-  multiSwitchRoot: {
-    borderRadius: 10,
-    padding: 0,
-  },
-  multiSwitchContainer: {
-    backgroundColor: Colors.gray6,
-    borderRadius: 5,
-    borderWidth: 2,
-    borderColor: '#E6EBF1',
-    paddingHorizontal: 10,
-  },
-  activeState: {
-    backgroundColor: Colors.red,
-    borderRadius: 5,
-  },
-  activeStateText: {
-    fontFamily: Fonts.InterRegular,
-    color: Colors.white,
-    fontWeight: '500',
-    fontSize: 12,
-  },
-  inactiveStateText: {
-    color: Colors.black,
-    fontFamily: Fonts.InterRegular,
-    fontWeight: '500',
-    fontSize: 12,
-  },
-  listContainer: {
-    paddingVertical: 20,
-  },
-  horizontalList: {
-    gap: 10,
-  },
-  listItem: {
-    alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 10,
-  },
-  listItemImage: {
-    height: 60,
-    width: 60,
-    borderRadius: 100,
-  },
-  listItemText: {
-    fontSize: 14,
-    color: Colors.black,
-    fontFamily: Fonts.InterRegular,
-    fontWeight: '500',
-  },
+
   verticalList: {
     gap: 10,
     marginVertical: 15,
@@ -900,55 +488,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   progressBarContainer: {
-    height: 8,
-    backgroundColor: '#fff',
-    borderRadius: 5,
+    height: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 8,
     overflow: 'hidden',
   },
   progressBar: {
     height: '100%',
     backgroundColor: '#FFD700',
-  },
-  convertButton: {
-    backgroundColor: '#fff',
-    padding: 8,
     borderRadius: 8,
-    alignItems: 'center',
   },
-  convertButtonText: {
-    color: '#000',
-    fontWeight: 'bold',
-  },
-  quizButtonsContainer: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 10,
-    justifyContent: 'space-between',
-  },
-  rewardContainer: {
-    marginTop: 16,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
-  },
-  rewardTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  rewardOption: {
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 6,
-    marginVertical: 6,
-    width: '100%',
-  },
-  rewardText: {
-    textAlign: 'center',
-    color: '#333',
-  },
+
   errorText: {
     fontSize: 18,
     color: Colors.red,

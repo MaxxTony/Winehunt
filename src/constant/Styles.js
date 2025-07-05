@@ -27,6 +27,19 @@ export const Colors = {
   lightGreen: '#E8F5E8',
   lightBlue: '#E3F2FD',
   lightYellow: '#FFF8E1',
+  orange: '#FF6B35',
+  orange2: '#FF8C42',
+  purple: '#6C5CE7',
+  teal: '#00B894',
+  pink: '#FD79A8',
+  indigo: '#5F27CD',
+  amber: '#FFA726',
+  lime: '#CDDC39',
+  cyan: '#00BCD4',
+  deepOrange: '#FF5722',
+  lightGrey: '#F5F5F5',
+  darkGrey: '#424242',
+  mediumGrey: '#9E9E9E',
 };
 
 export const Fonts = {

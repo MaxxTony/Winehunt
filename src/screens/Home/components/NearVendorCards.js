@@ -4,6 +4,7 @@ import {Colors, Fonts} from '../../../constant/Styles';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import LinearGradient from 'react-native-linear-gradient';
 import haversine from 'haversine';
 
 const formatNumber = num => {
@@ -14,6 +15,7 @@ const formatNumber = num => {
 };
 
 const NearVendorCards = ({item, navigation, userCoordinates}) => {
+  console.log(item)
   const vendorCoordinates = {
     latitude: parseFloat(item?.latitude),
     longitude: parseFloat(item?.longitude),
@@ -44,124 +46,128 @@ const NearVendorCards = ({item, navigation, userCoordinates}) => {
     <Pressable
       style={styles.cardContainer}
       onPress={() => {
-        
         navigation.navigate('VendorDetail', {
           item: item,
           userCoordinates: userCoords,
         });
       }}>
-      {/* Background Image */}
-      <View style={styles.imageContainer}>
-        <Image
-          source={
-            item?.background
-              ? {uri: item?.background}
-              : require('../images/shopbg.png')
-          }
-          style={styles.backgroundImage}
-        />
-        <View style={styles.overlay} />
-
-        {/* Vendor Profile Image */}
-        <View style={styles.profileImageContainer}>
+      {/* Main Card with Gradient Background */}
+      <LinearGradient
+        colors={['#FFFFFF', '#F8F9FA']}
+        style={styles.gradientContainer}>
+        
+        {/* Header Section with Background Image */}
+        <View style={styles.headerSection}>
           <Image
             source={
-              item?.image ? {uri: item?.image} : require('../images/wine.png')
+              item?.background
+                ? {uri: item?.background}
+                : require('../images/shopbg.png')
             }
-            style={styles.profileImage}
+            style={styles.headerBackground}
           />
-        </View>
-
-        {/* Status Badge */}
-        <View style={styles.statusBadge}>
-          <View
-            style={[
-              styles.statusDot,
-              {
-                backgroundColor:
-                  item?.status === 1 ? Colors.green : Colors.gray,
-              },
-            ]}
+          <LinearGradient
+            colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.6)']}
+            style={styles.headerOverlay}
           />
-          <Text style={styles.statusText}>
-            {item?.status === 1 ? 'Open' : 'Closed'}
-          </Text>
-        </View>
-      </View>
-
-      {/* Content Section */}
-      <View style={styles.contentContainer}>
-        {/* Header */}
-        <View style={styles.headerSection}>
-          <View style={styles.titleContainer}>
-            <Text
-              style={styles.vendorName}
-              allowFontScaling={false}
-              numberOfLines={1}>
-              {item?.shop_name || 'Wine Shop'}
+          
+          {/* Status Badge */}
+          <View style={styles.statusBadge}>
+            <View
+              style={[
+                styles.statusDot,
+                {
+                  backgroundColor:
+                    item?.status === 1 ? '#10B981' : '#6B7280',
+                },
+              ]}
+            />
+            <Text style={styles.statusText}>
+              {item?.status === 1 ? 'Open Now' : 'Closed'}
             </Text>
           </View>
 
-          <View style={styles.distanceContainer}>
-            <Feather name="navigation" size={16} color={Colors.primary} />
-            <Text style={styles.distanceText} allowFontScaling={false}>
+          {/* Distance Badge */}
+          <View style={styles.distanceBadge}>
+            <Feather name="navigation" size={12} color="#FFFFFF" />
+            <Text style={styles.distanceText}>
               {formattedDistance} km
             </Text>
           </View>
         </View>
 
-        {/* Location */}
-        <View style={styles.locationContainer}>
-          <MaterialIcons name="location-on" size={16} color={Colors.gray7} />
-          <Text
-            style={styles.locationText}
-            allowFontScaling={false}
-            numberOfLines={1}>
-            {city || 'Noida, Uttar Pradesh'}
-          </Text>
-        </View>
-
-        {/* Contact Info */}
-        <View style={styles.contactContainer}>
-          {item?.phone && (
-            <View style={styles.contactItem}>
-              <Feather name="phone" size={14} color={Colors.gray7} />
-              <Text style={styles.contactText} allowFontScaling={false}>
-                {item?.country_code} {item?.phone}
+        {/* Content Section */}
+        <View style={styles.contentSection}>
+          {/* Vendor Info Row */}
+          <View style={styles.vendorInfoRow}>
+            <View style={styles.profileImageContainer}>
+              <Image
+                source={
+                  item?.image ? {uri: item?.image} : require('../images/wine.png')
+                }
+                style={styles.profileImage}
+              />
+              <View style={styles.onlineIndicator} />
+            </View>
+            
+            <View style={styles.vendorDetails}>
+              <Text style={styles.vendorName} numberOfLines={1}>
+                {item?.shop_name || 'Wine Shop'}
               </Text>
+              <View style={styles.locationRow}>
+                <MaterialIcons name="location-on" size={14} color="#6B7280" />
+                <Text style={styles.locationText} numberOfLines={1}>
+                  {city || 'Noida, Uttar Pradesh'}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Description */}
+          {item?.description && (
+            <Text style={styles.description} numberOfLines={2}>
+              {item?.description}
+            </Text>
+          )}
+
+          {/* Contact Info */}
+          {(item?.phone || item?.website) && (
+            <View style={styles.contactSection}>
+              {item?.phone && (
+                <View style={styles.contactItem}>
+                  <View style={styles.contactIcon}>
+                    <Feather name="phone" size={12} color="#6B7280" />
+                  </View>
+                  <Text style={styles.contactText} numberOfLines={1}>
+                    {item?.country_code} {item?.phone}
+                  </Text>
+                </View>
+              )}
+
+              {item?.website && (
+                <View style={styles.contactItem}>
+                  <View style={styles.contactIcon}>
+                    <Feather name="globe" size={12} color="#6B7280" />
+                  </View>
+                  <Text style={styles.contactText} numberOfLines={1}>
+                    {item?.website}
+                  </Text>
+                </View>
+              )}
             </View>
           )}
 
-          {item?.website && (
-            <View style={styles.contactItem}>
-              <Feather name="globe" size={14} color={Colors.gray7} />
-              <Text
-                style={styles.contactText}
-                allowFontScaling={false}
-                numberOfLines={1}>
-                {item?.website}
-              </Text>
-            </View>
-          )}
-        </View>
-        {/* Description */}
-        {item?.description && (
-          <Text
-            style={styles.description}
-            allowFontScaling={false}
-            numberOfLines={2}>
-            {item?.description}
-          </Text>
-        )}
-
-        {/* Action Button */}
-        <View style={styles.actionContainer}>
-          <View style={styles.viewDetailsButton}>
-            <Text style={styles.viewDetailsText}>View Details</Text>
-            <AntDesign name="arrowright" size={16} color={Colors.white} />
+          {/* Action Button */}
+          <View style={styles.actionSection}>
+            <LinearGradient
+                colors={[Colors.red, Colors.blue]}
+              style={styles.actionButton}>
+              <Text style={styles.actionButtonText}>View Details</Text>
+              <AntDesign name="arrowright" size={16} color="#FFFFFF" />
+            </LinearGradient>
           </View>
         </View>
-      </View>
+      </LinearGradient>
     </Pressable>
   );
 };
@@ -170,63 +176,44 @@ export default NearVendorCards;
 
 const styles = StyleSheet.create({
   cardContainer: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    marginHorizontal: 5,
+    marginHorizontal: 8,
     marginVertical: 8,
+    borderRadius: 20,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 8,
     },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 12,
     overflow: 'hidden',
   },
-  imageContainer: {
-    position: 'relative',
-    height: 120,
+  gradientContainer: {
+    borderRadius: 20,
+    overflow: 'hidden',
   },
-  backgroundImage: {
+  headerSection: {
+    position: 'relative',
+    height: 140,
+  },
+  headerBackground: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
   },
-  overlay: {
+  headerOverlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  },
-  profileImageContainer: {
-    position: 'absolute',
-    bottom: -30,
-    left: 16,
-    borderRadius: 50,
-    borderWidth: 4,
-    borderColor: Colors.white,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  profileImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 50,
   },
   statusBadge: {
     position: 'absolute',
-    top: 12,
-    right: 12,
-    backgroundColor: Colors.white,
+    top: 16,
+    left: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -250,107 +237,135 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 12,
     fontFamily: Fonts.InterMedium,
-    color: Colors.black,
+    color: '#1F2937',
   },
-  contentContainer: {
-    padding: 16,
-    paddingTop: 40,
-  },
-  headerSection: {
+  distanceBadge: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
+    alignItems: 'center',
+    gap: 4,
   },
-  titleContainer: {
-    flex: 1,
+  distanceText: {
+    color: '#FFFFFF',
+    fontFamily: Fonts.InterMedium,
+    fontSize: 11,
+  },
+  contentSection: {
+    padding: 20,
+  },
+  vendorInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  profileImageContainer: {
+    position: 'relative',
     marginRight: 12,
   },
+  profileImage: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  onlineIndicator: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#10B981',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  vendorDetails: {
+    flex: 1,
+  },
   vendorName: {
-    color: Colors.black,
+    color: '#1F2937',
     fontFamily: Fonts.InterBold,
     fontSize: 18,
     marginBottom: 4,
   },
-  ratingContainer: {
+  locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-  },
-  ratingText: {
-    color: Colors.black,
-    fontFamily: Fonts.InterMedium,
-    fontSize: 14,
-    marginLeft: 2,
-  },
-  reviewCount: {
-    color: Colors.gray7,
-    fontFamily: Fonts.InterRegular,
-    fontSize: 12,
-  },
-  distanceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.lightBlue,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    gap: 4,
-  },
-  distanceText: {
-    color: Colors.primary,
-    fontFamily: Fonts.InterMedium,
-    fontSize: 12,
-  },
-  description: {
-    color: Colors.gray7,
-    fontFamily: Fonts.InterRegular,
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 8,
   },
   locationText: {
-    color: Colors.gray7,
+    color: '#6B7280',
     fontFamily: Fonts.InterRegular,
     fontSize: 13,
     flex: 1,
   },
-  contactContainer: {
-    gap: 6,
+  description: {
+    color: '#4B5563',
+    fontFamily: Fonts.InterRegular,
+    fontSize: 14,
+    lineHeight: 20,
     marginBottom: 16,
+  },
+  contactSection: {
+    gap: 8,
+    marginBottom: 20,
   },
   contactItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-  },
-  contactText: {
-    color: Colors.gray7,
-    fontFamily: Fonts.InterRegular,
-    fontSize: 12,
-    flex: 1,
-  },
-  actionContainer: {
-    alignItems: 'flex-end',
-  },
-  viewDetailsButton: {
-    backgroundColor: Colors.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 25,
     gap: 8,
   },
-  viewDetailsText: {
-    color: Colors.white,
+  contactIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contactText: {
+    color: '#6B7280',
+    fontFamily: Fonts.InterRegular,
+    fontSize: 13,
+    flex: 1,
+  },
+  actionSection: {
+    alignItems: 'flex-end',
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 25,
+    gap: 8,
+    shadowColor: Colors.primary,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
     fontFamily: Fonts.InterMedium,
-    fontSize: 14,
+    fontSize: 15,
   },
 });

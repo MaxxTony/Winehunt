@@ -13,6 +13,7 @@ import {Colors, Fonts} from '../../../constant/Styles';
 const {width} = Dimensions.get('window');
 
 const NewArrivalCard = ({onPress, item}) => {
+ 
   const formatPrice = (price) => {
     return `£${parseFloat(price).toFixed(2)}`;
   };
