@@ -344,7 +344,7 @@ const VendorDetail = props => {
       const res = await axios.post(
         Constants.baseUrl5 + Constants.vendorDetail,
         {
-          vendor_id: data?.user_id || data?.id,
+          vendor_id: data?.user_id || data?.id  || data?.userId,
         },
         {
           headers: {

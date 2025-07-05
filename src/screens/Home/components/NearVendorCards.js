@@ -15,7 +15,7 @@ const formatNumber = num => {
 };
 
 const NearVendorCards = ({item, navigation, userCoordinates}) => {
-  console.log(item)
+  
   const vendorCoordinates = {
     latitude: parseFloat(item?.latitude),
     longitude: parseFloat(item?.longitude),
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.15,
     shadowRadius: 8,
-    elevation: 6,
+    // elevation: 6,
   },
   onlineIndicator: {
     position: 'absolute',

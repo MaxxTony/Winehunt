@@ -7,11 +7,12 @@ import {
   Animated,
   Dimensions,
   ScrollView,
+  BackHandler,
 } from 'react-native';
 import React, {useRef, useEffect} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors, Fonts} from '../../constant/Styles';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import Lottie from 'lottie-react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -23,6 +24,8 @@ const ThankYou = props => {
   const navigation = useNavigation();
   const info = props?.route?.params?.info;
 
+  console.log(info)
+
   // Animation refs
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -32,6 +35,21 @@ const ThankYou = props => {
   const buttonScale = useRef(new Animated.Value(1)).current;
   const confettiAnim = useRef(new Animated.Value(0)).current;
   const backgroundAnim = useRef(new Animated.Value(0)).current;
+  const checkmarkAnim = useRef(new Animated.Value(0)).current;
+
+  // Handle back button press
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("Home");
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [navigation])
+  );
 
   useEffect(() => {
     // Background animation
@@ -77,6 +95,15 @@ const ThankYou = props => {
 
     Animated.stagger(200, animations).start();
 
+    // Checkmark animation after success
+    setTimeout(() => {
+      Animated.timing(checkmarkAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }).start();
+    }, 800);
+
     // Confetti animation after success
     setTimeout(() => {
       Animated.timing(confettiAnim, {
@@ -102,7 +129,10 @@ const ThankYou = props => {
         friction: 8,
       }),
     ]).start(() => {
-      navigation.navigate('Home');
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'Home'}],
+      });
     });
   };
 
@@ -128,9 +158,10 @@ const ThankYou = props => {
     }
   };
 
-  // Custom Success Animation Component
+  // Enhanced Success Animation Component
   const SuccessAnimation = () => (
     <View style={styles.successContainer}>
+      {/* Main success circle */}
       <Animated.View
         style={[
           styles.successCircle,
@@ -141,7 +172,19 @@ const ThankYou = props => {
         <LinearGradient
           colors={[Colors.green, Colors.green2]}
           style={styles.successGradient}>
-          <Icon name="check" size={40} color={Colors.white} />
+          <Animated.View
+            style={{
+              transform: [
+                {
+                  scale: checkmarkAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 1],
+                  }),
+                },
+              ],
+            }}>
+            <Icon name="check" size={40} color={Colors.white} />
+          </Animated.View>
         </LinearGradient>
       </Animated.View>
       
@@ -184,6 +227,25 @@ const ThankYou = props => {
           },
         ]}
       />
+      <Animated.View
+        style={[
+          styles.ring3,
+          {
+            opacity: confettiAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 0.1],
+            }),
+            transform: [
+              {
+                scale: confettiAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.4, 1.6],
+                }),
+              },
+            ],
+          },
+        ]}
+      />
     </View>
   );
 
@@ -195,11 +257,11 @@ const ThankYou = props => {
         {
           opacity: backgroundAnim.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, 0.05],
+            outputRange: [0, 0.03],
           }),
         },
       ]}>
-      {[...Array(20)].map((_, index) => (
+      {[...Array(15)].map((_, index) => (
         <View
           key={index}
           style={[
@@ -390,7 +452,7 @@ const ThankYou = props => {
           </LinearGradient>
         </Animated.View>
 
-        {/* Action Buttons */}
+        {/* Action Button */}
         <Animated.View
           style={[
             styles.buttonContainer,
@@ -420,17 +482,6 @@ const ThankYou = props => {
               </LinearGradient>
             </Pressable>
           </Animated.View>
-
-          <Pressable
-            style={styles.trackButton}
-            onPress={() => navigation.navigate('TrackOrder', {orderId: info?.id})}>
-            <View style={styles.trackButtonContent}>
-              <Icon name="local-shipping" size={20} color={Colors.blue} />
-              <Text style={styles.trackButtonText} allowFontScaling={false}>
-                Track Order
-              </Text>
-            </View>
-          </Pressable>
         </Animated.View>
       </ScrollView>
     </View>
@@ -454,60 +505,71 @@ const styles = StyleSheet.create({
   },
   patternDot: {
     position: 'absolute',
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 20,
+    padding: 24,
     paddingBottom: 40,
     zIndex: 1,
   },
   headerSection: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 40,
+    marginTop: 20,
   },
   successContainer: {
-    marginBottom: 20,
+    marginBottom: 30,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
   successCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     shadowColor: Colors.green,
-    shadowOffset: {width: 0, height: 8},
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: {width: 0, height: 12},
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
+    elevation: 12,
     zIndex: 3,
   },
   successGradient: {
     width: '100%',
     height: '100%',
-    borderRadius: 50,
+    borderRadius: 60,
     alignItems: 'center',
     justifyContent: 'center',
   },
   ring1: {
     position: 'absolute',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
     borderWidth: 2,
     borderColor: Colors.green,
     zIndex: 2,
   },
   ring2: {
     position: 'absolute',
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
     borderWidth: 1,
     borderColor: Colors.green2,
     zIndex: 1,
+  },
+  ring3: {
+    position: 'absolute',
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    borderWidth: 1,
+    borderColor: Colors.green,
+    zIndex: 0,
   },
   textContainer: {
     alignItems: 'center',
@@ -515,41 +577,42 @@ const styles = StyleSheet.create({
   thankYouText: {
     fontFamily: Fonts.PhilosopherBold,
     color: Colors.black,
-    fontSize: 28,
+    fontSize: 32,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   subText: {
-    fontSize: 16,
+    fontSize: 18,
     color: Colors.gray7,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
     fontFamily: Fonts.InterMedium,
+    lineHeight: 24,
   },
   orderNumber: {
-    fontSize: 14,
+    fontSize: 16,
     color: Colors.red,
     fontFamily: Fonts.InterBold,
     textAlign: 'center',
   },
   orderCard: {
-    marginBottom: 30,
-    borderRadius: 20,
+    marginBottom: 40,
+    borderRadius: 24,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 8},
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: {width: 0, height: 12},
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 12,
   },
   cardGradient: {
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 24,
+    padding: 24,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 20,
   },
   headerRow: {
     flexDirection: 'row',
@@ -557,18 +620,18 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontFamily: Fonts.PhilosopherBold,
-    fontSize: 18,
+    fontSize: 20,
     color: Colors.black,
-    marginLeft: 10,
+    marginLeft: 12,
   },
   statusBadge: {
     backgroundColor: Colors.lightGreen,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 24,
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.green,
     fontFamily: Fonts.InterBold,
     textTransform: 'uppercase',
@@ -576,24 +639,24 @@ const styles = StyleSheet.create({
   separator: {
     height: 1,
     backgroundColor: Colors.gray3,
-    marginVertical: 15,
+    marginVertical: 20,
   },
   detailsSection: {
-    marginBottom: 10,
+    marginBottom: 15,
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   detailLabel: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.gray7,
     fontFamily: Fonts.InterMedium,
   },
   detailValue: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.black,
     fontFamily: Fonts.InterBold,
   },
@@ -602,107 +665,89 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 8,
   },
   transactionId: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.gray7,
     fontFamily: Fonts.InterMedium,
-    maxWidth: 120,
+    maxWidth: 140,
   },
   customerSection: {
-    marginBottom: 10,
+    marginBottom: 15,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.black,
     fontFamily: Fonts.InterBold,
-    marginLeft: 8,
+    marginLeft: 10,
   },
   customerInfo: {
-    marginLeft: 28,
+    marginLeft: 32,
   },
   customerName: {
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.black,
     fontFamily: Fonts.InterBold,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   customerEmail: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.gray7,
     fontFamily: Fonts.InterMedium,
-    marginBottom: 2,
+    marginBottom: 3,
   },
   customerPhone: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.gray7,
     fontFamily: Fonts.InterMedium,
   },
   addressSection: {
-    marginBottom: 10,
+    marginBottom: 15,
   },
   addressText: {
-    fontSize: 14,
+    fontSize: 15,
     color: Colors.gray7,
     fontFamily: Fonts.InterMedium,
-    marginBottom: 2,
-    marginLeft: 28,
+    marginBottom: 3,
+    marginLeft: 32,
   },
   buttonContainer: {
-    gap: 15,
+    alignItems: 'center',
   },
   buttonWrapper: {
-    borderRadius: 15,
+    borderRadius: 20,
     overflow: 'hidden',
     shadowColor: Colors.red,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOffset: {width: 0, height: 8},
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 12,
+    width: '100%',
   },
   continueButton: {
-    borderRadius: 15,
+    borderRadius: 20,
     overflow: 'hidden',
   },
   gradientButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: 18,
+    paddingHorizontal: 32,
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: 18,
     color: Colors.white,
     fontFamily: Fonts.InterBold,
-    marginLeft: 8,
-  },
-  trackButton: {
-    borderWidth: 2,
-    borderColor: Colors.blue,
-    borderRadius: 15,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  trackButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  trackButtonText: {
-    fontSize: 16,
-    color: Colors.blue,
-    fontFamily: Fonts.InterBold,
-    marginLeft: 8,
+    marginLeft: 10,
   },
 });

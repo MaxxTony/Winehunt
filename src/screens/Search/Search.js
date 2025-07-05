@@ -19,7 +19,11 @@ import {
 } from 'react-native';
 import {Colors, Fonts} from '../../constant/Styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useIsFocused,
+  useNavigation,
+} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
@@ -34,6 +38,8 @@ import {showWarning} from '../../helper/Toastify';
 import Geolocation from '@react-native-community/geolocation';
 import AnimatedCartModal from '../Home/components/AnimatedCartModal';
 import AnimatedCartButton from '../../components/AnimatedCartButton';
+import {fetchProfile} from '../../redux/slices/profileSlice';
+import {useDispatch, useSelector} from 'react-redux';
 
 // --- Debounce Hook ---
 function useDebounce(value, delay) {
@@ -165,33 +171,62 @@ const ProductList = React.memo(({products, loading, onRefresh, navigation}) =>
 );
 
 // --- MapProductMarkers Component ---
-const MapProductMarkers = React.memo(({region, allMarkers, mapViewRef}) => (
-  <MapView
-    ref={mapViewRef}
-    scrollEnabled
-    showsCompass
-    followsUserLocation
-    mapType="standard"
-    showsScale
-    zoomControlEnabled={true}
-    initialRegion={region}
-    provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
-    style={{height: '75%', width: '100%'}}>
-    {allMarkers.map((marker, index) => (
+const MapProductMarkers = React.memo(
+  ({region, allMarkers, mapViewRef, onMarkerPress}) => {
+    // Custom marker component
+    const CustomMarker = ({marker}) => (
       <Marker
-        key={index}
-        coordinate={{latitude: marker.latitude, longitude: marker.longitude}}>
+        coordinate={{latitude: marker.latitude, longitude: marker.longitude}}
+        title={marker.shopName}
+        tracksViewChanges={false}
+        description={marker.address}
+        onPress={() => onMarkerPress(marker)}>
+        <View style={styles.customMarkerContainer}>
+          <View style={styles.customMarker}>
+            <Text style={styles.markerText} allowFontScaling={false}>
+              {marker.shopName.charAt(0).toUpperCase()}
+            </Text>
+          </View>
+        </View>
         <Callout tooltip>
           <View style={styles.calloutContainer}>
             <Text style={styles.shopName} allowFontScaling={false}>
               {marker.shopName}
             </Text>
+            {marker.address && (
+              <Text style={styles.shopAddress} allowFontScaling={false}>
+                {marker.address}
+              </Text>
+            )}
+            {marker.shopType && (
+              <Text style={styles.shopType} allowFontScaling={false}>
+                {marker.shopType}
+              </Text>
+            )}
           </View>
         </Callout>
       </Marker>
-    ))}
-  </MapView>
-));
+    );
+
+    return (
+      <MapView
+        ref={mapViewRef}
+        scrollEnabled
+        showsCompass
+        followsUserLocation
+        mapType="standard"
+        showsScale
+        zoomControlEnabled={true}
+        initialRegion={region}
+        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+        style={{height: '75%', width: '100%'}}>
+        {allMarkers.map((marker, index) => (
+          <CustomMarker key={`${marker.userId}-${index}`} marker={marker} />
+        ))}
+      </MapView>
+    );
+  },
+);
 
 // --- CartButton Component ---
 const CartButton = React.memo(({count, onPress}) => (
@@ -237,9 +272,13 @@ const Search = () => {
   const [homeData, setHomeData] = useState([]);
   const [filterModal, setFilterModal] = useState(false);
 
+  const dispatch = useDispatch();
+  const {userData} = useSelector(state => state.profile);
+
   // Debounced search text for API call
   const debouncedSearchText = useDebounce(searchText, 400);
 
+  // console.log(allMarkers)
   // --- Fetch Cart Data ---
   const getCartData = useCallback(async () => {
     try {
@@ -274,6 +313,7 @@ const Search = () => {
         latest: true,
         filter_by: type === 'Popular' ? 'popular' : 'top_rated',
       };
+    
       const res = await axios.post(url, info, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -282,7 +322,6 @@ const Search = () => {
       });
       if (res?.status === 200) {
         setProducts(res?.data?.products);
-        // Memoize unique markers
         const uniqueMarkers = {};
         res?.data?.products.forEach(item => {
           const userId = item?.user?.id;
@@ -290,6 +329,10 @@ const Search = () => {
             let latitude = parseFloat(item?.user?.latitude);
             let longitude = parseFloat(item?.user?.longitude);
             const shopName = item?.user?.shop_name || 'Unknown Shop';
+            const address = item?.user?.address || '';
+            const shopType = item?.user?.vendor_shop_type?.name || '';
+            const shopEmail = item?.user?.shop_email || '';
+
             if (
               !latitude ||
               !longitude ||
@@ -299,7 +342,15 @@ const Search = () => {
               latitude = 28.625986666666666;
               longitude = 77.38616833333333;
             }
-            uniqueMarkers[userId] = {latitude, longitude, shopName};
+            uniqueMarkers[userId] = {
+              userId,
+              latitude,
+              longitude,
+              shopName,
+              address,
+              shopType,
+              shopEmail,
+            };
           }
         });
         setAllMarkers(Object.values(uniqueMarkers));
@@ -336,7 +387,7 @@ const Search = () => {
         setLocationError(error.message || 'Location error');
       },
       {
-        enableHighAccuracy: true,
+        enableHighAccuracy: Platform.OS == 'ios' ? true : false,
         timeout: 10000,
       },
     );
@@ -374,7 +425,13 @@ const Search = () => {
   // --- Effects ---
   useEffect(() => {
     getProducts();
-  }, [isFocused,type]);
+  }, [isFocused, type]);
+
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchProfile());
+    }, [dispatch]),
+  );
 
   useEffect(() => {
     getCartData();
@@ -382,24 +439,60 @@ const Search = () => {
     getHomePageData();
   }, [isFocused]);
 
- 
- 
-
-  // Fit map to markers when markers change
+  // Fit map to markers when markers change AND map is visible
   useEffect(() => {
-    if (allMarkers.length > 0 && mapViewRef.current) {
-      mapViewRef.current.fitToCoordinates(
-        allMarkers.map(marker => ({
-          latitude: marker.latitude,
-          longitude: marker.longitude,
-        })),
-        {
-          edgePadding: {top: 50, right: 50, bottom: 50, left: 50},
-          animated: true,
-        },
-      );
+    if (allMarkers.length > 0 && mapViewRef.current && showMapType) {
+      const coordinates = allMarkers.map(marker => ({
+        latitude: marker.latitude,
+        longitude: marker.longitude,
+      }));
+
+      // Calculate bounds for better fitting
+      const latitudes = coordinates.map(coord => coord.latitude);
+      const longitudes = coordinates.map(coord => coord.longitude);
+
+      const minLat = Math.min(...latitudes);
+      const maxLat = Math.max(...latitudes);
+      const minLng = Math.min(...longitudes);
+      const maxLng = Math.max(...longitudes);
+
+      const latDelta = (maxLat - minLat) * 1.5; // Add 50% padding
+      const lngDelta = (maxLng - minLng) * 1.5;
+
+      // Ensure minimum zoom level
+      const minDelta = 0.01;
+      const finalLatDelta = Math.max(latDelta, minDelta);
+      const finalLngDelta = Math.max(lngDelta, minDelta);
+
+      const centerLat = (minLat + maxLat) / 2;
+      const centerLng = (minLng + maxLng) / 2;
+
+      const newRegion = {
+        latitude: centerLat,
+        longitude: centerLng,
+        latitudeDelta: finalLatDelta,
+        longitudeDelta: finalLngDelta,
+      };
+
+      mapViewRef.current.animateToRegion(newRegion, 1000);
     }
-  }, [allMarkers]);
+  }, [allMarkers, showMapType]);
+
+  // --- Handle Marker Press ---
+  const handleMarkerPress = useCallback(marker => {
+    const userCoords = {
+      latitude: parseFloat(userData?.latitude),
+      longitude: parseFloat(userData?.longitude),
+    };
+
+    console.log('Marker pressed:', marker);
+    navigation.navigate('VendorDetail', {
+      item: marker,
+      userCoordinates: userCoords,
+    });
+    // You can add navigation logic here to show vendor details
+    // navigation.navigate('VendorDetail', { vendorId: marker.userId });
+  }, []);
 
   // --- Remove Item from Cart ---
   const handleRemoveItem = useCallback(
@@ -455,11 +548,20 @@ const Search = () => {
         </View>
       )}
       {showMapType ? (
-        <MapProductMarkers
-          region={region}
-          allMarkers={allMarkers}
-          mapViewRef={mapViewRef}
-        />
+        allMarkers.length === 0 ? (
+          <View style={styles.noMarkersContainer}>
+            <Text style={styles.noMarkersText} allowFontScaling={false}>
+              No vendors found in this area
+            </Text>
+          </View>
+        ) : (
+          <MapProductMarkers
+            region={region}
+            allMarkers={allMarkers}
+            mapViewRef={mapViewRef}
+            onMarkerPress={handleMarkerPress}
+          />
+        )
       ) : (
         <ProductList
           products={products}
@@ -474,9 +576,8 @@ const Search = () => {
         onClose={() => setFilterModal(false)}
         onApplyFilters={filters => {
           console.log(filters, 'lolo');
-          // TODO: Use filters to update product search
           setFilterModal(false);
-          getProducts()
+          getProducts();
         }}
       />
       {cartData?.length > 0 && (
@@ -601,18 +702,80 @@ const styles = StyleSheet.create({
   },
   calloutContainer: {
     backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 10,
-    elevation: 5, // Shadow for Android
+    padding: 15,
+    borderRadius: 12,
+    elevation: 8, // Shadow for Android
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    minWidth: 200,
+    maxWidth: 250,
   },
   shopName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: Colors.black,
     textAlign: 'center',
+    marginBottom: 4,
+    fontFamily: Fonts.InterRegular,
+  },
+  customMarkerContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.blue,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  customMarker: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.blue,
+  },
+  markerText: {
+    fontFamily: Fonts.InterRegular,
+    color: Colors.blue,
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  shopAddress: {
+    fontSize: 12,
+    color: Colors.gray4,
+    textAlign: 'center',
+    marginBottom: 2,
+    fontFamily: Fonts.InterRegular,
+  },
+  shopType: {
+    fontSize: 12,
+    color: Colors.blue,
+    textAlign: 'center',
+    fontFamily: Fonts.InterRegular,
+    fontWeight: '500',
+  },
+  noMarkersContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+  },
+  noMarkersText: {
+    fontSize: 16,
+    color: Colors.gray4,
+    textAlign: 'center',
+    fontFamily: Fonts.InterRegular,
   },
 });

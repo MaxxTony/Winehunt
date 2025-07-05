@@ -98,6 +98,12 @@ const Home = () => {
     loadInitialData();
   }, []);
 
+  useEffect(() => {
+    if (isFocused) {
+      getCartData();
+    }
+  }, [isFocused]);
+
   const loadInitialData = useCallback(async () => {
     try {
       setError(null);
@@ -266,7 +272,6 @@ const Home = () => {
       </View>
     );
   }
-
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
