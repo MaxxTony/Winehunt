@@ -261,7 +261,7 @@ const Search = () => {
   const isFocused = useIsFocused();
   const [region, setRegion] = useState(null);
   const [searchText, setSearchText] = useState('');
-  const [type, setType] = useState('Popular');
+  const [type, setType] = useState('Top Rated');
   const [showMapType, setShowMapType] = useState(false);
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
@@ -271,6 +271,7 @@ const Search = () => {
   const [locationError, setLocationError] = useState(null);
   const [homeData, setHomeData] = useState([]);
   const [filterModal, setFilterModal] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState(null);
 
   const dispatch = useDispatch();
   const {userData} = useSelector(state => state.profile);
@@ -278,7 +279,7 @@ const Search = () => {
   // Debounced search text for API call
   const debouncedSearchText = useDebounce(searchText, 400);
 
-  // console.log(allMarkers)
+  console.log(products)
   // --- Fetch Cart Data ---
   const getCartData = useCallback(async () => {
     try {
@@ -303,16 +304,78 @@ const Search = () => {
       setLoading(true);
       const data = await AsyncStorage.getItem('userDetail');
       const token = JSON.parse(data)?.token;
+    
       const url = Constants.baseUrl4 + Constants.searchProducts;
+      
+      // Base info object
       const info = {
         search_name: debouncedSearchText,
-        shop_type: '',
-        product_type: '',
-        categories: '',
-        price_range: 'high_to_low',
-        latest: true,
         filter_by: type === 'Popular' ? 'popular' : 'top_rated',
       };
+
+      // Apply filters if available and have meaningful values
+      if (appliedFilters) {
+        // Helper function to check if array has meaningful values
+        const hasMeaningfulValues = (arr) => arr && Array.isArray(arr) && arr.length > 0;
+        
+        // Helper function to check if value is not null/undefined/empty
+        const hasValue = (value) => value !== null && value !== undefined && value !== '';
+
+        // Map sortBy to appropriate parameters
+        if (hasValue(appliedFilters.sortBy)) {
+          switch (appliedFilters.sortBy) {
+            case 'Low to High (Price)':
+              info.price_range = 'low_to_high';
+              break;
+            case 'High to Low (Price)':
+              info.price_range = 'high_to_low';
+              break;
+            default:
+              // Default to the current type selection
+              info.filter_by = type === 'Popular' ? 'popular' : 'top_rated';
+          }
+        } else {
+          // Default to the current type selection when no sortBy is selected
+          info.filter_by = type === 'Popular' ? 'popular' : 'top_rated';
+        }
+
+        // Map New Arrival (only if true)
+        if (appliedFilters.hasNewArrival === true) {
+          info.latest = true;
+        }
+
+        // Map wine types (only if array has values)
+        if (hasMeaningfulValues(appliedFilters.wineTypes)) {
+          info.product_type = appliedFilters.wineTypes;
+        }
+
+        // Map grapes types (only if array has values)
+        if (hasMeaningfulValues(appliedFilters.grapesTypes)) {
+          info.categories = appliedFilters.grapesTypes;
+        }
+
+        // Map popular countries (only if array has values)
+        if (hasMeaningfulValues(appliedFilters.popularCountry)) {
+          info.shop_type = appliedFilters.popularCountry;
+        }
+
+        // Map average rating (only if has meaningful value)
+        if (hasValue(appliedFilters.averageRating)) {
+          info.average_rating = appliedFilters.averageRating;
+        }
+
+        // Map milestone rewards (only if true)
+        if (appliedFilters.hasMilestoneRewards === true) {
+          info.has_milestone_rewards = true;
+        }
+
+        // Map offers (only if true)
+        if (appliedFilters.hasOffers === true) {
+          info.has_offers = true;
+        }
+      }
+
+      console.log('API Request Parameters:', info)
     
       const res = await axios.post(url, info, {
         headers: {
@@ -366,7 +429,7 @@ const Search = () => {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearchText, type]);
+  }, [debouncedSearchText, type, appliedFilters]);
 
   // --- Get Current Position (debounced) ---
   const getCurrentPosition = useCallback(() => {
@@ -425,7 +488,7 @@ const Search = () => {
   // --- Effects ---
   useEffect(() => {
     getProducts();
-  }, [isFocused, type]);
+  }, [isFocused, type, debouncedSearchText, appliedFilters]);
 
   useFocusEffect(
     useCallback(() => {
@@ -575,9 +638,9 @@ const Search = () => {
         data={homeData}
         onClose={() => setFilterModal(false)}
         onApplyFilters={filters => {
-          console.log(filters, 'lolo');
+          console.log(filters)
+          setAppliedFilters(filters);
           setFilterModal(false);
-          getProducts();
         }}
       />
       {cartData?.length > 0 && (

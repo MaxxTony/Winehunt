@@ -299,11 +299,9 @@ const SkeletonLoader = () => {
 const VendorDetail = props => {
   const navigation = useNavigation();
   const data = props?.route?.params?.item;
-  console.log(data,"vendor k liye data")
   const isFocused = useIsFocused();
   const userCoords = props?.route?.params?.userCoordinates;
   const inset = useSafeAreaInsets();
-
   const [loading, setLoading] = useState(false);
   const [detail, setDetail] = useState(null);
   const [likedItems, setLikedItems] = useState({});

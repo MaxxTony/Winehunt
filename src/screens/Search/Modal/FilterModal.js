@@ -28,6 +28,7 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
     popularCountry: [],
     hasMilestoneRewards: false,
     hasOffers: false,
+    hasNewArrival: false,
     averageRating: null,
   });
 
@@ -62,14 +63,12 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
   }, [visible]);
 
   const sortByList = [
-    {id: 1, name: 'Popular'},
-    {id: 2, name: 'New Arrival'},
     {id: 3, name: 'Low to High (Price)'},
     {id: 4, name: 'High to Low (Price)'},
   ];
 
-  const handleSortBy = id => {
-    setFilters(prev => ({...prev, sortBy: id}));
+  const handleSortBy = (id, name) => {
+    setFilters(prev => ({...prev, sortBy: name}));
   };
 
   const handleSwitch = (key, value) => {
@@ -84,6 +83,7 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
       popularCountry: [],
       hasMilestoneRewards: false,
       hasOffers: false,
+      hasNewArrival: false,
       averageRating: null,
     });
   };
@@ -384,20 +384,42 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
                 />
               </View>
               <View style={styles.divider} />
+              {/* New Arrival */}
+              <View style={styles.switchRow}>
+                <MaterialCommunityIcons
+                  name="new-box"
+                  size={26}
+                  color={filters.hasNewArrival ? Colors.red : Colors.gray14}
+                />
+                <Text style={styles.switchLabel} allowFontScaling={false}>
+                  New Arrival
+                </Text>
+                <Switch
+                  value={filters.hasNewArrival}
+                  onValueChange={val =>
+                    handleSwitch('hasNewArrival', val)
+                  }
+                  thumbColor={
+                    filters.hasNewArrival
+                      ? Colors.red
+                      : Platform.OS === 'android'
+                      ? Colors.gray5
+                      : undefined
+                  }
+                  trackColor={{false: Colors.gray14, true: Colors.red + '55'}}
+                />
+              </View>
+              <View style={styles.divider} />
               <Text style={styles.subTitle} allowFontScaling={false}>
-                Sort By
+                Price Range
               </Text>
               <View style={styles.priceChipRow}>
                 {sortByList.map(item =>
                   renderSortChip(
-                    filters.sortBy === item.id,
-                    () => handleSortBy(item.id),
+                    filters.sortBy === item.name,
+                    () => handleSortBy(item.id, item.name),
                     item.name,
-                    item.id === 1
-                      ? 'fire'
-                      : item.id === 2
-                      ? 'new-box'
-                      : item.id === 3
+                    item.id === 3
                       ? 'arrow-down-bold'
                       : item.id === 4
                       ? 'arrow-up-bold'
