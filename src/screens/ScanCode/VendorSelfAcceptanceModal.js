@@ -5,6 +5,7 @@ import { Colors, Fonts } from '../../constant/Styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from '../../helper/Constant';
 import axios from 'axios';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const VendorSelfAcceptanceModal = ({ visible, onClose, userData }) => {
   const [step, setStep] = useState(1);
@@ -81,20 +82,29 @@ const VendorSelfAcceptanceModal = ({ visible, onClose, userData }) => {
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={styles.modalContainer}>
-          <Pressable style={styles.closeBtn} onPress={onClose}>
+          <Pressable style={styles.closeBtn} onPress={onClose} accessibilityLabel="Close modal">
             <Text style={styles.closeIcon}>×</Text>
           </Pressable>
+          {/* Step Indicator */}
+          <View style={styles.stepIndicatorContainer}>
+            <Text style={styles.stepIndicatorText}>Step {step} of 2</Text>
+          </View>
           {step === 1 && (
             <>
               <Text style={styles.title}>Which vendor are you visiting?</Text>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search vendor..."
-                placeholderTextColor="#aaa"
-                value={search}
-                onChangeText={setSearch}
-                autoFocus
-              />
+              <Text style={styles.subtitle}>Select the vendor you are currently visiting from the list below.</Text>
+              <View style={styles.searchInputWrapper}>
+                <Ionicons name="search" size={20} color="#aaa" style={styles.searchIcon} />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search vendor..."
+                  placeholderTextColor="#aaa"
+                  value={search}
+                  onChangeText={setSearch}
+                  autoFocus
+                  accessibilityLabel="Search vendor"
+                />
+              </View>
               {loading ? (
                 <ActivityIndicator color={Colors.red} />
               ) : filteredVendors.length === 0 ? (
@@ -102,6 +112,7 @@ const VendorSelfAcceptanceModal = ({ visible, onClose, userData }) => {
               ) : (
                 <FlatList
                   data={filteredVendors}
+                  showsVerticalScrollIndicator={false}
                   keyExtractor={item => item.id?.toString()}
                   renderItem={({ item }) => (
                     <Pressable
@@ -110,13 +121,21 @@ const VendorSelfAcceptanceModal = ({ visible, onClose, userData }) => {
                         selectedVendor?.id === item.id && styles.vendorItemSelected,
                       ]}
                       onPress={() => setSelectedVendor(item)}
+                      accessibilityLabel={`Select vendor ${item.shop_name}`}
                     >
-                      <Text style={[
-                        styles.vendorName,
-                        { color: selectedVendor?.id === item.id ? Colors.white : Colors.black }
-                      ]}>{item.shop_name}</Text>
+                      <View style={styles.vendorRow}>
+                        {/* Optionally add vendor avatar here */}
+                        <Text style={[
+                          styles.vendorName,
+                          { color: selectedVendor?.id === item.id ? Colors.white : Colors.black }
+                        ]}>{item.shop_name}</Text>
+                        {selectedVendor?.id === item.id && (
+                          <Ionicons name="checkmark-circle" size={20} color={Colors.white} style={{ marginLeft: 8 }} />
+                        )}
+                      </View>
                     </Pressable>
                   )}
+                  ItemSeparatorComponent={() => <View style={styles.vendorDivider} />}
                   style={{ maxHeight: 220, width: '100%' }}
                   keyboardShouldPersistTaps="handled"
                 />
@@ -127,45 +146,57 @@ const VendorSelfAcceptanceModal = ({ visible, onClose, userData }) => {
                 extraTextStyle={styles.buttonText}
                 onPress={() => setStep(2)}
                 disabled={!selectedVendor}
+                accessibilityLabel="Go to bill confirmation"
               />
             </>
           )}
           {step === 2 && (
             <View style={styles.billCardContainer}>
               <Text style={styles.billTitle}>Bill Amount Confirmation</Text>
+              <Text style={styles.subtitle}>Please confirm the customer's bill amount to apply the correct reward.</Text>
               <View style={styles.billCard}>
                 <Text style={styles.mandatoryLabel}>Mandatory Question:</Text>
                 <Text style={styles.billQuestion}>Is the customer's bill over £70?</Text>
                 <View style={{ marginVertical: 10 }}>
-                  <Text style={styles.bulletText}>{'\u2022'} If Click Yes, Customer Achieve a +5 Points</Text>
-                  <Text style={styles.bulletText}>{'\u2022'} If Click No, Customer Achieve a +3 Points</Text>
+                  <Text style={styles.bulletText}>{'\u2022'} If Yes, Customer Achieves +5 Points</Text>
+                  <Text style={styles.bulletText}>{'\u2022'} If No, Customer Achieves +3 Points</Text>
                 </View>
                 <View style={styles.optionsRow}>
                   <Pressable
-                    style={[styles.optionBtn, billOver70 === true && styles.optionBtnSelected]}
+                    style={[styles.radioBtn, billOver70 === true && styles.radioBtnSelected]}
                     onPress={() => setBillOver70(true)}
+                    accessibilityLabel="Bill is over £70"
                   >
-                    <Text style={[styles.optionCheck, billOver70 === true && styles.optionCheckSelected]}>✓</Text>
+                    <View style={[styles.radioCircle, billOver70 === true && styles.radioCircleSelected]}>
+                      {billOver70 === true && <View style={styles.radioDot} />}
+                    </View>
                     <Text style={styles.optionLabel}>Yes</Text>
                   </Pressable>
                   <Pressable
-                    style={[styles.optionBtn, billOver70 === false && styles.optionBtnSelected]}
+                    style={[styles.radioBtn, billOver70 === false && styles.radioBtnSelected]}
                     onPress={() => setBillOver70(false)}
+                    accessibilityLabel="Bill is not over £70"
                   >
-                    <Text style={[styles.optionCheck, billOver70 === false && styles.optionCheckSelected]}></Text>
+                    <View style={[styles.radioCircle, billOver70 === false && styles.radioCircleSelected]}>
+                      {billOver70 === false && <View style={styles.radioDot} />}
+                    </View>
                     <Text style={styles.optionLabel}>No</Text>
                   </Pressable>
                 </View>
                 <WineHuntButton
                   text={submitting ? 'Submitting...' : 'Submit'}
-                  extraButtonStyle={styles.button}
+                  extraButtonStyle={[styles.button, submitting && styles.buttonDisabled]}
                   extraTextStyle={styles.buttonText}
                   onPress={handleSubmit}
                   disabled={billOver70 === null || submitting}
+                  accessibilityLabel="Submit bill confirmation"
                 />
               </View>
               {success && (
-                <Text style={styles.successText}>Reward accepted and applied!</Text>
+                <View style={styles.successContainer}>
+                  <Ionicons name="checkmark-circle" size={32} color={Colors.green} />
+                  <Text style={styles.successText}>Reward accepted and applied!</Text>
+                </View>
               )}
             </View>
           )}
@@ -274,7 +305,7 @@ const styles = StyleSheet.create({
     borderColor: '#e0e0e0',
     borderRadius: 10,
     padding: 10,
-    marginBottom: 10,
+    paddingLeft: 38,
     fontSize: 16,
     fontFamily: Fonts.InterMedium,
     color: Colors.black,
@@ -373,6 +404,96 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: Fonts.InterMedium,
     color: Colors.black,
+  },
+  stepIndicatorContainer: {
+    width: '100%',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+  stepIndicatorText: {
+    fontSize: 14,
+    color: '#888',
+    fontFamily: Fonts.InterMedium,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#666',
+    fontFamily: Fonts.InterMedium,
+    marginBottom: 8,
+    textAlign: 'center',
+    width: '100%',
+  },
+  searchInputWrapper: {
+    width: '100%',
+    position: 'relative',
+    marginBottom: 10,
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: 12,
+    top: 14,
+    zIndex: 2,
+  },
+  vendorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  vendorDivider: {
+    height: 1,
+    backgroundColor: '#f0f0f0',
+    width: '100%',
+  },
+  radioBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: '#fff',
+    minWidth: 90,
+  },
+  radioBtnSelected: {
+    borderColor: Colors.green,
+    backgroundColor: '#eaffea',
+  },
+  radioCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: '#ccc',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+    backgroundColor: '#fff',
+  },
+  radioCircleSelected: {
+    borderColor: Colors.green,
+    backgroundColor: '#eaffea',
+  },
+  radioDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.green,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  successContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    backgroundColor: '#eaffea',
+    borderRadius: 10,
+    padding: 10,
+    gap: 8,
   },
 });
 

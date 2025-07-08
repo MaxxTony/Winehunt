@@ -1,22 +1,61 @@
-import React from 'react';
-import {View, Text, Pressable, Alert} from 'react-native';
+import React, { useState } from 'react';
+import {View, Text, Pressable, Alert, ActivityIndicator} from 'react-native';
 import {Colors, Fonts} from '../../../constant/Styles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProfile } from '../../../redux/slices/profileSlice';
 
-const QuizMilestoneCard = ({userData, navigation, quizProgress, milestoneProgress}) => {
-  const handleConvertQuizPoints = () => {
-    if ((userData?.milestone || 0) < 40) {
+const QuizMilestoneCard = ({navigation}) => {
+  const dispatch = useDispatch();
+  const { userData } = useSelector(state => state.profile);
+  const [converting, setConverting] = useState(false);
+
+  // Calculate progress based on userData
+  const quizProgress = ((userData?.points || 0) / 40) * 100;
+  const milestoneProgress = ((userData?.milestone || 0) / 10) * 100;
+
+  const handleConvertQuizPoints = async () => {
+    const milestonesToConvert = Math.floor((userData?.points ?? 0) / 40);
+    if (milestonesToConvert < 1) {
+      Alert.alert('Not Enough Points', 'You need at least 40 quiz points to convert.');
       return;
     }
-
+    const pointsToConvert = milestonesToConvert * 40;
     Alert.alert(
       'Convert Quiz Points',
-      'Are you sure you want to convert 40 quiz points to 1 milestone?',
+      `Convert ${pointsToConvert} quiz points to ${milestonesToConvert} milestone${milestonesToConvert > 1 ? 's' : ''}?`,
       [
         {text: 'Cancel', style: 'cancel'},
         {
           text: 'Convert',
-          onPress: () => {
-            console.log('lp');
+          onPress: async () => {
+            setConverting(true);
+            try {
+              const datas = await AsyncStorage.getItem('userDetail');
+              const token = JSON.parse(datas)?.token;
+              const url = 'http://13.48.249.80:8000/api/other/redeem-points';
+              const res = await axios.post(
+                url,
+                {},
+                {
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                  },
+                },
+              );
+              if (res?.data?.status === 200) {
+                Alert.alert('Success', res?.data?.message || 'Points redeemed successfully');
+                dispatch(fetchProfile());
+              } else {
+                Alert.alert('Error', res?.data?.message || 'Failed to convert points.');
+              }
+              setConverting(false);
+            } catch (e) {
+              setConverting(false);
+              Alert.alert('Error', 'Failed to convert points.');
+            }
           },
         },
       ],
@@ -28,6 +67,7 @@ const QuizMilestoneCard = ({userData, navigation, quizProgress, milestoneProgres
       {text: 'OK', onPress: () => navigation.navigate('ScanCode')},
     ]);
   };
+
 
   return (
     <>
@@ -52,7 +92,7 @@ const QuizMilestoneCard = ({userData, navigation, quizProgress, milestoneProgres
               Quiz Points
             </Text>
             <Text style={styles.progressValue} allowFontScaling={false}>
-              {userData?.milestone || 0} / 40
+              {userData?.points || 0} / 40
             </Text>
           </View>
 
@@ -62,13 +102,19 @@ const QuizMilestoneCard = ({userData, navigation, quizProgress, milestoneProgres
         </View>
 
         <View style={styles.quizActions}>
-          {(userData?.milestone || 0) >= 40 && (
+          {(userData?.points || 0) >= 40 && (
             <Pressable
               style={styles.convertButton}
-              onPress={handleConvertQuizPoints}>
-              <Text style={styles.convertButtonText} allowFontScaling={false}>
-                Convert to Milestone
-              </Text>
+              onPress={handleConvertQuizPoints}
+              disabled={converting}
+            >
+              {converting ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.convertButtonText} allowFontScaling={false}>
+                  Convert to Milestone
+                </Text>
+              )}
             </Pressable>
           )}
 
@@ -103,18 +149,17 @@ const QuizMilestoneCard = ({userData, navigation, quizProgress, milestoneProgres
               Milestone Points
             </Text>
             <Text style={styles.progressValue} allowFontScaling={false}>
-              {userData?.milestonePoints || 0} / 10
+              {userData?.milestone || 0} / 10
             </Text>
           </View>
 
           <View style={styles.progressBarContainer}>
             <View
-              style={[styles.progressBar, {width: `${milestoneProgress}%`}]}
-            />
+              style={[styles.progressBar, {width: `${milestoneProgress}%`}]} />
           </View>
         </View>
 
-        {(userData?.milestonePoints || 0) >= 10 && (
+        {(userData?.milestone || 0) >= 10 && (
           <View style={styles.rewardSection}>
             <Text style={styles.rewardTitle} allowFontScaling={false}>
               🎉 Available Rewards

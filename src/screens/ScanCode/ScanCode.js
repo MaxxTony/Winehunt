@@ -39,6 +39,8 @@ const ScanCode = () => {
 
   const {userData} = useSelector(state => state.profile);
 
+  console.log(userData)
+
   const [showRedeemModal, setShowRedeemModal] = useState(false);
   const [showVendorSelfModal, setShowVendorSelfModal] = useState(false);
   const supportEmail = 'support@winehunt.com';
@@ -60,27 +62,21 @@ const ScanCode = () => {
         <ProfileHeader
           userData={userData}
           onRedeemPress={() => setShowRedeemModal(true)}
+          onVendorSelfPress={() => setShowVendorSelfModal(true)}
+          milestone={userData?.milestone || 0}
           inset={inset}
         />
-        {/* <View>
-          <WineHuntButton
-            text="Vendor Self Acceptance"
-            extraButtonStyle={styles.redeemButton}
-            extraTextStyle={styles.redeemButtonText}
-            onPress={() => setShowVendorSelfModal(true)}
-          />
-        </View> */}
       </ScrollView>
       <RedeemModal
-        visible={showRedeemModal}
+        visible={showRedeemModal && (userData?.milestone < 10)}
         onClose={() => setShowRedeemModal(false)}
         userData={userData}
         supportEmail={supportEmail}
         styles={styles}
       />
-      {/* Vendor Self Acceptance Modal */}
+      
       <VendorSelfAcceptanceModal
-        visible={showVendorSelfModal}
+        visible={showVendorSelfModal && (userData?.milestone >= 10)}
         onClose={() => setShowVendorSelfModal(false)}
         userData={userData}
       />

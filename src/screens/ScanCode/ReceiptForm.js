@@ -144,19 +144,26 @@ const ReceiptForm = ({ userData, onSuccess, onCancel }) => {
   };
 
   return (
-    <>
+    <View style={styles.cardContainer}>
       <Text style={styles.modalTitlePro} allowFontScaling={false}>
         Submit Receipt
       </Text>
-      <Pressable style={styles.imagePickerPro} onPress={handlePickReceipt}>
+      <Pressable
+        style={({ pressed }) => [
+          styles.imagePickerPro,
+          styles.dashedBorder,
+          pressed && styles.imagePickerProPressed,
+        ]}
+        onPress={handlePickReceipt}
+      >
         {form.receipt ? (
           <>
             {form.receipt.type && form.receipt.type.startsWith('image') ? (
               <Image source={{ uri: form.receipt.uri }} style={styles.imagePreviewPro} />
             ) : (
-              <View style={{ alignItems: 'center', justifyContent: 'center', height: 130, width: 130 }}>
-                <Text style={{ fontSize: 48, color: Colors.red }}>📄</Text>
-                <Text style={{ fontSize: 13, color: '#333', textAlign: 'center', marginTop: 6 }} numberOfLines={2}>
+              <View style={styles.pdfPreviewWrap}>
+                <Text style={styles.pdfIcon}>📄</Text>
+                <Text style={styles.pdfName} numberOfLines={2}>
                   {form.receipt.name || 'PDF File'}
                 </Text>
               </View>
@@ -176,7 +183,6 @@ const ReceiptForm = ({ userData, onSuccess, onCancel }) => {
             <View style={styles.imageUploadIconWrap}>
               <Text style={styles.imageUploadIcon}>＋</Text>
             </View>
-            <Text style={styles.imageUploadText}>Tap to upload receipt (image or PDF)</Text>
           </>
         )}
       </Pressable>
@@ -190,7 +196,7 @@ const ReceiptForm = ({ userData, onSuccess, onCancel }) => {
       />
       {formErrors.vendor && <Text style={styles.errorText}>{formErrors.vendor}</Text>}
       <Pressable style={styles.inputPro} onPress={() => handleFormChange('showDatePicker', true)}>
-        <Text style={{ color: form.date ? '#000' : '#888' }}>
+        <Text style={{ color: form.date ? '#000' : '#888', fontSize: 16 }}>
           {form.date ? form.date.toLocaleDateString() : 'Select Date'}
         </Text>
       </Pressable>
@@ -204,7 +210,7 @@ const ReceiptForm = ({ userData, onSuccess, onCancel }) => {
         />
       )}
       <Pressable style={styles.inputPro} onPress={() => handleFormChange('showTimePicker', true)}>
-        <Text style={{ color: form.time ? '#000' : '#888' }}>
+        <Text style={{ color: form.time ? '#000' : '#888', fontSize: 16 }}>
           {form.time
             ? form.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             : 'Select Time'}
@@ -240,149 +246,191 @@ const ReceiptForm = ({ userData, onSuccess, onCancel }) => {
         extraButtonStyle={styles.closeButtonPro}
         onPress={onCancel}
       />
-    </>
+    </View>
   );
 };
 
 
 const styles = StyleSheet.create({
+  cardContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 24,
+    margin: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 8,
+    alignSelf: 'center',
+    width: '95%',
+    maxWidth: 420,
+  },
+  dashedBorder: {
+    borderStyle: 'dashed',
+    borderWidth: 2,
+    borderColor: Colors.red,
+    backgroundColor: '#f7f7fa',
+  },
   imagePickerPro: {
-     width: 130,
-     height: 130,
-     backgroundColor: '#f7f7fa',
-     borderRadius: 20,
-     alignItems: 'center',
-     justifyContent: 'center',
-     marginBottom: 10,
-     alignSelf: 'center',
-     borderWidth: 2,
-     borderColor: '#e0e0e0',
-     shadowColor: '#000',
-     shadowOffset: { width: 0, height: 2 },
-     shadowOpacity: 0.1,
-     shadowRadius: 6,
-     position: 'relative',
-     overflow: 'hidden',
-   },
-   imagePreviewPro: {
-     width: 130,
-     height: 130,
-     borderRadius: 20,
-     resizeMode: 'cover',
-   },
-   imageOverlayBtn: {
-     position: 'absolute',
-     bottom: 0,
-     left: 0,
-     right: 0,
-     backgroundColor: 'rgba(0,0,0,0.25)',
-     paddingVertical: 6,
-     alignItems: 'center',
-     borderBottomLeftRadius: 20,
-     borderBottomRightRadius: 20,
-   },
-   imageOverlayText: {
-     color: '#fff',
-     fontSize: 15,
-     fontFamily: Fonts.InterBold,
-     letterSpacing: 0.2,
-   },
-   imageRemoveBtn: {
-     position: 'absolute',
-     top: 6,
-     right: 6,
-     backgroundColor: 'rgba(255,255,255,0.85)',
-     borderRadius: 14,
-     width: 28,
-     height: 28,
-     alignItems: 'center',
-     justifyContent: 'center',
-     zIndex: 2,
-     shadowColor: '#000',
-     shadowOffset: { width: 0, height: 1 },
-     shadowOpacity: 0.1,
-     shadowRadius: 2,
-   },
-   imageRemoveIcon: {
-     fontSize: 20,
-     color: Colors.red,
-     fontWeight: 'bold',
-     lineHeight: 22,
-   },
-   imageUploadIconWrap: {
-     backgroundColor: Colors.red,
-     width: 48,
-     height: 48,
-     borderRadius: 24,
-     alignItems: 'center',
-     justifyContent: 'center',
-     marginBottom: 8,
-     shadowColor: Colors.red,
-     shadowOffset: { width: 0, height: 2 },
-     shadowOpacity: 0.18,
-     shadowRadius: 4,
-     elevation: 2,
-   },
-   imageUploadIcon: {
-     color: '#fff',
-     fontSize: 32,
-     fontWeight: 'bold',
-     lineHeight: 36,
-   },
-   imageUploadText: {
-     color: '#888',
-     fontSize: 15,
-     fontFamily: Fonts.InterMedium,
-     textAlign: 'center',
-   },
-   inputPro: {
-     width: '100%',
-     borderWidth: 1.5,
-     borderColor: '#e0e0e0',
-     borderRadius: 10,
-     padding: 14,
-     marginBottom: 10,
-     fontSize: 17,
-     backgroundColor: '#f9f9fb',
-     color: '#000',
-     fontFamily: Fonts.InterMedium,
-     shadowColor: '#000',
-     shadowOffset: { width: 0, height: 1 },
-     shadowOpacity: 0.06,
-     shadowRadius: 2,
-   },
-   submitButtonPro: {
-     backgroundColor: Colors.red,
-     borderRadius: 14,
-     marginTop: 10,
-     width: '100%',
-     shadowColor: Colors.red,
-     shadowOffset: { width: 0, height: 4 },
-     shadowOpacity: 0.18,
-     shadowRadius: 8,
-     elevation: 4,
-   },
-   submitButtonTextPro: {
-     color: Colors.white,
-     fontFamily: Fonts.InterBold,
-     fontSize: 19,
-     letterSpacing: 0.5,
-   },
-   closeButtonPro: {
-     backgroundColor: Colors.gray15,
-     borderRadius: 14,
-     marginTop: 10,
-     width: '100%',
-     borderWidth: 1,
-     borderColor: '#eee',
-   },
-   errorText: {
-     color: 'red',
-     fontSize: 13,
-     marginBottom: 6,
-     marginLeft: 2,
-     fontFamily: Fonts.InterMedium,
-   },
+    width: 140,
+    height: 140,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    alignSelf: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+    backgroundColor: '#f7f7fa',
+  },
+  imagePickerProPressed: {
+    backgroundColor: '#f2eaea',
+    borderColor: Colors.red,
+    opacity: 0.92,
+  },
+  imagePreviewPro: {
+    width: 140,
+    height: 140,
+    borderRadius: 20,
+    resizeMode: 'cover',
+  },
+  pdfPreviewWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 140,
+    width: 140,
+  },
+  pdfIcon: {
+    fontSize: 54,
+    color: Colors.red,
+  },
+  pdfName: {
+    fontSize: 14,
+    color: '#333',
+    textAlign: 'center',
+    marginTop: 8,
+    fontFamily: Fonts.InterMedium,
+  },
+  imageOverlayBtn: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.22)',
+    paddingVertical: 7,
+    alignItems: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  imageOverlayText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: Fonts.InterBold,
+    letterSpacing: 0.2,
+  },
+  imageRemoveBtn: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 16,
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+  },
+  imageRemoveIcon: {
+    fontSize: 22,
+    color: Colors.red,
+    fontWeight: 'bold',
+    lineHeight: 24,
+  },
+  imageUploadIconWrap: {
+    backgroundColor: Colors.red,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: Colors.red,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  imageUploadIcon: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  imageUploadText: {
+    color: '#888',
+    fontSize: 16,
+    fontFamily: Fonts.InterMedium,
+    textAlign: 'center',
+  },
+  inputPro: {
+    width: '100%',
+    borderWidth: 1.5,
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    fontSize: 18,
+    backgroundColor: '#f9f9fb',
+    color: '#000',
+    fontFamily: Fonts.InterMedium,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.07,
+    shadowRadius: 2,
+  },
+  submitButtonPro: {
+    backgroundColor: Colors.red,
+    borderRadius: 16,
+    marginTop: 12,
+    width: '100%',
+    shadowColor: Colors.red,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  submitButtonTextPro: {
+    color: Colors.white,
+    fontFamily: Fonts.InterBold,
+    fontSize: 20,
+    letterSpacing: 0.5,
+  },
+  closeButtonPro: {
+    backgroundColor: Colors.gray15,
+    borderRadius: 16,
+    marginTop: 10,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  errorText: {
+    color: Colors.red,
+    fontSize: 14,
+    marginBottom: 7,
+    marginLeft: 2,
+    fontFamily: Fonts.InterMedium,
+  },
+  modalTitlePro: {
+    fontSize: 26,
+    fontFamily: Fonts.InterBold,
+    color: Colors.red,
+    textAlign: 'center',
+    marginBottom: 18,
+    letterSpacing: 0.2,
+  },
 });
 
 

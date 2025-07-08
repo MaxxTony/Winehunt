@@ -117,7 +117,7 @@ const Home = () => {
   useFocusEffect(
     useCallback(() => {
       dispatch(fetchProfile());
-    }, [dispatch]),
+    }, [dispatch,isFocused]),
   );
 
   useEffect(() => {
@@ -249,13 +249,16 @@ const Home = () => {
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      await Promise.all([loadInitialData()]);
+      await Promise.all([
+        loadInitialData(),
+        dispatch(fetchProfile()),
+      ]);
     } catch (error) {
       console.error('Refresh error:', error);
     } finally {
       setIsRefreshing(false);
     }
-  }, [loadInitialData]);
+  }, [loadInitialData, dispatch]);
 
   if (error && !loading) {
     return (

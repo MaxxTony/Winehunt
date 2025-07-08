@@ -20,13 +20,15 @@ import Modal from 'react-native-modal';
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 
 const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
+
+
   // Unified filter state
   const [filters, setFilters] = useState({
     wineTypes: [],
     sortBy: null,
     grapesTypes: [],
     popularCountry: [],
-    hasMilestoneRewards: false,
+    hasMilestoneRewards: false ,
     hasOffers: false,
     hasNewArrival: false,
     averageRating: null,
@@ -46,6 +48,7 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
 
   // Animation for slide up
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
   useEffect(() => {
     if (visible) {
       Animated.timing(slideAnim, {
@@ -82,7 +85,7 @@ const FilterModal = ({visible, onClose, onApplyFilters, data}) => {
       grapesTypes: [],
       popularCountry: [],
       hasMilestoneRewards: false,
-      hasOffers: false,
+      hasOffers: false ,
       hasNewArrival: false,
       averageRating: null,
     });

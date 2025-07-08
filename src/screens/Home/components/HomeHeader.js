@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  Image,
-  Pressable,
-  StyleSheet,
-} from 'react-native';
+import {View, Text, Image, Pressable, StyleSheet} from 'react-native';
 import {Colors, Fonts} from '../../../constant/Styles';
 
 const HomeHeader = ({
@@ -17,6 +11,7 @@ const HomeHeader = ({
   onScanPress,
   onNotificationPress,
 }) => {
+  console.log(userData?.milestone);
   const getProfileImage = () => {
     if (userData && userData?.image !== null) {
       return {uri: userData?.image};
@@ -27,9 +22,8 @@ const HomeHeader = ({
   return (
     <View style={styles.header}>
       <View style={styles.headerContent}>
-        <Pressable 
-          onPress={onProfilePress || (() => navigation.navigate('Profile'))}
-        >
+        <Pressable
+          onPress={onProfilePress || (() => navigation.navigate('Profile'))}>
           <View style={styles.profileImageContainer}>
             <Image
               source={getProfileImage()}
@@ -59,22 +53,27 @@ const HomeHeader = ({
         </View>
 
         <View style={styles.actionIcons}>
-          <Pressable 
+          <Pressable
             style={styles.iconContainer}
-            onPress={onScanPress || (() => navigation.navigate('ScanCode'))}
-          >
+            onPress={onScanPress || (() => navigation.navigate('ScanCode'))}>
             <View style={styles.iconWrapper}>
               <Image
-                source={require('../images/scanner2.png')}
+                source={
+                  userData?.milestone < 10
+                    ? require('../images/scanner2.png')
+                    : require('../images/scanner.png')
+                }
                 style={styles.icon}
                 resizeMode="contain"
               />
             </View>
           </Pressable>
 
-          <Pressable 
-            onPress={onNotificationPress || (() => navigation.navigate('Notifications'))}
-          >
+          <Pressable
+            onPress={
+              onNotificationPress ||
+              (() => navigation.navigate('Notifications'))
+            }>
             <View style={styles.iconWrapper}>
               <Image
                 source={require('../images/notification.png')}
@@ -148,7 +147,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
- 
+
   iconWrapper: {
     position: 'relative',
   },
@@ -158,4 +157,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeHeader; 
+export default HomeHeader;

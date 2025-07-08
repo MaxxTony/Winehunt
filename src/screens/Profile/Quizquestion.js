@@ -1,25 +1,27 @@
+import React, { useState } from 'react';
 import {
-  FlatList,
-  StyleSheet,
-  Text,
   View,
+  Text,
+  StyleSheet,
+  FlatList,
   TouchableOpacity,
   Modal,
-  Button,
   Pressable,
   Image,
+  Dimensions,
 } from 'react-native';
-import React, {useState} from 'react';
 import BackNavigationWithTitle from '../../components/BackNavigationWithTitle';
-import {useNavigation} from '@react-navigation/native';
-import {Colors, Fonts} from '../../constant/Styles';
+import { useNavigation } from '@react-navigation/native';
+import { Colors, Fonts } from '../../constant/Styles';
 import WineHuntButton from '../../common/WineHuntButton';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import {showSucess} from '../../helper/Toastify';
+import { showSucess } from '../../helper/Toastify';
 
-const Quizquestion = props => {
+const SCREEN_WIDTH = Dimensions.get('window').width;
+
+const Quizquestion = (props) => {
   const quizInfo = props?.route?.params?.data;
   const navigation = useNavigation();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -29,45 +31,51 @@ const Quizquestion = props => {
   const [answers, setAnswers] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
+  // Handle answer selection
   const handleAnswerSelection = (answer, index) => {
-    if (selectedAnswer !== null) return; // Prevent multiple selections
+    if (selectedAnswer !== null) return;
     setSelectedAnswer(index);
-
     const isCorrect = answer.is_right === 1;
     if (isCorrect) {
-      setScore(prevScore => prevScore + quizInfo.quizzes[currentIndex].mark); // Add marks
-      setCorrectAnswers(prevCount => prevCount + 1);
+      setScore((prevScore) => prevScore + quizInfo.quizzes[currentIndex].mark);
+      setCorrectAnswers((prevCount) => prevCount + 1);
     }
-
-    setAnswers([
-      ...answers,
+    setAnswers((prev) => [
+      ...prev,
       {
         question: quizInfo.quizzes[currentIndex].question,
         selected: answer.text,
         isCorrect,
+        correct: quizInfo.quizzes[currentIndex].answers.find((a) => a.is_right === 1)?.text,
       },
     ]);
-
     setTimeout(() => {
-      if (currentIndex < quizInfo.quizzes.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-        setSelectedAnswer(null);
-      } else {
-        onSubmitQuiz();
-      }
-    }, 1000);
+      goToNextQuestion();
+    }, 1200);
   };
 
+  // Go to next question or submit
+  const goToNextQuestion = () => {
+    if (currentIndex < quizInfo.quizzes.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setSelectedAnswer(null);
+    } else {
+      onSubmitQuiz();
+    }
+  };
+
+  // Submit quiz
   const onSubmitQuiz = async () => {
     try {
       const datas = await AsyncStorage.getItem('userDetail');
       const token = JSON.parse(datas)?.token;
-      const url = 'http://13.48.249.80:8000/api/other/update-quiz-milestone';
+      const url = 'http://13.48.249.80:8000/api/other/update-quiz-points';
       const data = {
         quiz_id: quizInfo?.id,
         scores: correctAnswers,
-        milestones: score,
+        points: score,
       };
+      console.log(data);
       const res = await axios.post(url, data, {
         headers: {
           'Content-Type': 'application/json',
@@ -75,13 +83,76 @@ const Quizquestion = props => {
         },
       });
       if (res?.status === 200) {
+        console.log(res?.data)
         showSucess(res?.data?.message);
-        setShowModal(true); // Show the results modal
+        setShowModal(true);
       }
     } catch (error) {
       console.log('Error updating quiz result :', error);
+      setShowModal(true); // Still show modal for UX
     }
   };
+
+  // UI Components
+  const renderAnswer = ({ item, index }) => {
+    const isSelected = selectedAnswer === index;
+    const isCorrect = item.is_right === 1;
+    const showCorrect =
+      selectedAnswer !== null && isCorrect && (selectedAnswer !== index || isSelected);
+    let bgColor = Colors.gray12;
+    let borderColor = 'transparent';
+    let icon = null;
+    if (selectedAnswer !== null) {
+      if (isSelected) {
+        if (isCorrect) {
+          bgColor = '#4BB543';
+          borderColor = '#4BB543';
+          icon = <AntDesign name="checkcircle" size={22} color="white" style={{ marginLeft: 8 }} />;
+        } else {
+          bgColor = '#E74C3C';
+          borderColor = '#E74C3C';
+          icon = <AntDesign name="closecircle" size={22} color="white" style={{ marginLeft: 8 }} />;
+        }
+      } else if (showCorrect) {
+        bgColor = '#4BB543';
+        borderColor = '#4BB543';
+        icon = <AntDesign name="checkcircle" size={22} color="white" style={{ marginLeft: 8 }} />;
+      }
+    }
+    return (
+      <TouchableOpacity
+        style={[
+          styles.answerOption,
+          {
+            backgroundColor: bgColor,
+            borderColor,
+            flexDirection: 'row',
+            alignItems: 'center',
+            opacity: selectedAnswer !== null && !isSelected && !showCorrect ? 0.6 : 1,
+          },
+        ]}
+        onPress={() => handleAnswerSelection(item, index)}
+        disabled={selectedAnswer !== null}
+        activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityLabel={`Answer option: ${item.text}`}
+      >
+        <Text
+          style={[
+            styles.answerText,
+            isSelected && { color: 'white' },
+            showCorrect && { color: 'white' },
+          ]}
+          allowFontScaling={false}
+        >
+          {item.text}
+        </Text>
+        {icon}
+      </TouchableOpacity>
+    );
+  };
+
+
 
   return (
     <View style={styles.container}>
@@ -91,81 +162,78 @@ const Quizquestion = props => {
       />
       <View style={styles.quizInfoContainer}>
         <Text style={styles.totalQuizText} allowFontScaling={false}>
-          Total Quiz: {quizInfo.quizzes.length}
-        </Text>
-        <Text style={styles.timerText} allowFontScaling={false}>
-          (Time: 10 sec)
+          Question {currentIndex + 1} of {quizInfo.quizzes.length}
         </Text>
       </View>
-      <View style={styles.progressBarContainer}>
-        {quizInfo?.quizzes?.map((_, index) => (
+      {/* Question Progress Dots */}
+      <View style={styles.questionDotsContainer}>
+        {quizInfo?.quizzes?.map((_, idx) => (
           <View
-            key={index}
+            key={idx}
             style={[
-              styles.progressBar,
-              {backgroundColor: index <= currentIndex ? Colors.green2 : 'gray'},
+              styles.progressDot,
+              idx < currentIndex
+                ? { backgroundColor: '#4BB543' }
+                : idx === currentIndex
+                ? { backgroundColor: Colors.green2 }
+                : { backgroundColor: Colors.gray12 },
             ]}
           />
         ))}
       </View>
       <View style={styles.questionContainer}>
         <Text style={styles.questionText} allowFontScaling={false}>
-          {currentIndex + 1}. {quizInfo.quizzes[currentIndex]?.question}
+          {quizInfo.quizzes[currentIndex]?.question}
         </Text>
         <FlatList
           data={quizInfo.quizzes[currentIndex]?.answers}
           contentContainerStyle={styles.answersContainer}
-          renderItem={({item, index}) => {
-            const isSelected = selectedAnswer === index;
-            const isCorrect = item.is_right === 1;
-            return (
-              <TouchableOpacity
-                style={[
-                  styles.answerOption,
-                  isSelected && {backgroundColor: isCorrect ? 'green' : 'red'},
-                ]}
-                onPress={() => handleAnswerSelection(item, index)}
-                disabled={selectedAnswer !== null}>
-                <Text
-                  style={[styles.answerText, isSelected && {color: 'white'}]}
-                  allowFontScaling={false}>
-                  {item.text}
-                </Text>
-              </TouchableOpacity>
-            );
-          }}
+          renderItem={renderAnswer}
+          keyExtractor={(_, idx) => idx.toString()}
         />
       </View>
-
       {/* Result Modal */}
       <Modal visible={showModal} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Pressable
-              style={{padding: 5, alignSelf: 'flex-end'}}
-              onPress={() => {
-                navigation.goBack();
-                setShowModal(false);
-              }}>
-              <AntDesign name="close" size={20} color={Colors.black} />
-            </Pressable>
-            <Text style={styles.modalTitle} allowFontScaling={false}>
-              Thank You for Playing!
-            </Text>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle} allowFontScaling={false}>
+                🎉 Quiz Complete! 🎉
+              </Text>
+             
+            </View>
+            
             <Image
               source={require('./images/score.png')}
-              style={{height: 280, width: 280}}
+              style={styles.resultImage}
               resizeMode="contain"
             />
-            <Text
-              style={[
-                styles.modalScore,
-                {color: correctAnswers < 3 ? 'red' : 'green'},
-              ]}
-              allowFontScaling={false}>
-              You got {correctAnswers}/{quizInfo.quizzes.length}
-            </Text>
-            <WineHuntButton text={`Total Earn Milestones ${score}`} />
+            
+            <View style={styles.scoreContainer}>
+              <Text
+                style={[
+                  styles.modalScore,
+                  { color: correctAnswers < Math.ceil(quizInfo.quizzes.length / 2) ? '#E74C3C' : '#4BB543' },
+                ]}
+                allowFontScaling={false}
+              >
+                {correctAnswers} / {quizInfo.quizzes.length} Correct
+              </Text>
+              <Text style={styles.pointsText} allowFontScaling={false}>
+                Total Points Earned: {score}
+              </Text>
+            </View>
+
+            <View style={styles.buttonContainer}>
+              <WineHuntButton 
+                text="Continue" 
+                onPress={() => {
+                  navigation.goBack();
+                  setShowModal(false);
+                }}
+                extraButtonStyle={styles.continueButton}
+              />
+            </View>
           </View>
         </View>
       </Modal>
@@ -192,42 +260,45 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.black,
   },
-  timerText: {
-    ...Fonts.InterRegular,
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: Colors.green2,
-  },
-  progressBarContainer: {
+  questionDotsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 30,
-    paddingHorizontal: 20,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    marginBottom: 20,
+    gap: 8,
   },
-  progressBar: {
-    width: 60,
-    height: 3,
-    borderRadius: 2,
-    marginHorizontal: 5,
+  progressDot: {
+    width: 16,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 2,
   },
   questionContainer: {
     paddingHorizontal: 20,
+    marginBottom: 20,
   },
   questionText: {
     ...Fonts.InterRegular,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     color: Colors.black,
+    marginBottom: 18,
   },
   answersContainer: {
-    gap: 20,
+    gap: 18,
     marginTop: 10,
   },
   answerOption: {
-    padding: 10,
+    padding: 16,
     backgroundColor: Colors.gray12,
-    borderRadius: 5,
+    borderRadius: 10,
+    marginBottom: 6,
+    borderWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   answerText: {
     ...Fonts.InterRegular,
@@ -242,33 +313,60 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    width: '80%',
+    width: '90%',
     backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    // alignItems: 'center',
+    padding: 24,
+    borderRadius: 16,
+    alignItems: 'center',
+    maxHeight: '90%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 10,
+  },
+  closeButton: {
+    padding: 5,
   },
   modalTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
     color: Colors.black,
-    marginBottom: 10,
     textAlign: 'center',
+  },
+  resultImage: {
+    height: 180,
+    width: 180,
+    alignSelf: 'center',
+    marginBottom: 10,
+  },
+  scoreContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
   modalScore: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.green2,
-    marginVertical: 5,
-    textAlign: 'center',
+    marginBottom: 5,
   },
-  resultItem: {
-    marginVertical: 5,
-    alignItems: 'center',
-  },
-  resultQuestion: {
+  pointsText: {
     fontSize: 16,
-    fontWeight: 'bold',
     color: Colors.black,
   },
+  buttonContainer: {
+    width: '100%',
+    gap: 10,
+  },
+  continueButton: {
+    backgroundColor: Colors.green2,
+    paddingVertical: 15,
+  },
+
 });

@@ -279,7 +279,7 @@ const Search = () => {
   // Debounced search text for API call
   const debouncedSearchText = useDebounce(searchText, 400);
 
-  console.log(products)
+
   // --- Fetch Cart Data ---
   const getCartData = useCallback(async () => {
     try {
@@ -311,69 +311,34 @@ const Search = () => {
       const info = {
         search_name: debouncedSearchText,
         filter_by: type === 'Popular' ? 'popular' : 'top_rated',
+        ...(appliedFilters && {
+          categories: [
+            ...(appliedFilters.popularCountry || []),
+            ...(appliedFilters.wineTypes || []),
+            ...(appliedFilters.grapesTypes || []),
+          ],
+          // Map sortBy to price_range
+          ...(appliedFilters.sortBy && {
+            price_range: (() => {
+              const sortByMap = {
+                'Low to High (Price)': 'low_to_high',
+                'High to Low (Price)': 'high_to_low',
+              };
+              return sortByMap[appliedFilters.sortBy] || appliedFilters.sortBy;
+            })(),
+          }),
+          // Map hasNewArrival to latest
+          ...(appliedFilters.hasNewArrival !== undefined && { latest: appliedFilters.hasNewArrival }),
+          // Map hasOffers
+          ...(appliedFilters.hasOffers !== undefined && { hasOffers: appliedFilters.hasOffers }),
+          // Map hasMilestoneRewards
+          ...(appliedFilters.hasMilestoneRewards !== undefined && { hasMilestoneRewards: appliedFilters.hasMilestoneRewards }),
+          // Map averageRating
+          ...(appliedFilters.averageRating !== undefined && { averageRating: appliedFilters.averageRating }),
+        }),
       };
 
-      // Apply filters if available and have meaningful values
-      if (appliedFilters) {
-        // Helper function to check if array has meaningful values
-        const hasMeaningfulValues = (arr) => arr && Array.isArray(arr) && arr.length > 0;
-        
-        // Helper function to check if value is not null/undefined/empty
-        const hasValue = (value) => value !== null && value !== undefined && value !== '';
-
-        // Map sortBy to appropriate parameters
-        if (hasValue(appliedFilters.sortBy)) {
-          switch (appliedFilters.sortBy) {
-            case 'Low to High (Price)':
-              info.price_range = 'low_to_high';
-              break;
-            case 'High to Low (Price)':
-              info.price_range = 'high_to_low';
-              break;
-            default:
-              // Default to the current type selection
-              info.filter_by = type === 'Popular' ? 'popular' : 'top_rated';
-          }
-        } else {
-          // Default to the current type selection when no sortBy is selected
-          info.filter_by = type === 'Popular' ? 'popular' : 'top_rated';
-        }
-
-        // Map New Arrival (only if true)
-        if (appliedFilters.hasNewArrival === true) {
-          info.latest = true;
-        }
-
-        // Map wine types (only if array has values)
-        if (hasMeaningfulValues(appliedFilters.wineTypes)) {
-          info.product_type = appliedFilters.wineTypes;
-        }
-
-        // Map grapes types (only if array has values)
-        if (hasMeaningfulValues(appliedFilters.grapesTypes)) {
-          info.categories = appliedFilters.grapesTypes;
-        }
-
-        // Map popular countries (only if array has values)
-        if (hasMeaningfulValues(appliedFilters.popularCountry)) {
-          info.shop_type = appliedFilters.popularCountry;
-        }
-
-        // Map average rating (only if has meaningful value)
-        if (hasValue(appliedFilters.averageRating)) {
-          info.average_rating = appliedFilters.averageRating;
-        }
-
-        // Map milestone rewards (only if true)
-        if (appliedFilters.hasMilestoneRewards === true) {
-          info.has_milestone_rewards = true;
-        }
-
-        // Map offers (only if true)
-        if (appliedFilters.hasOffers === true) {
-          info.has_offers = true;
-        }
-      }
+    
 
       console.log('API Request Parameters:', info)
     
@@ -547,14 +512,10 @@ const Search = () => {
       latitude: parseFloat(userData?.latitude),
       longitude: parseFloat(userData?.longitude),
     };
-
-    console.log('Marker pressed:', marker);
     navigation.navigate('VendorDetail', {
       item: marker,
       userCoordinates: userCoords,
     });
-    // You can add navigation logic here to show vendor details
-    // navigation.navigate('VendorDetail', { vendorId: marker.userId });
   }, []);
 
   // --- Remove Item from Cart ---
