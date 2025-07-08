@@ -227,9 +227,7 @@ const Home = () => {
     try {
       const info = await AsyncStorage.getItem('userDetail');
       const token = JSON.parse(info)?.token;
-
       if (!token) return;
-
       const url = Constants.baseUrl10 + Constants.latestOffers;
       const res = await axios.get(url, {
         headers: {
