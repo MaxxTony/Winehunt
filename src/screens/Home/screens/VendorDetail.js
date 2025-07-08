@@ -17,6 +17,7 @@ import {
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Colors, Fonts} from '../../../constant/Styles';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -510,7 +511,6 @@ const VendorDetail = props => {
     return <SkeletonLoader />;
   }
 
-  
 
   return (
     <View style={{flex: 1, backgroundColor: Colors.white}}>
@@ -568,18 +568,27 @@ const VendorDetail = props => {
 
           {/* Modernized Business Hours Section - Creative UI */}
           {detail?.business_hours && detail?.business_hours.length > 0 && (
-            <View style={styles.businessHoursModernCard}>
-              {detail.business_hours.map((item, index) => (
-                <View key={item.id} style={styles.businessHoursModernRow}>
-                  <Ionicons name="time-outline" size={20} color={Colors.primary} style={styles.businessHoursIcon} />
-                  <Text style={styles.businessHoursModernDay}>{item.weekday}</Text>
-                  <View style={styles.businessHoursPill}>
-                    <Text style={styles.businessHoursModernTime}>
+            <View style={styles.businessHoursCard}>
+              {detail.business_hours.map((item, index) => {
+                const isToday = item.weekday.slice(0, 3).toLowerCase() === dayjs().format('ddd').toLowerCase();
+                return (
+                  <View
+                    key={item.id}
+                    style={[
+                      styles.businessHoursRow,
+                      isToday && styles.businessHoursTodayRow,
+                      index === detail.business_hours.length - 1 && { borderBottomWidth: 0 },
+                    ]}
+                  >
+                    <Text style={[styles.businessHoursDay, isToday && styles.businessHoursTodayText]}>
+                      {item.weekday.slice(0, 3)}
+                    </Text>
+                    <Text style={[styles.businessHoursTime, isToday && styles.businessHoursTodayText]}>
                       {formatTime(item.open_time)} - {formatTime(item.close_time)}
                     </Text>
                   </View>
-                </View>
-              ))}
+                );
+              })}
             </View>
           )}
 
@@ -675,8 +684,10 @@ const VendorDetail = props => {
             renderItem={({item}) => (
               <Pressable
                 style={styles.offerCard}
-                onPress={() =>
+                onPress={() =>{
+
                   navigation.navigate('WineDetail', {item: item?.id})
+                }
                 }>
                 <ImageBackground
                   source={{uri: item.image}}
@@ -1358,53 +1369,31 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray13,
     borderRadius: 8,
   },
-  businessHoursModernCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 18,
-    paddingVertical: 10,
+  businessHoursCompactCard: {
+    backgroundColor: Colors.gray13,
+    borderRadius: 10,
+    paddingVertical: 8,
     paddingHorizontal: 12,
-    marginBottom: 18,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
+    marginBottom: 12,
   },
-  businessHoursModernRow: {
+  businessHoursCompactRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 7,
-    padding: 8,
-    backgroundColor:Colors.gray13,
-    borderRadius:10
-  },
-  businessHoursIcon: {
-    marginRight: 10,
-  },
-  businessHoursModernDay: {
-    fontSize: 15,
-    fontFamily: Fonts.InterBold,
-    color: Colors.primary,
-    minWidth: 80,
-    flex:1
-  },
-  businessHoursPill: {
-    backgroundColor: Colors.white,
-    borderRadius: 5,
     paddingVertical: 4,
-    paddingHorizontal: 14,
-    marginLeft: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
-    elevation: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray10,
   },
-  businessHoursModernTime: {
-    fontSize: 15,
-    fontFamily: Fonts.InterMedium,
+  businessHoursDay: {
+    fontSize: 13,
     color: Colors.gray8,
-    letterSpacing: 0.1,
+    fontFamily: Fonts.InterMedium,
+    width: 60,
+  },
+  businessHoursTime: {
+    fontSize: 13,
+    color: Colors.black,
+    fontFamily: Fonts.InterRegular,
   },
   milestoneLabel: {
     fontSize: 18,
@@ -1499,6 +1488,57 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     fontFamily: Fonts.InterBold,
+  },
+  businessHoursCard: {
+    backgroundColor: '#F6F8FF', // Soft accent
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  businessHoursHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 6,
+  },
+  businessHoursTitle: {
+    fontSize: 16,
+    fontFamily: Fonts.InterBold,
+    color: Colors.primary,
+    marginLeft: 6,
+  },
+  businessHoursRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 7,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E6F0',
+  },
+  businessHoursDay: {
+    fontSize: 14,
+    color: Colors.gray8,
+    fontFamily: Fonts.InterMedium,
+    width: 60,
+  },
+  businessHoursTime: {
+    fontSize: 14,
+    color: Colors.black,
+    fontFamily: Fonts.InterRegular,
+  },
+  businessHoursTodayRow: {
+    backgroundColor: '#EAF2FF',
+    borderRadius: 8,
+  },
+  businessHoursTodayText: {
+    color: Colors.primary,
+    fontWeight: 'bold',
   },
 });
 

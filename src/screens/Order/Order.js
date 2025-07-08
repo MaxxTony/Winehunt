@@ -60,6 +60,7 @@ const Order = () => {
 
       if (res?.status === 200) {
         const ordersData = res?.data?.response?.data || [];
+        console.log(ordersData[0])
 
         // Filter orders based on type
         let filteredOrders = [];
@@ -73,7 +74,7 @@ const Order = () => {
           // Show only canceled orders
           filteredOrders = ordersData.filter(
             order =>
-              order?.status === 'Canceled' || order?.status === 'canceled',
+              order?.status === 'cancelled' || order?.status === 'cancelled',
           );
         }
 
@@ -266,8 +267,30 @@ const Order = () => {
           ) : null
         }
         renderItem={({item}) => {
+          // Helper to normalize status
+          const normalizeStatus = status => (status ? status.toLowerCase() : '');
+
+          // Helper to determine available actions
+          const getAvailableActions = status => {
+            const s = normalizeStatus(status);
+            return {
+              canCancel:
+                s === 'processing',
+              canTrack:
+                s === 'processing' || s === 'confirmed',
+              canGetInvoice:
+                s !== 'canceled' && s !== 'cancelled' && s !== 'rejected',
+              showRefund:
+                s === 'canceled' || s === 'cancelled' || s === 'rejected',
+              canRefund:
+                s === 'confirmed',
+            };
+          };
+
+          const actions = getAvailableActions(item.status);
+
           const getStatusColor = status => {
-            switch (status?.toLowerCase()) {
+            switch (normalizeStatus(status)) {
               case 'canceled':
               case 'cancelled':
                 return Colors.red;
@@ -277,13 +300,15 @@ const Order = () => {
                 return Colors.green;
               case 'delivered':
                 return Colors.blue;
-              default:
+              case 'processing':
                 return Colors.yellow;
+              default:
+                return Colors.gray4;
             }
           };
 
           const getStatusText = status => {
-            switch (status?.toLowerCase()) {
+            switch (normalizeStatus(status)) {
               case 'canceled':
               case 'cancelled':
                 return 'Canceled';
@@ -293,6 +318,8 @@ const Order = () => {
                 return 'Confirmed';
               case 'delivered':
                 return 'Delivered';
+              case 'processing':
+                return 'Processing';
               default:
                 return status || 'Processing';
             }
@@ -310,19 +337,8 @@ const Order = () => {
             <Pressable
               style={[
                 styles.cardContainer,
-                // Add a green border for confirmed orders
-                item.status?.toLowerCase() === 'confirmed' && {
-                  borderWidth: 2,
-                  borderColor: Colors.green,
-                },
-                item.status?.toLowerCase() === 'processing' && {
-                  borderWidth: 2,
-                  borderColor: Colors.yellow,
-                },
-                item.status?.toLowerCase() === 'canceled' && {
-                  borderWidth: 2,
-                  borderColor: Colors.red,
-                },
+                // Border color by status
+                { borderWidth: 2, borderColor: getStatusColor(item.status) },
               ]}
               onPress={() => navigation.navigate('OrderDetail', {item: item})}>
               {/* Header with gradient background */}
@@ -345,33 +361,26 @@ const Order = () => {
                         : 'Date not available'}
                     </Text>
                   </View>
-                </View>
-              </View>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <View
-                  style={[
-                    styles.statusBadge,
-                    {backgroundColor: getStatusColor(item.status)},
-                    // Make the badge larger and more prominent for confirmed orders
-                    // item.status?.toLowerCase() === 'confirmed' && { borderWidth: 2, borderColor: Colors.green, shadowColor: Colors.green, shadowOpacity: 0.3, shadowRadius: 8 },
-                  ]}>
-                  <Text style={styles.statusText}>
-                    {getStatusText(item.status)}
-                  </Text>
-                </View>
-
-                {/* Refund Button for Confirmed Orders */}
-                {item.status?.toLowerCase() === 'confirmed' && (
-                  <View style={styles.refundBoxContainer}>
-                    <Pressable
-                      style={styles.refundBox}
-                      onPress={handleRefundRequest}>
-                      <Text style={styles.refundBoxText}>Refund</Text>
-                    </Pressable>
+                  {/* Status badge more prominent */}
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      {backgroundColor: getStatusColor(item.status), minWidth: 110, borderWidth: 2, borderColor: '#fff'},
+                    ]}>
+                    <Text style={styles.statusText}>{getStatusText(item.status)}</Text>
                   </View>
-                )}
+                </View>
               </View>
-
+              {/* Refund Button for Confirmed Orders */}
+              {actions.canRefund && (
+                <View style={styles.refundBoxContainer}>
+                  <Pressable
+                    style={styles.refundBox}
+                    onPress={handleRefundRequest}>
+                    <Text style={styles.refundBoxText}>Refund</Text>
+                  </Pressable>
+                </View>
+              )}
               {/* Products Section */}
               <View style={styles.productsSection}>
                 <Text style={styles.sectionTitle}>Order Items</Text>
@@ -403,7 +412,6 @@ const Order = () => {
                   );
                 })}
               </View>
-
               {/* Total Section */}
               <View style={styles.totalSection}>
                 <View style={styles.totalRow}>
@@ -411,9 +419,8 @@ const Order = () => {
                   <Text style={styles.totalAmount}> £{item?.amount}</Text>
                 </View>
               </View>
-
               {/* Refund Status for Canceled/Rejected Orders */}
-              {(item?.status === 'Rejected' || item?.status === 'Canceled') && (
+              {actions.showRefund && (
                 <View style={styles.refundSection}>
                   <View style={styles.refundBadge}>
                     <Text style={styles.refundLabel}>
@@ -426,13 +433,11 @@ const Order = () => {
                   </View>
                 </View>
               )}
-
               {/* Action Buttons for Active Orders */}
-              {item?.status !== 'Rejected' &&
-                item?.status !== 'Canceled' &&
-                type === 'Current Order' && (
-                  <View style={styles.actionButtonsContainer}>
-                    <View style={styles.actionButtons}>
+              {type === 'Current Order' && (actions.canTrack || actions.canGetInvoice || actions.canCancel) && (
+                <View style={styles.actionButtonsContainer}>
+                  <View style={styles.actionButtons}>
+                    {actions.canTrack && (
                       <Pressable
                         style={[styles.actionButton, styles.trackButton]}
                         onPress={() =>
@@ -440,26 +445,29 @@ const Order = () => {
                         }>
                         <Text style={styles.actionButtonText}>Track Order</Text>
                       </Pressable>
+                    )}
+                    {actions.canGetInvoice && (
                       <Pressable
                         style={[styles.actionButton, styles.invoiceButton]}
                         onPress={() => getInvoice(item)}>
                         <Text style={styles.actionButtonText}>Get Invoice</Text>
                       </Pressable>
-                    </View>
-                    {item.status?.toLowerCase() !== 'confirmed' && (
-                      <Pressable
-                        style={[styles.actionButton, styles.cancelButton]}
-                        onPress={() => {
-                          setShowDeleteModal(true);
-                          setSelectedOrder(item);
-                        }}>
-                        <Text style={styles.cancelButtonText}>
-                          Cancel Order
-                        </Text>
-                      </Pressable>
                     )}
                   </View>
-                )}
+                  {actions.canCancel && (
+                    <Pressable
+                      style={[styles.actionButton, styles.cancelButton]}
+                      onPress={() => {
+                        setShowDeleteModal(true);
+                        setSelectedOrder(item);
+                      }}>
+                      <Text style={styles.cancelButtonText}>
+                        Cancel Order
+                      </Text>
+                    </Pressable>
+                  )}
+                </View>
+              )}
             </Pressable>
           );
         }}

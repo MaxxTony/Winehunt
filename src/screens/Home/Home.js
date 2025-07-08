@@ -131,6 +131,7 @@ const Home = () => {
     try {
       const info = await AsyncStorage.getItem('userDetail');
       const token = JSON.parse(info)?.token;
+      console.log(token)
 
       if (!token) {
         console.warn('No token found for cart request');
