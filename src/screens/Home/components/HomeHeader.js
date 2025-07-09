@@ -11,7 +11,6 @@ const HomeHeader = ({
   onScanPress,
   onNotificationPress,
 }) => {
-  console.log(userData?.milestone);
   const getProfileImage = () => {
     if (userData && userData?.image !== null) {
       return {uri: userData?.image};

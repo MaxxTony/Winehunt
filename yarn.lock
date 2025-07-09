@@ -3262,6 +3262,7 @@ __metadata:
     libphonenumber-js: ^1.11.19
     lottie-react-native: ^6.5.1
     metro-react-native-babel-preset: 0.76.8
+    moment: ^2.30.1
     patch-package: ^8.0.0
     postinstall-postinstall: ^2.1.0
     prettier: ^2.4.1
@@ -8547,6 +8548,13 @@ __metadata:
     react-dom: 16.x.x
     react-native-web: 0.9.x
   checksum: d879850c1923fc9c5d4d669e0a4bc6f25cc158f8aea45c4c88c9400643f8bb9ca8d681e3ebb4e4290b8c69a32c143ba4c33244d898d0d3644cd4d7fa147e635a
+  languageName: node
+  linkType: hard
+
+"moment@npm:^2.30.1":
+  version: 2.30.1
+  resolution: "moment@npm:2.30.1"
+  checksum: 859236bab1e88c3e5802afcf797fc801acdbd0ee509d34ea3df6eea21eb6bcc2abd4ae4e4e64aa7c986aa6cba563c6e62806218e6412a765010712e5fa121ba6
   languageName: node
   linkType: hard
 

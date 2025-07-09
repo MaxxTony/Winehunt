@@ -581,7 +581,6 @@ const WineDetail = props => {
     const body = {
       product_id: id,
     };
-    console.log(token)
     try {
       const res = await axios.post(url, body, {
         headers: {
@@ -707,7 +706,6 @@ const WineDetail = props => {
       quantity: quantity,
     };
     
-    console.log(body);
     try {
       const res = await axios.post(url, body, {
         headers: {

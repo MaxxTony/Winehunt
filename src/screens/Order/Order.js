@@ -60,7 +60,6 @@ const Order = () => {
 
       if (res?.status === 200) {
         const ordersData = res?.data?.response?.data || [];
-        console.log(ordersData[0])
 
         // Filter orders based on type
         let filteredOrders = [];

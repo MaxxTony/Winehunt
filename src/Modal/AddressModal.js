@@ -127,8 +127,7 @@ const AddressFormModal = ({
             <GooglePlacesAutocomplete
               placeholder="Search for address"
               onPress={(data, details = null) => {
-                console.log('data:', JSON.stringify(data));
-                console.log('details:', JSON.stringify(details));
+              
                 if (!details) return;
                 const addressComponents = details.address_components || [];
                 const getComponent = (type) =>
