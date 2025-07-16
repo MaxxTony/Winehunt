@@ -60,6 +60,7 @@ const Order = () => {
 
       if (res?.status === 200) {
         const ordersData = res?.data?.response?.data || [];
+       
 
         // Filter orders based on type
         let filteredOrders = [];
@@ -67,13 +68,13 @@ const Order = () => {
           // Show orders that are NOT canceled
           filteredOrders = ordersData.filter(
             order =>
-              order?.status !== 'Canceled' && order?.status !== 'canceled',
+              order?.status !== 'Cancelled' || order?.status !== 'canceled',
           );
         } else if (type === 'Order History') {
           // Show only canceled orders
           filteredOrders = ordersData.filter(
             order =>
-              order?.status === 'cancelled' || order?.status === 'cancelled',
+              order?.status === 'Cancelled' || order?.status === 'canceled',
           );
         }
 

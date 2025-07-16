@@ -14,7 +14,32 @@ const formatNumber = num => {
   }).format(num);
 };
 
+const shopTypeMeta = {
+  1: {name: 'Restaurant', emoji: '🍽️', color: '#FFB74D'},
+  2: {name: 'Hotel', emoji: '🏨', color: '#64B5F6'},
+  3: {name: 'Winery', emoji: '🍇', color: '#BA68C8'},
+  4: {name: 'Wine Bar', emoji: '🍷', color: '#E57373'},
+  5: {name: 'Wine Shop', emoji: '🏪', color: '#81C784'},
+};
+
+const ShopTypeBadge = ({type}) => {
+  if (!type || typeof type !== 'object') return null;
+  const meta = shopTypeMeta[type.id] || {
+    name: String(type.name || ''),
+    emoji: '🏬',
+    color: '#F6F8FF',
+  };
+  return (
+    <View style={styles.shopTypeBadge}>
+      <Text style={styles.shopTypeEmoji}>{meta.emoji}</Text>
+      <Text style={styles.shopTypeText}>{meta.name}</Text>
+    </View>
+  );
+};
+
 const NearVendorCards = ({item, navigation, userCoordinates}) => {
+
+
   
   const vendorCoordinates = {
     latitude: parseFloat(item?.latitude),
@@ -53,7 +78,7 @@ const NearVendorCards = ({item, navigation, userCoordinates}) => {
       }}>
       {/* Main Card with Gradient Background */}
       <LinearGradient
-        colors={['#FFFFFF', '#F8F9FA']}
+        colors={['#FFFFFF', '#b1cbf0ff']}
         style={styles.gradientContainer}>
         
         {/* Header Section with Background Image */}
@@ -114,6 +139,7 @@ const NearVendorCards = ({item, navigation, userCoordinates}) => {
               <Text style={styles.vendorName} numberOfLines={1}>
                 {item?.shop_name || 'Wine Shop'}
               </Text>
+              <ShopTypeBadge type={item?.vendor_shop_type} />
               <View style={styles.locationRow}>
                 <MaterialIcons name="location-on" size={14} color="#6B7280" />
                 <Text style={styles.locationText} numberOfLines={1}>
@@ -307,6 +333,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    marginTop:5
   },
   locationText: {
     color: '#6B7280',
@@ -367,5 +394,26 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontFamily: Fonts.InterMedium,
     fontSize: 15,
+  },
+  shopTypeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F6F8FF', // default, will be overridden
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    alignSelf: 'flex-start',
+    marginTop: 2,
+    marginBottom: 2,
+    marginRight: 8,
+  },
+  shopTypeEmoji: {
+    fontSize: 13,
+    marginRight: 4,
+  },
+  shopTypeText: {
+    fontSize: 12,
+    color: '#222',
+    fontFamily: Fonts.InterMedium,
   },
 });

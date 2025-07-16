@@ -118,14 +118,14 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   discountBadge: {
-    backgroundColor: Colors.red,
+    backgroundColor: Colors.green,
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 2,
     marginRight: 4,
   },
   offerBadge: {
-    backgroundColor: Colors.gray8,
+    backgroundColor: Colors.black,
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 2,

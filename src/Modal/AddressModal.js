@@ -13,6 +13,7 @@ import {
   Pressable,
   TouchableOpacity,
   Dimensions,
+  useColorScheme,
 } from 'react-native';
 import Modal from 'react-native-modal';
 import {Colors, Fonts} from '../constant/Styles';
@@ -31,6 +32,13 @@ const countries = [
   {id: 'IRL', name: 'Ireland'},
 ];
 
+const ukCountries = [
+  { id: 'ENG', name: 'England' },
+  { id: 'SCT', name: 'Scotland' },
+  { id: 'WLS', name: 'Wales' },
+  { id: 'NIR', name: 'Northern Ireland' },
+];
+
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 const AddressFormModal = ({
@@ -43,6 +51,8 @@ const AddressFormModal = ({
   error = '',
 }) => {
   const inset = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const [form, setForm] = useState({
     country: '',
     city: '',
@@ -70,7 +80,7 @@ const AddressFormModal = ({
     if (!form.city) return 'Please enter the city';
     if (!form.flat) return 'Please enter the flat number';
     if (!form.area) return 'Please enter the area';
-    if (!form.pincode) return 'Please enter the pincode';
+    if (!form.pincode) return 'Please enter the post code';
     return '';
   };
 
@@ -102,11 +112,11 @@ const AddressFormModal = ({
         style={styles.keyboardAvoidingView}
         
       >
-        <View style={[styles.card, {paddingBottom: inset.bottom + 16}]}> 
+        <View style={[styles.card, {paddingBottom: inset.bottom + 16, backgroundColor: isDark ? '#181818' : Colors.white}]}> 
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.dragIndicator} />
-            <Text style={styles.title} allowFontScaling={false}>
+            <Text style={[styles.title,{color:isDark ? "#fff" : "#000"}]} allowFontScaling={false}>
               {mode === 'edit' ? 'Update Address' : 'Add Address'}
             </Text>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose} hitSlop={{top:10,left:10,right:10,bottom:10}}>
@@ -123,7 +133,7 @@ const AddressFormModal = ({
             keyboardShouldPersistTaps="always"
           >
             {/* Google Places Autocomplete */}
-            <Text style={styles.label}>Search Address</Text>
+            <Text style={[styles.label, isDark && { color: '#fff' }]}>Search Address</Text>
             <GooglePlacesAutocomplete
               placeholder="Search for address"
               onPress={(data, details = null) => {
@@ -148,72 +158,93 @@ const AddressFormModal = ({
               fetchDetails={true}
               styles={{
                 container: { marginBottom: 14 },
-                textInputContainer: styles.googleInput,
-                textInput: styles.googleTextInput,
+                textInputContainer: [styles.googleInput, isDark && { backgroundColor: '#222', borderColor: '#444' }],
+                textInput: [styles.googleTextInput, isDark && { color: '#fff', backgroundColor: '#222' }],
                 listView: {
                   borderWidth: 1,
-                  borderColor: '#ddd',
+                  borderColor: isDark ? '#444' : '#ddd',
                   borderRadius: 8,
                   maxHeight: 100,
-                  backgroundColor: '#fff',
+                  backgroundColor: isDark ? '#222' : '#fff',
                 },
+                row: isDark ? { backgroundColor: '#222' } : {},
+                description: isDark ? { color: '#fff' } : {},
               }}
               enablePoweredByContainer={false}
               debounce={300}
             />
 
-            {/* Manual Country Field */}
-            <Text style={styles.label}>Country</Text>
-            <View style={[styles.inputWrapper, focus.country && styles.inputWrapperActive]}> 
-              <FontAwesome6 name="globe" size={18} color={Colors.gray20} style={styles.inputIcon} />
-              <TextInput
-                value={form.country}
-                onChangeText={v => setForm(f => ({...f, country: v}))}
-                style={styles.input}
-                placeholder="Enter country"
-                placeholderTextColor={Colors.gray10}
-                onFocus={() => setFocus(f => ({...f, country: true}))}
-                onBlur={() => setFocus(f => ({...f, country: false}))}
-              />
-            </View>
+            {/* Manual Country Field or UK Dropdown */}
+            <Text style={[styles.label, isDark && { color: '#fff' }]}>Country</Text>
+            {['United Kingdom', 'Great Britain', 'UK', 'Britain'].includes(form.country.trim()) ? (
+              <View style={[styles.inputWrapper, focus.country && styles.inputWrapperActive]}> 
+                <FontAwesome6 name="globe" size={18} color={Colors.gray13} style={styles.inputIcon} />
+                <Dropdown
+                  data={ukCountries}
+                  labelField="name"
+                  valueField="name"
+                  value={form.country}
+                  onChange={item => setForm(f => ({ ...f, country: item.name }))}
+                  style={[styles.input, { flex: 1, backgroundColor: 'transparent', color: isDark ? '#fff' : '#000' }]}
+                  placeholder="Select country"
+                  placeholderStyle={[styles.placeholderStyle, isDark && { color: '#aaa' }]}
+                  selectedTextStyle={[styles.selectedTextStyle, isDark && { color: '#fff' }]}
+                  itemTextStyle={[styles.itemTextStyle, isDark && { color: '#fff' }]}
+                  containerStyle={isDark ? { backgroundColor: '#222' } : {}}
+                />
+              </View>
+            ) : (
+              <View style={[styles.inputWrapper, focus.country && styles.inputWrapperActive]}> 
+                <FontAwesome6 name="globe" size={18} color={Colors.gray20} style={styles.inputIcon} />
+                <TextInput
+                  value={form.country}
+                  onChangeText={v => setForm(f => ({...f, country: v}))}
+                  style={[styles.input, { color: isDark ? '#fff' : '#000' }]}
+                  placeholder="Enter country"
+                  placeholderTextColor={isDark ? '#aaa' : Colors.gray10}
+                  onFocus={() => setFocus(f => ({...f, country: true}))}
+                  onBlur={() => setFocus(f => ({...f, country: false}))}
+                />
+              </View>
+            )}
             {/* Manual City Field */}
-            <Text style={styles.label}>City</Text>
+            <Text style={[styles.label, isDark && { color: '#fff' }]}>City</Text>
             <View style={[styles.inputWrapper, focus.city && styles.inputWrapperActive]}> 
               <FontAwesome6 name="city" size={18} color={Colors.gray20} style={styles.inputIcon} />
               <TextInput
                 value={form.city}
                 onChangeText={v => setForm(f => ({...f, city: v}))}
-                style={styles.input}
+                style={[styles.input, { color: isDark ? '#fff' : '#000' }]}
                 placeholder="Enter city"
-                placeholderTextColor={Colors.gray10}
+                placeholderTextColor={isDark ? '#aaa' : Colors.gray10}
                 onFocus={() => setFocus(f => ({...f, city: true}))}
                 onBlur={() => setFocus(f => ({...f, city: false}))}
               />
             </View>
             {/* Manual Area/Street Field */}
-            <Text style={styles.label}>Area/Street</Text>
+            <Text style={[styles.label, isDark && { color: '#fff' }]}>Area/Street</Text>
             <View style={[styles.inputWrapper, focus.area && styles.inputWrapperActive]}> 
               <FontAwesome6 name="road" size={18} color={Colors.gray20} style={styles.inputIcon} />
               <TextInput
                 value={form.area}
                 onChangeText={v => setForm(f => ({...f, area: v}))}
-                style={styles.input}
+                style={[styles.input, { color: isDark ? '#fff' : '#000' }]}
                 placeholder="Enter area or street"
-                placeholderTextColor={Colors.gray10}
+                placeholderTextColor={isDark ? '#aaa' : Colors.gray10}
                 onFocus={() => setFocus(f => ({...f, area: true}))}
                 onBlur={() => setFocus(f => ({...f, area: false}))}
               />
             </View>
-            {/* Manual ZIP Code Field */}
-            <Text style={styles.label}>ZIP Code</Text>
+            {/* Manual Post Code Field */}
+            <Text style={[styles.label, isDark && { color: '#fff' }]}>Post Code</Text>
             <View style={[styles.inputWrapper, focus.pincode && styles.inputWrapperActive]}> 
               <FontAwesome6 name="location-dot" size={18} color={Colors.gray20} style={styles.inputIcon} />
               <TextInput
                 value={form.pincode}
                 onChangeText={v => setForm(f => ({...f, pincode: v}))}
-                style={styles.input}
-                placeholder="Enter ZIP code"
-                placeholderTextColor={Colors.gray10}
+                style={[styles.input, { color: isDark ? '#fff' : '#000' }]}
+                placeholder="Enter post code"
+                placeholderTextColor={isDark ? '#aaa' : Colors.gray10}
                 keyboardType="number-pad"
                 onFocus={() => setFocus(f => ({...f, pincode: true}))}
                 onBlur={() => setFocus(f => ({...f, pincode: false}))}
@@ -221,15 +252,15 @@ const AddressFormModal = ({
             </View>
 
             {/* Flat/Block */}
-            <Text style={styles.label}>Flat/Block</Text>
+            <Text style={[styles.label, isDark && { color: '#fff' }]}>Flat/Block</Text>
             <View style={[styles.inputWrapper, focus.flat && styles.inputWrapperActive]}> 
               <FontAwesome6 name="building" size={18} color={Colors.gray15} style={styles.inputIcon} />
               <TextInput
                 value={form.flat}
                 onChangeText={v => setForm(f => ({...f, flat: v}))}
-                style={styles.input}
+                style={[styles.input, { color: isDark ? '#fff' : '#000' }]}
                 placeholder="Enter flat or block"
-                placeholderTextColor={Colors.gray10}
+                placeholderTextColor={isDark ? '#aaa' : Colors.gray10}
                 onFocus={() => setFocus(f => ({...f, flat: true}))}
                 onBlur={() => setFocus(f => ({...f, flat: false}))}
               />

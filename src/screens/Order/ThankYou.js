@@ -129,10 +129,7 @@ const ThankYou = props => {
         friction: 8,
       }),
     ]).start(() => {
-      navigation.reset({
-        index: 0,
-        routes: [{name: 'Home'}],
-      });
+      navigation.navigate('Home');
     });
   };
 

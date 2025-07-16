@@ -1,6 +1,5 @@
 import React, {useEffect, useState, useCallback, useMemo} from 'react';
 import {
-  Dimensions,
   FlatList,
   Image,
   ImageBackground,
@@ -11,13 +10,11 @@ import {
   StyleSheet,
   Text,
   View,
-  ActivityIndicator,
   Animated,
 } from 'react-native';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Colors, Fonts} from '../../../constant/Styles';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -31,33 +28,9 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import ImageView from 'react-native-image-viewing';
 import AnimatedCartButton from '../../../components/AnimatedCartButton';
+import {formatNumber, formatTime, formatDate} from '../../../utils/Format';
 
 dayjs.extend(relativeTime);
-
-const screenWidth = Dimensions.get('window').width;
-
-const formatNumber = num => {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(num);
-};
-
-const formatTime = time => {
-  const [hour, minute] = time.split(':').map(Number);
-  const suffix = hour >= 12 ? 'PM' : 'AM';
-  const formattedHour = hour % 12 || 12; // Convert 24-hour format to 12-hour
-  return `${formattedHour} ${suffix}`;
-};
-
-const formatDate = dateStr => {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-};
 
 const VendorHeader = React.memo(
   ({detail, onBack, onLike, isLiked, distance}) => (
@@ -108,13 +81,69 @@ const VendorHeader = React.memo(
   ),
 );
 
-const ContactOptions = React.memo(({onContactPress}) => {
-  const contactOptions = [
-    {id: 1, name: 'Call', image: require('../images/call.png')},
-    {id: 2, name: 'Message', image: require('../images/sms.png')},
-    {id: 3, name: 'View Map', image: require('../images/location.png')},
-    {id: 4, name: 'Website', image: require('../images/global.png')},
-  ];
+const ContactOptions = React.memo(({onContactPress, detail}) => {
+  // Prepare phone numbers
+  const phoneNumbers = [detail?.phone];
+  if (
+    detail?.second_phone_number &&
+    detail?.second_phone_number !== detail?.phone
+  ) {
+    phoneNumbers.push(detail.second_phone_number);
+  }
+  // Use shop_email if available, else email
+  const emailToUse = detail?.shop_email || detail?.email;
+  // Show View Map if coordinates exist
+  const hasCoords = !!detail?.latitude && !!detail?.longitude;
+  // Show Navigate if userCoords and vendorCoords exist (handled in parent)
+
+  // Build contact options
+  let contactOptions = [];
+  // Add call options for each phone number
+  phoneNumbers.forEach((num, idx) => {
+    if (num) {
+      contactOptions.push({
+        id: `call_${idx}`,
+        name: idx === 0 ? 'Call' : `Call (${idx + 1})`,
+        phone: num,
+        image: require('../images/call.png'),
+        show: true,
+        type: 'Call',
+      });
+    }
+  });
+  // Add message/email option
+  if (emailToUse) {
+    contactOptions.push({
+      id: 'message',
+      name: 'Message',
+      email: emailToUse,
+      image: require('../images/sms.png'),
+      show: true,
+      type: 'Message',
+    });
+  }
+  // Add View Map
+  if (hasCoords) {
+    contactOptions.push({
+      id: 'view_map',
+      name: 'View Map',
+      image: require('../images/location.png'),
+      show: true,
+      type: 'View Map',
+    });
+  }
+  // Add Website
+  if (detail?.website) {
+    contactOptions.push({
+      id: 'website',
+      name: 'Website',
+      image: require('../images/global.png'),
+      show: true,
+      type: 'Website',
+    });
+  }
+
+  const filteredOptions = contactOptions.filter(option => option.show);
 
   const renderContactOption = ({item}) => (
     <Pressable
@@ -123,15 +152,17 @@ const ContactOptions = React.memo(({onContactPress}) => {
         pressed && styles.contactOptionIconPressed,
       ]}
       android_ripple={{color: '#e0e0e0', borderless: true}}
-      onPress={() => onContactPress(item.name)}>
+      onPress={() => onContactPress(item)}>
       <Image source={item.image} style={styles.contactImageModern} />
       <Text style={styles.contactOptionTextModern}>{item.name}</Text>
     </Pressable>
   );
 
+  if (filteredOptions.length === 0) return null;
+
   return (
     <View style={styles.contactListModern}>
-      {contactOptions.map(option => (
+      {filteredOptions.map(option => (
         <View key={option.id} style={styles.contactOptionContainerModern}>
           {renderContactOption({item: option})}
         </View>
@@ -140,70 +171,134 @@ const ContactOptions = React.memo(({onContactPress}) => {
   );
 });
 
-const ProductCard = React.memo(({item, onLike, isLiked, onPress, isOffer, isMilestone}) => (
-  <Pressable style={styles.productCardModern} onPress={onPress}>
-    <View style={styles.productImageWrapper}>
-      <Image
-        source={
-          item?.product_images[0]?.image
-            ? {uri: item?.product_images[0]?.image}
-            : require('../images/bottle.png')
-        }
-        style={styles.productImageModern}
-        resizeMode="contain"
-      />
-      {/* Heart Icon Overlay */}
-      <Pressable style={styles.heartIconOverlay} onPress={onLike} hitSlop={10}>
-        <AntDesign
-          size={22}
-          name={isLiked ? 'heart' : 'hearto'}
-          color={isLiked ? Colors.red : Colors.white}
+const ProductCard = React.memo(
+  ({item, onLike, isLiked, onPress, offer, isMilestone}) => (
+    <Pressable style={styles.productCardModern} onPress={onPress}>
+      <View style={styles.productImageWrapper}>
+        <Image
+          source={
+            item?.product_images[0]?.image
+              ? {uri: item?.product_images[0]?.image}
+              : require('../images/bottle.png')
+          }
+          style={styles.productImageModern}
+          resizeMode="contain"
         />
-      </Pressable>
-      {/* Rating Overlay */}
-      <View style={styles.ratingOverlay}>
-        <AntDesign name="star" size={16} color={Colors.yellow} />
-        <Text style={styles.ratingTextModern} allowFontScaling={false}>
-          {item?.average_rating || '0.0'}
-        </Text>
-      </View>
-      {/* Offer and Milestone Badges */}
-      {isOffer && (
-        <View style={[styles.productBadge, {backgroundColor: Colors.primary, top: 10, left: 10}]}> 
-          <Text style={styles.productBadgeText}>Offer</Text>
-        </View>
-      )}
-      {isMilestone && (
-        <View style={[styles.productBadge, {backgroundColor: Colors.green, top: 40, left: 10}]}> 
-          <Text style={styles.productBadgeText}>Milestone</Text>
-        </View>
-      )}
-    </View>
-    <View style={styles.productInfoModern}>
-      <Text
-        style={styles.productTitleModern}
-        numberOfLines={1}
-        allowFontScaling={false}>
-        {item?.name}
-      </Text>
-      <View style={styles.priceRowModern}>
-        {item?.has_discount && (
-          <Text style={styles.originalPriceModern} allowFontScaling={false}>
-            £ {item?.actual_price}
+        {/* Heart Icon Overlay */}
+        <Pressable
+          style={styles.heartIconOverlay}
+          onPress={onLike}
+          hitSlop={10}>
+          <AntDesign
+            size={22}
+            name={isLiked ? 'heart' : 'hearto'}
+            color={isLiked ? Colors.red : Colors.white}
+          />
+        </Pressable>
+        {/* Rating Overlay */}
+        <View style={styles.ratingOverlay}>
+          <AntDesign name="star" size={16} color={Colors.yellow} />
+          <Text style={styles.ratingTextModern} allowFontScaling={false}>
+            {item?.average_rating || '0.0'}
           </Text>
+        </View>
+        {/* Offer and Milestone Badges */}
+        {offer && (
+          <View
+            style={[
+              styles.productBadge,
+              {backgroundColor: Colors.primary, top: 40, left: 10},
+            ]}>
+            <Text style={styles.productBadgeText}>Offer</Text>
+          </View>
         )}
-        <Text style={styles.priceTextModern} allowFontScaling={false}>
-          £ {item?.price}
-        </Text>
+        {isMilestone && (
+          <View
+            style={[
+              styles.productBadge,
+              {backgroundColor: Colors.green, top: 60, left: 10},
+            ]}>
+            <Text style={styles.productBadgeText}>Milestone</Text>
+          </View>
+        )}
       </View>
-      <Pressable style={styles.viewMoreButtonModern} onPress={onPress}>
-        <Text style={styles.viewMoreTextModern} allowFontScaling={false}>
-          View More
+      <View style={styles.productInfoModern}>
+        <Text
+          style={styles.productTitleModern}
+          numberOfLines={1}
+          allowFontScaling={false}>
+          {item?.name}
         </Text>
-      </Pressable>
-    </View>
-  </Pressable>
-));
+        <View style={styles.priceRowModern}>
+          {item?.has_discount && (
+            <Text style={styles.originalPriceModern} allowFontScaling={false}>
+              £ {item?.actual_price}
+            </Text>
+          )}
+          <Text style={styles.priceTextModern} allowFontScaling={false}>
+            £ {item?.price}
+          </Text>
+        </View>
+        {/* Offer Details */}
+        {offer && (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: Colors.lightBlue,
+              borderRadius: 10,
+              marginTop: 10,
+              marginBottom: 4,
+              padding: 12,
+              shadowColor: '#000',
+              shadowOpacity: 0.07,
+              shadowOffset: {width: 0, height: 2},
+              shadowRadius: 6,
+              elevation: 2,
+              borderLeftWidth: 5,
+              borderLeftColor: Colors.primary,
+            }}>
+            {/* Optional: Icon */}
+            <AntDesign
+              name="gift"
+              size={22}
+              color={Colors.primary}
+              style={{marginRight: 10}}
+            />
+            <View style={{flex: 1}}>
+              <Text
+                style={{
+                  color: Colors.primary,
+                  fontWeight: 'bold',
+                  fontSize: 15,
+                  marginBottom: 2,
+                }}>
+                {offer.discount?.name
+                  ? `${offer.discount.name}% OFF`
+                  : 'Special Offer'}
+              </Text>
+              {offer.offer_desc ? (
+                <Text
+                  style={{color: Colors.gray8, fontSize: 13, marginBottom: 2}}>
+                  {offer.offer_desc}
+                </Text>
+              ) : null}
+              <Text style={{color: Colors.black, fontSize: 12}}>
+                Valid: {formatDate(offer.from_date)} -{' '}
+                {formatDate(offer.to_date)}
+              </Text>
+            </View>
+          </View>
+        )}
+        <Pressable style={styles.viewMoreButtonModern} onPress={onPress}>
+          <Text style={styles.viewMoreTextModern} allowFontScaling={false}>
+            View More
+          </Text>
+        </Pressable>
+      </View>
+    </Pressable>
+  ),
+);
 
 const ReviewCard = React.memo(({review}) => (
   <View style={styles.card}>
@@ -343,7 +438,7 @@ const VendorDetail = props => {
       const res = await axios.post(
         Constants.baseUrl5 + Constants.vendorDetail,
         {
-          vendor_id: data?.user_id || data?.id  || data?.userId,
+          vendor_id: data?.user_id || data?.id || data?.userId,
         },
         {
           headers: {
@@ -390,18 +485,17 @@ const VendorDetail = props => {
       getVendorDetail();
       getCartData();
     }
-  }, [isFocused, getVendorDetail, getCartData]);
+  }, [isFocused, getCartData]);
 
   const handleContactPress = useCallback(
-    type => {
+    option => {
       if (!detail) return;
-
-      switch (type) {
+      switch (option.type) {
         case 'Call':
-          if (detail.phone) Linking.openURL(`tel:${detail.phone}`);
+          if (option.phone) Linking.openURL(`tel:${option.phone}`);
           break;
         case 'Message':
-          if (detail.email) Linking.openURL(`mailto:${detail.email}`);
+          if (option.email) Linking.openURL(`mailto:${option.email}`);
           break;
         case 'View Map':
           if (detail.latitude && detail.longitude) {
@@ -511,6 +605,39 @@ const VendorDetail = props => {
     return <SkeletonLoader />;
   }
 
+  // Shop type emoji and color mapping
+  const shopTypeMeta = {
+    1: {name: 'Restaurant', emoji: '🍽️', color: '#FFB74D'},
+    2: {name: 'Hotel', emoji: '🏨', color: '#64B5F6'},
+    3: {name: 'Winery', emoji: '🍇', color: '#BA68C8'},
+    4: {name: 'Wine Bar', emoji: '🍷', color: '#E57373'},
+    5: {name: 'Wine Shop', emoji: '🏪', color: '#81C784'},
+  };
+
+  const ShopTypeBadge = ({type}) => {
+    if (!type || typeof type !== 'object') return null;
+    const meta = shopTypeMeta[type.id] || {
+      name: String(type.name || ''),
+      emoji: '🏬',
+      color: '#F6F8FF',
+    };
+    // Defensive: ensure emoji and name are strings
+    let emoji = meta.emoji;
+    if (typeof emoji !== 'string') {
+      try {
+        emoji = String(emoji);
+      } catch {
+        emoji = '🏬';
+      }
+    }
+    const name = typeof meta.name === 'string' ? meta.name : '';
+    return (
+      <View style={[styles.shopTypeBadge, {backgroundColor: meta.color}]}>
+        <Text style={styles.shopTypeEmoji}>{emoji}</Text>
+        <Text style={styles.shopTypeText}>{name}</Text>
+      </View>
+    );
+  };
 
   return (
     <View style={{flex: 1, backgroundColor: Colors.white}}>
@@ -559,32 +686,49 @@ const VendorDetail = props => {
               </View>
             )}
           </View>
+          <Text style={styles.sectionTitle} allowFontScaling={false}>
+              Shop Type
+            </Text>
 
-          <View style={styles.sectionHeader}>
+          <ShopTypeBadge type={detail?.vendor_shop_type} />
+
+        
             <Text style={styles.sectionTitle} allowFontScaling={false}>
               Business Hours
             </Text>
-          </View>
+        
 
           {/* Modernized Business Hours Section - Creative UI */}
           {detail?.business_hours && detail?.business_hours.length > 0 && (
             <View style={styles.businessHoursCard}>
               {detail.business_hours.map((item, index) => {
-                const isToday = item.weekday.slice(0, 3).toLowerCase() === dayjs().format('ddd').toLowerCase();
+                const isToday =
+                  item.weekday.slice(0, 3).toLowerCase() ===
+                  dayjs().format('ddd').toLowerCase();
                 return (
                   <View
                     key={item.id}
                     style={[
                       styles.businessHoursRow,
                       isToday && styles.businessHoursTodayRow,
-                      index === detail.business_hours.length - 1 && { borderBottomWidth: 0 },
-                    ]}
-                  >
-                    <Text style={[styles.businessHoursDay, isToday && styles.businessHoursTodayText]}>
+                      index === detail.business_hours.length - 1 && {
+                        borderBottomWidth: 0,
+                      },
+                    ]}>
+                    <Text
+                      style={[
+                        styles.businessHoursDay,
+                        isToday && styles.businessHoursTodayText,
+                      ]}>
                       {item.weekday.slice(0, 3)}
                     </Text>
-                    <Text style={[styles.businessHoursTime, isToday && styles.businessHoursTodayText]}>
-                      {formatTime(item.open_time)} - {formatTime(item.close_time)}
+                    <Text
+                      style={[
+                        styles.businessHoursTime,
+                        isToday && styles.businessHoursTodayText,
+                      ]}>
+                      {formatTime(item.open_time)} -{' '}
+                      {formatTime(item.close_time)}
                     </Text>
                   </View>
                 );
@@ -592,63 +736,81 @@ const VendorDetail = props => {
             </View>
           )}
 
-          <ContactOptions onContactPress={handleContactPress} />
+          <ContactOptions onContactPress={handleContactPress} detail={detail} />
 
           <View style={styles.separator} />
 
           {/* Milestone Rewards Section */}
-          {detail?.discounted_products && detail.discounted_products.length > 0 && (
-            <>
-              <Text style={styles.milestoneLabel} allowFontScaling={false}>
-                Milestone Rewards
-              </Text>
-              <FlatList
-                data={detail.discounted_products}
-                horizontal
-                keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-                contentContainerStyle={styles.milestoneListContainer}
-                showsHorizontalScrollIndicator={false}
-                renderItem={({item}) => (
-                  <View style={styles.milestoneCard}>
-                    <View style={styles.milestoneCardHeader}>
-                      <Text style={styles.milestoneProductName} numberOfLines={1} allowFontScaling={false}>
-                        {item.name}
+          {detail?.discounted_products &&
+            detail.discounted_products.length > 0 && (
+              <>
+                <Text style={styles.milestoneLabel} allowFontScaling={false}>
+                  Milestone Rewards
+                </Text>
+                <FlatList
+                  data={detail.discounted_products}
+                  horizontal
+                  keyExtractor={(item, index) =>
+                    item.id?.toString() || index.toString()
+                  }
+                  contentContainerStyle={styles.milestoneListContainer}
+                  showsHorizontalScrollIndicator={false}
+                  renderItem={({item}) => (
+                    <View style={styles.milestoneCard}>
+                      <View style={styles.milestoneCardHeader}>
+                        <Text
+                          style={styles.milestoneProductName}
+                          numberOfLines={1}
+                          allowFontScaling={false}>
+                          {item.name}
+                        </Text>
+                        <View style={styles.milestoneDiscountBadge}>
+                          <Text
+                            style={styles.milestoneDiscountText}
+                            allowFontScaling={false}>
+                            -{Number(item.discount).toFixed(0)} %
+                          </Text>
+                        </View>
+                      </View>
+                      <Text
+                        style={styles.milestoneDesc}
+                        numberOfLines={2}
+                        allowFontScaling={false}>
+                        {item.discount_desc}
                       </Text>
-                      <View style={styles.milestoneDiscountBadge}>
-                        <Text style={styles.milestoneDiscountText} allowFontScaling={false}>
-                          -{Number(item.discount).toFixed(0)} %
+                      <View style={styles.milestonePriceRow}>
+                        <Text
+                          style={styles.milestoneActualPrice}
+                          allowFontScaling={false}>
+                          £ {item.actual_price}
+                        </Text>
+                        <Text
+                          style={styles.milestoneFinalPrice}
+                          allowFontScaling={false}>
+                          £ {item.final_price}
                         </Text>
                       </View>
                     </View>
-                    <Text style={styles.milestoneDesc} numberOfLines={2} allowFontScaling={false}>
-                      {item.discount_desc}
-                    </Text>
-                    <View style={styles.milestonePriceRow}>
-                      <Text style={styles.milestoneActualPrice} allowFontScaling={false}>
-                        £ {item.actual_price}
-                      </Text>
-                      <Text style={styles.milestoneFinalPrice} allowFontScaling={false}>
-                        £ {item.final_price}
-                      </Text>
-                    </View>
-                  </View>
-                )}
-                ListEmptyComponent={null}
-              />
-            </>
-          )}
+                  )}
+                  ListEmptyComponent={null}
+                />
+              </>
+            )}
 
           <Text style={styles.sectionTitle} allowFontScaling={false}>
             Product for you
           </Text>
 
-        
           <FlatList
             data={detail?.products}
             renderItem={({item}) => {
-              // Check if product is in offers or milestone
-              const isOffer = (detail?.offers || []).some(offer => offer.id === item.id);
-              const isMilestone = (detail?.discounted_products || []).some(prod => prod.id === item.id);
+              // Find the offer for this product, if any
+              const offer = (detail?.offers || []).find(
+                offer => offer.product_id === item.id,
+              );
+              const isMilestone = (detail?.discounted_products || []).some(
+                prod => prod.id === item.id,
+              );
               return (
                 <ProductCard
                   item={item}
@@ -661,7 +823,7 @@ const VendorDetail = props => {
                   onPress={() =>
                     navigation.navigate('WineDetail', {item: item?.id})
                   }
-                  isOffer={isOffer}
+                  offer={offer} // pass the offer object
                   isMilestone={isMilestone}
                 />
               );
@@ -671,7 +833,7 @@ const VendorDetail = props => {
             }
           />
 
-          <Text style={styles.sectionTitle} allowFontScaling={false}>
+          {/* <Text style={styles.sectionTitle} allowFontScaling={false}>
             Offers
           </Text>
 
@@ -725,7 +887,7 @@ const VendorDetail = props => {
             ListEmptyComponent={
               <Text style={styles.emptyText}>No Offers right now.</Text>
             }
-          />
+          /> */}
 
           <Text style={styles.sectionTitle} allowFontScaling={false}>
             Image Gallery
@@ -1144,7 +1306,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   viewMoreButtonModern: {
-    marginTop: 2,
+    marginTop: 10,
     backgroundColor: Colors.primary,
     borderRadius: 8,
     paddingVertical: 6,
@@ -1416,7 +1578,7 @@ const styles = StyleSheet.create({
     maxWidth: 220,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.10,
+    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
     borderWidth: 1,
@@ -1497,7 +1659,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     shadowColor: '#000',
     shadowOpacity: 0.06,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowRadius: 8,
     elevation: 2,
   },
@@ -1539,6 +1701,32 @@ const styles = StyleSheet.create({
   businessHoursTodayText: {
     color: Colors.primary,
     fontWeight: 'bold',
+  },
+  shopTypeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    marginBottom: 8,
+    backgroundColor: '#F6F8FF',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowOffset: {width: 0, height: 2},
+    shadowRadius: 6,
+    elevation: 2,
+    gap: 8,
+  },
+  shopTypeEmoji: {
+    fontSize: 20,
+    marginRight: 6,
+  },
+  shopTypeText: {
+    fontSize: 15,
+    fontFamily: Fonts.InterBold,
+    color: Colors.primary,
+    letterSpacing: 0.2,
   },
 });
 

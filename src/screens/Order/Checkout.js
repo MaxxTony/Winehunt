@@ -13,7 +13,6 @@ import Loader from '../../helper/Loader';
 import {showSucess} from '../../helper/Toastify';
 
 const Checkout = props => {
-  
   const data = props?.route?.params?.data;
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -139,7 +138,9 @@ const Checkout = props => {
       payment_intent_id: paymentInfo?.paymentIntentId,
       payment_method: data?.paymentType?.name,
       shipping_address_id: data?.address?.id,
+      // delievery_address: data?.address?.name,
       vendor_id: data?.vendorId,
+      delivery_amount: parseFloat(data?.orderSummary?.deliveryFee),
       items:
         data?.cartData?.map(item => ({
           cart_id: item?.id || '',
@@ -147,13 +148,14 @@ const Checkout = props => {
           product_id: item?.product?.id || '',
           product_name: item?.product?.name || '',
           price: item?.product?.price,
-          size:  'large',
+          size: 'large',
           quantity: item?.quantity,
           status: item?.status,
         })) || [],
     };
 
-
+    // console.log(param);
+    // return
 
     const url = Constants.baseUrl9 + Constants.createOrder;
     try {
@@ -165,7 +167,7 @@ const Checkout = props => {
         },
       });
       if (response?.status === 200) {
-        console.log(response?.data,"vishal")
+        console.log(response?.data, 'vishal');
         showSucess(response?.data?.message);
         navigation.navigate('ThankYou', {info: response?.data?.data?.order});
       }
@@ -174,7 +176,7 @@ const Checkout = props => {
     }
   };
 
-  const formatPrice = (price) => {
+  const formatPrice = price => {
     return `£${parseFloat(price).toFixed(2)}`;
   };
 
@@ -224,11 +226,10 @@ const Checkout = props => {
         onPress={() => navigation.goBack()}
       />
       <Loader modalVisible={loading} setModalVisible={setLoading} />
-      
-      <ScrollView 
+
+      <ScrollView
         contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         {/* Header Section */}
         <View style={styles.headerSection}>
           <Text style={styles.headerText} allowFontScaling={false}>

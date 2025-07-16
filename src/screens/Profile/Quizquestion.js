@@ -19,7 +19,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { showSucess } from '../../helper/Toastify';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const Quizquestion = (props) => {
   const quizInfo = props?.route?.params?.data;
@@ -50,32 +49,36 @@ const Quizquestion = (props) => {
       },
     ]);
     setTimeout(() => {
-      goToNextQuestion();
+      goToNextQuestion(isCorrect);
     }, 1200);
   };
 
   // Go to next question or submit
-  const goToNextQuestion = () => {
+  const goToNextQuestion = (isCorrect) => {
     if (currentIndex < quizInfo.quizzes.length - 1) {
       setCurrentIndex(currentIndex + 1);
       setSelectedAnswer(null);
     } else {
-      onSubmitQuiz();
+      // Pass the final values to onSubmitQuiz
+      const finalCorrectAnswers = correctAnswers + (isCorrect ? 1 : 0);
+      const finalScore = score + (isCorrect ? quizInfo.quizzes[currentIndex].mark : 0);
+      onSubmitQuiz(finalCorrectAnswers, finalScore);
     }
   };
 
   // Submit quiz
-  const onSubmitQuiz = async () => {
+  const onSubmitQuiz = async (finalCorrectAnswers, finalScore) => {
     try {
       const datas = await AsyncStorage.getItem('userDetail');
       const token = JSON.parse(datas)?.token;
       const url = 'http://13.48.249.80:8000/api/other/update-quiz-points';
       const data = {
         quiz_id: quizInfo?.id,
-        scores: correctAnswers,
-        points: score,
+        scores: finalCorrectAnswers,
+        points: finalScore,
       };
-      console.log(data);
+       console.log(data," data")
+      //  return
       const res = await axios.post(url, data, {
         headers: {
           'Content-Type': 'application/json',
@@ -167,19 +170,24 @@ const Quizquestion = (props) => {
       </View>
       {/* Question Progress Dots */}
       <View style={styles.questionDotsContainer}>
-        {quizInfo?.quizzes?.map((_, idx) => (
-          <View
-            key={idx}
-            style={[
-              styles.progressDot,
-              idx < currentIndex
-                ? { backgroundColor: '#4BB543' }
-                : idx === currentIndex
-                ? { backgroundColor: Colors.green2 }
-                : { backgroundColor: Colors.gray12 },
-            ]}
-          />
-        ))}
+        {quizInfo?.quizzes?.map((_, idx) => {
+          let dotColor = Colors.gray12;
+          if (idx < currentIndex) {
+            // Already answered
+            dotColor = answers[idx]?.isCorrect ? '#4BB543' : '#E74C3C'; // green or red
+          } else if (idx === currentIndex) {
+            dotColor = Colors.green2; // current question
+          }
+          return (
+            <View
+              key={idx}
+              style={[
+                styles.progressDot,
+                { backgroundColor: dotColor },
+              ]}
+            />
+          );
+        })}
       </View>
       <View style={styles.questionContainer}>
         <Text style={styles.questionText} allowFontScaling={false}>

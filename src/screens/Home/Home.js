@@ -181,7 +181,6 @@ const Home = () => {
         setType(firstType);
       }
     } catch (error) {
-      console.error('Home data fetch error:', error);
       setError(error);
       if (error.response) {
         showWarning(error.response.data?.message || 'Error loading home data');
@@ -223,6 +222,7 @@ const Home = () => {
   const getOffers = async () => {
     try {
       const info = await AsyncStorage.getItem('userDetail');
+    
       const token = JSON.parse(info)?.token;
       if (!token) return;
       const url = Constants.baseUrl10 + Constants.latestOffers;
@@ -271,6 +271,7 @@ const Home = () => {
       </View>
     );
   }
+
 
   return (
     <View style={[styles.container, {paddingTop: inset.top}]}>
